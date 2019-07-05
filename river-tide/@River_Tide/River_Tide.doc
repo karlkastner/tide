@@ -1,0 +1,6 @@
+predict tide in a backwater affected river
+
+- so far only two tidal components are supported (either D1 with D2 or D2 with D4),
+  for mixed diurnal-semidiurnal cases with dominant semidiurnal component,
+  the class has to be extended to support three components (D1 with D2 and D4)
+

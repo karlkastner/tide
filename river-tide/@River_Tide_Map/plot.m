@@ -1,5 +1,7 @@
 % Sun 11 Mar 20:40:28 CET 2018
-%% plot result
+%% quick plot of scenario result
+%%
+%% function obj = plot(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,omega,q,opt)
 function obj = plot(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,omega,q,opt)
 	Xi  = Xi{1};
 	L   = Xi(2)-Xi(1);

@@ -1,7 +1,11 @@
 % Tue  4 Apr 11:18:46 CEST 2017
-%% Loren't friction coefficient
-%% c.f. cai
-%% c.f. dronkers 
+%% friction coefficient according to Lorent'z
+%% identical to Dronker's coefficient for zero river flow
+%% and a single frequency component
+%% c.f. Cai
+%% c.f. Dronkers 
+%%
+%% function L = friction_coefficient_lorentz(obj,phi)
 function L = friction_coefficient_lorentz(obj,phi)
 	if (phi < 1)
 		% alpha is gamma in dronkers
@@ -15,5 +19,5 @@ function L = friction_coefficient_lorentz(obj,phi)
 		L(1) = -2 - 4*phi^2;
 		L(2) =      4*phi;
 	end % else of if
-end % fcl
+end % River_Tide/friction_coefficient_Lorentz
 

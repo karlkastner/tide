@@ -1,2 +1,17 @@
 analysis and prediction of river tides
+
+Sub-Classes:
  
+@River_Tide
+	- prediction of river tide in a backwater affected river with a sloping bed
+@River_Tide_Cai
+	- prediction of river tide, method of Cai
+@River_Tide_Empirical
+	- prediction of river tide, empirical
+@River_Tide_JK
+	- prediction of river tide, empirical after Jay and Kukulka
+@River_Tide_Map
+	- mulitple-scenaria container for River_Tide
+@River_Tide_Network
+	- extension of River_Tide to networks
+

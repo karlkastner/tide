@@ -3,6 +3,7 @@
 %% damping modulus of the tidal wave for river flow only
 %
 % function [r, k, r_0, r_inf] = damping_modulus_river(Q0,W,H,cd,omega)
+% function [rr, ri, k, r_0, r_inf] = damping_modulus_river(Q0,W,H,cd,omega)
 function [rr, ri, k, r_0, r_inf] = damping_modulus_river(Q0,W,H,cd,omega)
 	if (issym(Q0) || issym(W) || issym(H) || issym(cd) || issym(omega))
 		syms g
@@ -40,5 +41,5 @@ function [rr, ri, k, r_0, r_inf] = damping_modulus_river(Q0,W,H,cd,omega)
 %	r2 = real(r_)
 %	(cd*q0*(1/(H^5*g))^(1/2))
 %	r/r2
-end
+end % damping_modulus_river
 

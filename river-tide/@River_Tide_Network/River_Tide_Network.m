@@ -2,8 +2,9 @@
 %
 %% tide in a fluvial delta channel network, extension of 1D river tide
 %% the network is a directed graph
+%% TODO convert from trig-to exponential form
 %
-classdef Tidal_River_Network < handle
+classdef River_Tide_Network < handle
 	properties
 		% channel length
 		L 
@@ -60,7 +61,7 @@ classdef Tidal_River_Network < handle
 	end % properties
 
 	methods
-		function obj = Tidal_River_Network()
+		function obj = River_Tide_Network()
 		end % Tidal River Network
 		
 		function init(obj,L,zb,width,C,bc,junction_C)
@@ -161,5 +162,5 @@ classdef Tidal_River_Network < handle
 			      z0(channel(:,2)) - zb];
 		end % channel_depth
 	end % methods
-end % Tidal_River_Network
+end % classdef River_Tide_Network
 

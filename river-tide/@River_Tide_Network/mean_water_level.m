@@ -24,5 +24,5 @@ function [x,z0,Q0] = mean_water_level(obj,id)
 
 		z0 = z0(1) + x/L*(z0(2)-z0(1));
 		Q0 = Q0*ones(nx,1);
-end
+end % River_Tide_Network/mean_water_level
 

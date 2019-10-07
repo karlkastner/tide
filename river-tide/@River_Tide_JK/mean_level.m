@@ -17,12 +17,14 @@
 % time invariant parameter:
 % cD : drag coefficient
 %
-function h = jk_mean_level(x,alpha,R0,cD,h0,b,Qr,T)
+function h = mean_level(obj,x,alpha,R0,h0,b,Qr)
+%function h = mean_level(obj,x,alpha,R0,cD,h0,b,Qr,T)
 	if (1 == length(alpha))
 		alpha(2) = alpha(1);
 	end
-	Qt = jk_tidal_discharge(x,R0,cD,h0,b,Qr,T);
+	% Qt = obj.tidal_discharge(x,R0,h0,b,Qr,T);
+	Qt = obj.tidal_discharge(x,R0,cD,h0,b,Q);
 	% eq. 12 in J&K 2003b
 	h = alpha(1) .* Qr.^(2/3) + 1/6*alpha(2) .*  abs(Qt).^2 ./ abs(Qr).^(4/3);
-end
+end % mean_level
 

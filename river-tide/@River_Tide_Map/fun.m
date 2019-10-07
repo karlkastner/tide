@@ -1,5 +1,5 @@
 % Mon  2 Oct 12:27:30 CEST 2017
-%% compute a specific river tide scenario and store it in the hash,
+%% compute river tide for a scenario with specific boundary conditions and store it in the hash,
 %% or retrive the scenario, if it was already computed
 function [out, key, obj] = fun(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,omega,q,opt)
 	if (nargin()<10)
@@ -76,8 +76,8 @@ function [out, key, obj] = fun(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,om
 				 , 'opt',    opt ...
 				 ... %, 'flag', flag ...
 				);
-			out.bc(1,2).p = bc.p;
-			out.bc(1,2).q = bc.q;
+			out.bc(1,2).p   = bc.p;
+			out.bc(1,2).q   = bc.q;
 			out.bc(1,2).rhs = bc.rhs;
 
 			out.init([0,z1_downstream], Q0, Xi);
@@ -123,5 +123,5 @@ function [out, key, obj] = fun(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,om
 		end
 	end % sbfun
 
-end % function fun
+end % River_Tide_Map/fun
 

@@ -1,7 +1,7 @@
 % Fri  8 Dec 11:10:52 CET 2017
 %% determine tidal discharge from water level for tidal wave
 function q = z2q(x,z,hfun,omega)
-	g = 9.81;
+	g = Constant.gravity;
 	q = (-1i*omega)*cumintR(z,x);
 	h = hfun(x);
 

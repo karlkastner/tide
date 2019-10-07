@@ -1,9 +1,9 @@
 % Thu 23 Mar 10:51:00 CET 2017
-%% friction computed by dronkers method
-%% expressed as Fourier series coefficients
+%% friction computed by the method of Dronkers
+%% expressed as coefficients for the frequency components
 %% c.f. dronkers 1964 eq 8.2 and 8.4
 %% Note: Cai dennominates alpha as phi
-% function [c uau uau_ p] = friction_trigonometric_dronkers(u,dp,Umid,Uhr,order,psym)
+% function [c, uau, uau_, p] = friction_trigonometric_dronkers(u,dp,Umid,Uhr,order,psym)
 function [c, uau, uau_, p] = friction_trigonometric_dronkers(obj,u,dp,Umid,Uhr)
 	if (nargin() < 4 || isempty(Umid))
 		[Urange, Umid] = fourier_range(cvec(u),[0;dp]);
@@ -30,12 +30,13 @@ function [c, uau, uau_, p] = friction_trigonometric_dronkers(obj,u,dp,Umid,Uhr)
 		for jdx=1:obj.opt.friction_order
 			uau(idx).a = uau(idx).a + (p(jdx+1)*Uhr.^(2-jdx)*up(idx,1,jdx));
 			uau(idx).b = uau(idx).b + (p(jdx+1)*Uhr.^(2-jdx)*up(idx,2,jdx));
-		end
+		end % for jdx
 	end % for idx
 	% add constant term for mean
 	uau(1).a = uau(1).a + (p(1)*Uhr.^2);
-	uau_ = [];
 
 	c = [uau(1).a, uau(2).a, uau(2).b, uau(3).a, uau(3).b, uau(4).a, uau(4).b].';
+
+	uau_ = [];
 end % friction_trigonometric_dronkers
 

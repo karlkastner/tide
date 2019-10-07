@@ -1,5 +1,10 @@
 % 2017-04-08 15:16:22.323048338 +0200
 %% linearly damped wave in rectangular channel
+%% solve tide as initial value problem
+%% damped wave approximation
+%%
+%% z'' + a z = 0
+%%
 %% x_t = Ax + b
 function [x, z] = damped_wave_ivp(L)
 	% TODO no magic numbers

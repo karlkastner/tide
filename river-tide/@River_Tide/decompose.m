@@ -51,5 +51,5 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 
 %	qlr = bsxfun(@times,Qlr,1./wc);
 %	zlr = obj.q1_to_z1(xc,qlr,obj.omega);
-end
+end % River_Tide/decompose
 

@@ -57,5 +57,5 @@ function plot_water_level_amplitude(obj)
 		plot(x,c);
 		hold on
 	end % for idx
-end
+end % River_Tide_Network/plot_level_amplitude
 

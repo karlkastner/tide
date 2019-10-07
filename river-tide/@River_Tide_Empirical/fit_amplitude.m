@@ -44,5 +44,5 @@ function [s2, R2, neff, obj] = fit_amplitude(obj,time,z,z0,Ur,dUr_dt,x,x0,r0)
 
 	obj.c.amplitude  = par_;
 	obj.cs.amplitude = pars;
-end
+end % River_Tide_Empirical/fit_amplitude
 

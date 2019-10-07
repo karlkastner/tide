@@ -97,7 +97,7 @@ function [z,Q] = solve(obj)
 		end
 	end
 
-end % solve
+end % River_Tide_Network/solve
 
 % matrix main tidal species
 function [A,rhs] = matrix1(obj,A,rhs)

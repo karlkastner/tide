@@ -19,5 +19,5 @@ function [phi, k, obj] = predict_phase(obj,time,phi0,Ur,dUr_dt,x,x0,r0)
 	end % for idx
 	% phase
 	phi = wrapTo2Pi(phi0 - k*x);
-end
+end % River_Tide_Empirical/predict_phase
 

@@ -15,7 +15,7 @@ function [rtotal, r] = reflection_coefficient_gradual(x,h,w,omega)
 	r      = 1./y.*dy_dx.*exp(2i*k.*x);
 	dx     = x(2)-x(1);
 	rtotal = sum(r*dx);
-end
+end % reflection_coefficient_gradual
 	
 
 

@@ -1,8 +1,9 @@
 % Thu 23 Mar 10:51:00 CET 2017
-%% friction computed by dronkers method
-% c.f. dronkers 1964 eq 8.2 and 8.4
-% cai dennominates alpha as phi
-% function [c uau uau_ p] = friction_trigonometric_dronkers(u,dp,Umid,Uhr,order,psym)
+%% friction coefficicients for the frequency components computed by Dronkers method
+%% c.f. Dronker's 1964 eq 8.2 and 8.4
+%% Note: Cai dennominates alpha as phi
+%%
+%% function [c uau uau_ p] = friction_trigonometric_dronkers(u,dp,Umid,Uhr,order,psym)
 function [c, uau, uau_, p] = friction_exponential_dronkers(obj,u,dp,Umid,Uhr) %,order,psym)
 	if (nargin() < 4 || isempty(Umid))
 		[Urange, Umid] = fourier_range(cvec(u),[0;dp]);
@@ -34,5 +35,5 @@ function [c, uau, uau_, p] = friction_exponential_dronkers(obj,u,dp,Umid,Uhr) %,
 	uau_ = [];
 
 	c = [uau(1).c, uau(2).c, uau(3).c, uau(4).c].';
-end % friction_exponential_dronkers
+end % River_Tide/friction_exponential_dronkers
 

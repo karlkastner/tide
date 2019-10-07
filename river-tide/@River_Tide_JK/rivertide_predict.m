@@ -1,10 +1,15 @@
 % 2016-07-07 19:19:42.784764868 +0200
 % Karl Kastner, Berlin
 %% predict river tide by the method of jay and kukulka
-function [mag phi val] = jk_rivertide_predict(z0,phi0,Ur,h,d)
+%% TODO rename
+%old : function [mag, phi, val, obj] = rivertide_predict(obj,z0,phi0,Ur,h,d)
+function [mag, phi, val, obj] = rivertide_predict(obj,z0,phi0,Ur,h)
 	m 	  = size(z0,2);
 	n         = size(z0,1);
 	Ur        = abs(Ur);
+
+	% get coefficients	
+	d = obj.d;
 
 	mag = [];
 	phi = [];
@@ -26,5 +31,5 @@ function [mag phi val] = jk_rivertide_predict(z0,phi0,Ur,h,d)
 
 	% complex representation
 	val = mag.*exp(1i*phi);
-end
+end % River_Tide_JK/rivertide_predict
 

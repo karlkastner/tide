@@ -1,6 +1,6 @@
 % Sun 11 Mar 13:17:36 CET 2018
 %% coefficients of the backwater equation for the river tide
-% TODO merge with backwater
+%% TODO merge with backwater
 function c = odefun0(obj,x,z0,z1,zb,w,dw_dx,Q0,Qhr,Q1,cd,fc)
 	if (nargin() < 2)
 		c = zeros(0,0,1);
@@ -46,32 +46,5 @@ if (1)
 		c(fdx,4) = -(zb(fdx)+h);
 end
 
-%'c'
-%		c(fdx,4)
-%zb(fdx)
-%pause
-
-		%for idx=find(fdx)
-		%	%c(fdx,4) = -zb(fdx)-hmin;
-		%	c(fdx,4) = 
-		%end
-
-%Q0
-%cd
-%w
-%fc
-%g
-%limits(h)
-%pause
-%
-%figure(1)
-%clf
-%plot([zb z0])
-%pause()
-
-%
-%		[min(c),max(c)]
-%		min(abs(c))
-%		pause
-end
+end % River_Tide/odefun0
 

@@ -3,7 +3,7 @@
 %% c.f. friedrichs, ippen harleman
 function cd = rdamping_to_cdrag_tide(omega,r,h0,az1)
 	full = true;
-	g  = 9.81; % is eliminated
+	g  = Constant.gravity; % is eliminated
 	c  = sqrt(g*h0);
 	k  = omega/c;
 	u0 = az1*sqrt(g/h0);
@@ -14,5 +14,5 @@ function cd = rdamping_to_cdrag_tide(omega,r,h0,az1)
 		% linearised
 		cd = (3*pi*h0^2*r)/(4*a);
 	end
-end
+end % rdamping_to_cdrag_tide
 

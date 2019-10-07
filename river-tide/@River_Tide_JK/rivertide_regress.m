@@ -3,7 +3,7 @@
 %%
 %% coefficients of the r-regression factor 2 apart for specis (jay C7)
 %% this can be repeated for each tidal species (diurnal, semidiurnal)
-function [d] = jk_rivertide_regress(z,z0,phi,phi0,h,Ur)
+function [d,obj] = rivertide_regress(obj,z,z0,phi,phi0,h,Ur)
 	m   = size(z,2);
 	Ur  = abs(Ur);
 
@@ -32,5 +32,7 @@ function [d] = jk_rivertide_regress(z,z0,phi,phi0,h,Ur)
 		[Q R] = qr(X,0);
 		d(:,:,idx) = R \ (Q'*[Z(fdx,idx), delta_phi(fdx,idx)]);
 	end
-end
+
+	obj.d = d;
+end % River_Tide_JK/rivertide_regress
 

@@ -16,5 +16,5 @@ function [c, c0] = celerity(Q0,W,H,cd,omega,az1,S)
 	c0 = sqrt(g*H);
 	k0 = omega./c0;
 	c  = c0.*k0./sqrt(k0.^2 + r.^2);
-end
+end % celerity
 

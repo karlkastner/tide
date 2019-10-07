@@ -1,8 +1,7 @@
 % Wed 11 Oct 10:56:52 CEST 2017
 %% river tide in a single 1D channel
-% TODO split in two classes:
-% obe that stores data, one that provides equations
-% RT-solver and RT-analytic
+%% TODO split in two classes:
+%% one that stores data (RT_Solve), one that provides equations (RT_Analytic)
 classdef River_Tide < handle
 	properties
 		% acceleration by gravity
@@ -358,5 +357,5 @@ classdef River_Tide < handle
 	end
 
 	end % methods
-end % RT
+end % class River_Tide
 

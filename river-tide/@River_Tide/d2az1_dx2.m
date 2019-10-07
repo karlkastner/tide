@@ -8,5 +8,5 @@ function d2az1_dx2  = d2az1_dx2(obj,Q0,W,h,cd,omega,az1,Qt,dh_dx,dw_dx)
 	dkz_dx = out.dkz_dx(Q0,W,h,cd,omega,az1,Qt,dh_dx,dw_dx);
 
 	d2az1_dx2 = imag(dkz_dz) + imag(kz).^2;
-end
+end % River_Tide/d2az1_dx2
 

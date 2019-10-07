@@ -32,5 +32,5 @@ function [x,qmag,phi,s,c,sl,sr,cl,cr] = discharge_amplitude(obj,id)
 		% magnitude and phase angle
 		qmag = hypot(s,c);
 		phi  = atan2(s,c);
-end % amplitude
+end % River_Tide_Network/discharge_amplitude
 

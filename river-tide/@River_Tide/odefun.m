@@ -7,7 +7,7 @@
 %      this requires the bvp solve to accept a predefined mesh as an argument
 % TODO account for inhomogeneous part
 function [f, obj] = odefun(obj,x,y)
-	% TODO dirty hack to determin number of equations
+	% TODO dirty hack to determin the number of equations
 	if (nargin()<2)
 		switch (obj.opt.hmode)
 		case {'matrix'}
@@ -18,7 +18,7 @@ function [f, obj] = odefun(obj,x,y)
 		if (obj.opt.o2)
 			k=k+1;
 		end
-		f = zeros(0,0,k);
+			f = zeros(0,0,k);
 		return;
 	end
 
@@ -117,5 +117,5 @@ function [f, obj] = odefun(obj,x,y)
 	if (obj.opt.o2 == true)
 		f(:,:,k+1) = obj.odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, cf, omega1, flag);
 	end
-end % odefun
+end % River_Tide/odefun
 

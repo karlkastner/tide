@@ -1,11 +1,13 @@
 % Sun  8 Oct 13:08:39 CEST 2017
-%% differential equation coefficients of the main tidal species
+%%
+%% coefficients of the differential equation of the main tidal species
+%%
 %% f1 Q'' + f2 Q' + f3 Q + f4 = 0
-%
-% TODO rename f into c
-% TODO better pass dzb_dx instead of dz0_dx
-% TODO aa, oh and gh terms are not tested for width ~= 1
-%
+%%
+%% TODO rename f into c
+%% TODO better pass dzb_dx instead of dz0_dx
+%% TODO aa, oh and gh terms are not tested for width ~= 1
+%%
 % function [f F3]  = odefun1(Q0, Qhr, Q1, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, o1, flag)
 function [f, F3]  = odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, o1, flag)
 	qhr = Qhr./w;
@@ -57,5 +59,5 @@ function [f, F3]  = odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g
 	% inhomogeneous part
 	% lhs is multiplied by Q1 not q1, so rhs must be scaled up by w
 	f(:,4) = -0.*w.*conj(q1).*q2;
-end % odefun1
+end % River_Tide/odefun1
 

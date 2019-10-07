@@ -1,5 +1,7 @@
 % Thu 12 Oct 13:29:42 CEST 2017
 %% key for storing a scenario
+%%
+%% function [key obj] = key(obj,varargin)
 function [key obj] = key(obj,varargin)
 		key = '';
 		for idx=1:length(varargin)
@@ -15,5 +17,5 @@ function [key obj] = key(obj,varargin)
 				key = [key,' '];
 			end
 		end % for idx
-end % rtkey
+end % River_Tide_Map/key
 

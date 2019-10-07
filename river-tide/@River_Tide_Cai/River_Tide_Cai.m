@@ -23,5 +23,5 @@ classdef River_Tide_Cai < handle
 			end
 		end
 	end % methods 
-end% classder River_Tide_Car
+end% class River_Tide_Cai
 

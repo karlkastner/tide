@@ -146,5 +146,5 @@ end
 		        + cd*p2./pi.*q0./h.^2 ...
 		        + 1/2*cd.*p1./pi.*qt./h.^2 )./sqrt(g.*h) );
 	end
-end % wave_number_analytic
+end % River_Tide/wave_number_analytic
 

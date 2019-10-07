@@ -48,5 +48,5 @@ function Gamma = Gamma(obj,k,zeta,lambda,mu,phi,mode)
 	otherwise
 		error('unknown friction mode');
 	end % switch
-end % function Gamma
+end % River_Tide_Cai/Gamma
 

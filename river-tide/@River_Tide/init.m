@@ -26,5 +26,5 @@ function obj = init(obj, z_downstream, Q0, Xi)
 		obj.tmp.z0 = obj.fun.z0;
 		obj.tmp.h0 = @(x) obj.fun.z0(x) - obj.fun.zb(x);
 	end
-end % RT::init
+end % River_Tide/init
 

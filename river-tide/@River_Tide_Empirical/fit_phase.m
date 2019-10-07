@@ -51,7 +51,7 @@ function [s2, R2, neff, obj] = fit_phase(obj,time,z,z0,Ur,dUr_dt,x,x0,r0)
 	%[sum(fdx),f_.^2,f__.^2]
 	obj.c.phase  = par_;
 	obj.cs.phase = pars;
-end
+end % River_Tide_Empirical/fit_phase
 
 function res = objective(res)
 	res = [real(res);imag(res)];

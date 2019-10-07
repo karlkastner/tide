@@ -1,5 +1,7 @@
 % Wed 11 Oct 10:18:54 CEST 2017
 %% solve for the oscillatory (tidal) componets
+%%
+%% function obj   = solve_wave(obj)
 function obj   = solve_wave(obj)
 	% solve the system of ode's
 	[x, y, cflag] = feval(obj.opt.solver,@obj.odefun,@obj.bcfun,obj.Xi,obj.opt);
@@ -47,5 +49,5 @@ function obj   = solve_wave(obj)
 	obj.initial.z0 = obj.tmp.z0(x);
 
 	obj.cflag = cflag;
-end % solve_wave
+end % River_Tide/solve_wave
 

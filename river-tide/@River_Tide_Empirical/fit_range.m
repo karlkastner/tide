@@ -38,5 +38,5 @@ function [s2, R2, neff, obj] = fit_range(obj,time,R,R0,Ur,dUr_dt,x,x0)
 
 	obj.c.range  = par;
 %	obj.cs.amplitude = pars;
-end
+end % River_Tide_Empirical/fit_range
 

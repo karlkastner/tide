@@ -22,5 +22,5 @@ function [D, r, re, obj] = predict_amplitude(obj,time,D0,Ur,dUr_dt,x,x0,r0)
 		% D(:,idx) = obj.fD(c(:,idx),idx,D0(:,idx),x,x0,Ur,r0,D(:,1));
 		[D(:,idx) r(:,idx) re(:,idx)] = obj.fD(c(:,idx),idx,D0(:,idx),x,x0,Ur,r0,D(:,1));
 	end % for idx
-end % predict_amplitude
+end % River_Tide_Empirical/predict_amplitude
 

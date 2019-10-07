@@ -1,8 +1,8 @@
 % Tue 21 Mar 12:09:23 CET 2017
-% Karl Kastner, Berlin, c.f. cai
-%% determine the surface amplitude of the river tide
+% Karl Kastner, Berlin
+%% determine the surface amplitude of the river-tide
 %% c.f. Cai
-function [X, Y] = river_tide_cai(val0,omega,cd,Uscale,Xlim,zbfun,wfun,Qrfun)
+function [X, Y] = river_tide_cai_(val0,omega,cd,Uscale,Xlim,zbfun,wfun,Qrfun)
 
 	% acceleration by gravity
 	g = 9.81;

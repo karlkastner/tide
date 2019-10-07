@@ -13,5 +13,5 @@ function [h, level, obj] = predict_mwl(obj,R0,Qr)
 		h = c(1) + c(2)*(Qr.^2 + c(3)*abs(R0).^2).^(1/3);
 	end
 	level = h-c(1);
-end
+end % River_Tide_Empirical/predict_mwl
 

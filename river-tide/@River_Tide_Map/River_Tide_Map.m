@@ -42,6 +42,6 @@ classdef River_Tide_Map < handle
 					iterate_cell(@fun,val_C);
 				end
 		end % run
-	end % method
-end % RT_map
+	end % methods
+end % River_Tide_Map
 

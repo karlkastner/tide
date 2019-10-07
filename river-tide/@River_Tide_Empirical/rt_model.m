@@ -45,7 +45,7 @@ function obj = rt_model(obj)
 	obj.fD = fD;
 	obj.fk = @fk;
 	obj.fz = fz;
-end
+end % River_Tide_Empirical/rt_model
 
 % wave number (phase difference)
 % power law in flow velocity

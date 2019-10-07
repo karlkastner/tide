@@ -1,6 +1,7 @@
 % Tue  4 Apr 15:55:45 CEST 2017
 %% friction computed by the method of Lorent'z
-%% expressed as Fourier series coefficients
+%% expressed as coefficients of the frequency components (trigonometric form)
+%% 
 % c.f. dronkers 4.23
 function [c, uau] = friction_trigonometric_lorentz(obj,u,dp)
 	% phase
@@ -50,5 +51,5 @@ function [c, uau] = friction_trigonometric_lorentz(obj,u,dp)
 	c=[uau(1).a uau(2).a uau(2).b uau(3).a uau(3).b uau(4).a uau(4).b];
 
 	% semidiurnal term, complicated, see dronkers
-end % friction_lorentz
+end % River_Tide/friction_trigonometric_lorentz
 

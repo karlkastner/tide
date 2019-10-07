@@ -1,5 +1,22 @@
 % Sun  8 Oct 13:08:39 CEST 2017
-%% boundary conditions
+%% Robin (mixed) boundary conditions for the river tide,
+%% supplied for each frequency component,
+%% wrapper that copies values are from the member struct "bc"
+%%
+%%       q*(p*Q_1^- + (1-p)*dQ_1^-/dx 
+%  + (1-q)*(p*Q_1^+ + (1-p)*dQ_1^+/dx) = rhs
+%% input :
+%%	x       : coordinate (left or right end)
+%%	id,ccdx : frequency component index 
+%% output :
+%% 	p : linear combination of Dirichlet and Neumann boundary condition
+%%          1 -> Dirichlet boundary condition
+%%	    0 -> Neumann boundary condition
+%%      q linear combination of left and right travelling (incoming and outgoing) wave
+%% 	rhs = 0 -> homogeneous boundary condition
+%%
+%%
+%% function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
 function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
 	Xi = obj.Xi;
 	switch (obj.opt.hmode)
@@ -90,5 +107,5 @@ function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
 %		error('bcfun');
 %	end % switch
 %	end
-end % bcfun
+end % River_tide/bcfun
 

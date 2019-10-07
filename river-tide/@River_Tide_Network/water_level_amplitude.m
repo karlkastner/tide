@@ -41,5 +41,5 @@ function [x,zmag,phi,s,c,sl,sr,cl,cr] = water_level_amplitude(obj,id)
 		% magnitude and phase angle
 		zmag = hypot(s,c);
 		phi  = atan2(s,c);
-end % water_level_amplitude
+end % River_Tide/water_level_amplitude
 

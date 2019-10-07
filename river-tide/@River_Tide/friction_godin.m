@@ -1,5 +1,5 @@
 % 2017-04-04 18:11:50.871153511 +0200
-%% compute friction by the method of Godin
+%% compute friction with the method of Godin
 function [uau, obj] = friction_godin(obj,u,Umax)
 	if (nargin()<2 || isempty(Umax))
 		U   = max(abs(u));
@@ -37,5 +37,5 @@ function [uau, obj] = friction_godin(obj,u,Umax)
 		%uau = U^2*(c(1)*u_ + c(2)*u_.^3);
 		uau = uau + c(idx)*U^2*u_.^(idx-1);
 	end
-end
+end % River_Tide/friction_godin
 

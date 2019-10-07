@@ -3,7 +3,7 @@
 function [xt]   = tidal_ellipse(x,u0,u1,omega1,x0)
 	% normalize angle
 	u1_ = interp1(x,u1,x0);
-	u1 = u1/exp(1i*(angle(u1_)));
+	u1  = u1/exp(1i*(angle(u1_)));
 
 	Ti      = 2*pi/omega1;
 	[T, xt] = ode23s(@ufun,[0,Ti],x0);

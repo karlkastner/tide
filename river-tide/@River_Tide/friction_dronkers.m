@@ -1,6 +1,14 @@
 % Thu 23 Mar 09:51:57 CET 2017
 %% friction determined by Dronker's method
-% function [uau_sum uau p] = friction_dronkers(u,Umid,Uhr,order)
+%%
+%% input :
+%%         u    : velocity time series
+%%	   Umid : arithmetic mean of mininmum and maximum velocity
+%%                (not the mean of the velocity, usually non-zero even without river flow)
+%%         Uhr  : half-range of the velocity, less than the sum of
+%%                the frequency amplitudes, except at perigean spring tides
+%%
+%% function [uau_sum uau p] = friction_dronkers(u,Umid,Uhr,order)
 function [uau_sum, uau, p, obj] = friction_dronkers(obj,u,Umid,Uhr)
 	if (nargin() < 2||isempty(Uhr))
 		Umin = min(u);
@@ -34,5 +42,5 @@ function [uau_sum, uau, p, obj] = friction_dronkers(obj,u,Umid,Uhr)
 		uau(:,idx) = 1/pi_*p(idx)*Uhr.^(3-idx)*u.^(idx-1);
 	end
 	uau_sum = sum(uau,2);
-end % friction_dronkers
+end % River_Tide/friction_dronkers
 

@@ -1,6 +1,42 @@
-predict tide in a backwater affected river
+predict tide in a backwater affected river with a sloping/varying bed
 
-- so far only two tidal components are supported (either D1 with D2 or D2 with D4),
+Assumptions and capabilities:
+	- tidal dynamics follow the 1D-Shallow-Water-Equation
+	  (depth and cross-sectionally averaged Navier-Stokes-Equation)
+	- rectangular cross section
+	- width can vary along the channel
+	- friction coefficient (cd) constant along channel and over time (Chezy)
+	- advective accelleration term is considered, but can be deactivated
+	- vertical profile of streamwise velocity is constant
+	  (Boussinesq coefficient is unity (1))
+
+Limitations / TODO list:
+	- single channel dynamics only (no tidal networks)
+	- no wind-shear stress (no storm surges)
+	- no tidal flats / intertidal areas (width constant in time)
+	- no flood-plain during high-river flow
+	- no stratification or along-channel salinty gradient
+	- negligible head loss in channel bends
+	- negligible feed-back of the sediment concentration on the propagation of the tide
+	- low Froude Number (no hydraulic jumps due to cataracts or tidal bores)	
+
+- At present, only two tidal components are supported
+  (either D1 with D2 or D2 with D4, in addition to the mean water level z0),
   for mixed diurnal-semidiurnal cases with dominant semidiurnal component,
-  the class has to be extended to support three components (D1 with D2 and D4)
+  the class has to be extended to support three components (D1, D2 and D4)
+
+- At present, the tripel overtide is not computed (D3 for diurnal, D6 for semindiurnal tide),
+  note that this is the main overtide for the case of low river flow
+
+- At present, the 1/h non-linearity is only included in the approximations of
+  the backwater curve, but not it's influence on the tidal frequency components
+
+Method:
+
+This class calls numerical solvers for second order ordinary differential
+equation boundary value problems
+
+Tides is represented as exponential series in form of total discharge Q = sum Q_i = Q_0 + Q_1 + Q_2,
+as discharge is conserved (balanced), the equations are simpler than for level z and velocity u,
+and the frequency components of z are straight forward determined by differentiation of Q
 

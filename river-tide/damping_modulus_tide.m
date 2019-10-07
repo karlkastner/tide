@@ -49,5 +49,5 @@ function [k, r_low, r_high] = damping_modulus_tide(omega,cd,h0,az1)
 
 	% asymptotic linearisation for limit az1 -> infty
 	r_high = sqrt( (4/(3*Pi))*cd.*omega.*qt./(g*h0.^3) );
-end
+end % damping_modulus_tide
 

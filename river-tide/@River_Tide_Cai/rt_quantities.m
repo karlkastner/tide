@@ -80,5 +80,5 @@ function [delta, lambda, mu, e] = rt_quantities(obj,zeta,gamma,chi,rs,phi)
 		end
 
 	end %while
-end % rt_quantities
+end % River_Tide/rt_quantities
 

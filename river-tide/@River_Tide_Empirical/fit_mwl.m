@@ -31,5 +31,5 @@ function [rms_, R2, obj] = fit_mean_level(obj,h,R0,Qr);
 	R2   = 1 - rms_^2/var(h(fdx));
 
 	obj.c.mwl = c;
-end
+end % River_Tide_Empirical/fit_mean_water_level
 

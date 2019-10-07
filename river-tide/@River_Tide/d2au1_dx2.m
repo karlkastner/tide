@@ -16,5 +16,5 @@ function d2au1_dx2 = d2au1_dx2(obj,Q0,W,h,cd,omega,az1,Qt,dh_dx,dw_dx);
 			- 2./h.^2.*imag(kq) ...
 			+ 1./h.*(imag(dkq_dx) + imag(kq).^2) ...
 		    );
-end
+end % River_Tide/d2au1_dx2
 

@@ -3,12 +3,12 @@
 %%
 %% note: this is for finding zeros,
 %%       the true derivative has to be scaled  up by z
-function d2au1_dx2 = d2au1_dx2(obj,Q0,W,h,cd,omega,az1,Qt,dh_dx,dw_dx);
+function d2au1_dx2 = d2au1_dx2(obj,Q0,W,h,cd,omega,az1,Qt,dh_dx,dw_dx)
 	% TODO
 	d2h_dx2 = 0;
 	% d2z0_dx2 = -3*cd/g*Q0^2./(W^2.*h.^4);
 
-	[k, kq, kz] = obj.wave_number_analytic(
+	%[k, kq, kz] = obj.wave_number_analytic(
 	dkq_dx    = obj.dkq_dx(Q0,W,h,cd,omega,az1,Qt,dh_dx,dw_dx);
 	%2az1_dx2 = imag(dkz_dz) + imag(kz).^2;
 	d2au1_dx2 = ( ...

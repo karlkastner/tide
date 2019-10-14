@@ -32,12 +32,12 @@ function [f, obj] = odefun(obj,x,y)
 	flag   = obj.flag;
 
 	% TODO pass h for stage dependent roughness
-	cd     = feval(obj.cdfun,x);
-	w      = obj.wfun(x);
+	cd     = feval(obj.fun.cd,x);
+	w      = obj.fun.width(x);
 	%dw_dx  = obj.tmp.D1*w;
 	dw_dx  = derivative1(x,w); %obj.tmp.D1*w;
 
-	Q0     = obj.Q0fun(x);
+	Q0     = obj.fun.Q0(x);
 	zb     = obj.fun.zb(x);
 	nx = length(x);
         switch (obj.opt.hmode)                                                  
@@ -87,11 +87,12 @@ function [f, obj] = odefun(obj,x,y)
 		k = 1;
 	case {'iterate'}
 		% recompute the backwater curve
-		C = @(x) sqrt(obj.g/obj.cdfun(x));
+		C = @(x) drag2chezy(obj.fun.cd(x));
 		Q1fun = @(x_) interp1(x,Q1,x_,obj.opt.imethod,'extrap');
 		obj.backwater.sopt.InitialStep = x(2)-x(1);
 		%obj.backwater.sopt.RelTol = 10*eps^0.25;
-		[x_, h0_, z0_] = obj.backwater.solve(Q0,Q1fun,C,obj.wfun,obj.fun.zb,obj.z_downstream(1),obj.Xi);
+		[x_, h0_, z0_] = obj.backwater.solve(Q0(1),Q1fun,C,...
+			obj.fun.width,obj.fun.zb,obj.z0_downstream(1),obj.Xi);
 		obj.tmp.x   = x_;
 		obj.tmp.h0  = @(x) interp1(x_,h0_,x,obj.opt.imethod);
 		obj.tmp.z0  = @(x) interp1(x_,z0_,x,obj.opt.imethod);
@@ -106,6 +107,9 @@ function [f, obj] = odefun(obj,x,y)
 		error('odefun');
 	end
 	h0     = z0 - zb;
+	if (min(h0)<=0)
+		error('negative water depth')
+	end
 	% TODO h and z were mixed up here
 	%dh0_dx = obj.tmp.D1*h0;
 	%dz0_dx = obj.tmp.D1*z0;

@@ -37,7 +37,6 @@ classdef River_Tide_Map < handle
 			end
 		end % filename
 
-
 		function obj = save(obj)
 			if (obj.recflag)
 				rt = obj.rt;

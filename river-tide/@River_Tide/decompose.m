@@ -9,7 +9,7 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 
 	% element edges to centres
 	xc = 0.5*(x(1:end-1)+x(2:end));
-	wc = obj.wfun(xc);
+	wc = obj.fun.width(xc);
 	if (0)
 		Q1c = 0.5*(Q1(1:end-1)+Q1(2:end));
 		c  = obj.odefun(xc,Q1c);
@@ -39,7 +39,7 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 	z1lrc = [r(:,1)./(1i*omega*wc).*Q1lrc(:,1), r(:,2)./(1i*omega*wc).*Q1lrc(:,2)];
 	
 	% centres to edges
-	n = length(x)
+	n = length(x);
 
 	for idx=1:2
 		A = sparse(n,n-1,n);
@@ -51,5 +51,5 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 
 %	qlr = bsxfun(@times,Qlr,1./wc);
 %	zlr = obj.q1_to_z1(xc,qlr,obj.omega);
-end % River_Tide/decompose
+end
 

@@ -12,10 +12,16 @@
 %% TODO allow Q as input
 %% TODO rename into Q1_to_z1
 %% Mon  7 Oct 19:04:14 PST 2019 : added correction for change of width
-function z = q_to_z(x,q,omega)
-	w = obj.width(x);
-	z = 1i./omega ...
-	    *(         derivative1(x,q) ...
-	       + q./w.*derivative1(x,w) );
+function z = discharge2level(obj,Q)
+	x     = obj.x;
+	w     = obj.fun.width(x);
+	omega = obj.omega;
+	%q = bsxfun(@rdivide,Q,w);
+	z = zeros(size(Q));
+	for idx=1:size(Q,2)
+	z(:,idx) = 1i./(idx*omega*w) .* derivative1(x,Q(:,idx));
+	    	  %*(         derivative1(x,q) ...
+	          % + q./w.*derivative1(x,w) );
+	end
 end % River_Tide/q1_to_z1
 

@@ -6,7 +6,7 @@ function [key obj] = key(obj,varargin)
 		key = '';
 		for idx=1:length(varargin)
 			if (ischar(varargin{idx}))
-				key = [key, varargin{idx}]
+				key = [key, varargin{idx}];
 			else 
 				if (~isscalar(varargin{idx}))
 					error('arguments have to be strings or scalaras');

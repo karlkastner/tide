@@ -4,14 +4,17 @@
 function z0t = mwl_offset(obj)
 	opt = struct();
 	opt.MaxStep = 4*median(diff(obj.x));
-	[x_,z0t_] = ode23s(@fun_,limits(obj.x),0,opt);
+	% TODO normalize domain lenght
+	[x_,z0t_] = ode23s(@fun_,obj.Xi,0,opt);
 	z0t = interp1(x_,z0t_,obj.x);
 
 	function dz0t_dx = fun_(x_,z0t)
 		dz0_dx   = obj.dz0_dx(x_);
-		w        = interp1(obj.x, obj.w, x_);
-		h0       = interp1(obj.x, obj.h0, x_);
-		Q0       = obj.Q(0,x_);
+		w        = obj.fun.width(x_);
+		%h0       = interp1(obj.x, obj.h0, x_);
+		h0       = obj.tmp.h0(x_);
+		%Q0       = obj.Q(0,x_);
+		Q0       = obj.fun.Q0(x_);
 		aQ1      = interp1(obj.x, abs(obj.Q(1)), x_);
 		Qhr      = aQ1;
 		cd       = obj.cdfun(x_);

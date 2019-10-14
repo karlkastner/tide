@@ -24,10 +24,12 @@ classdef River_Tide < handle
 		% bed level
 		zb
 		% width
-		wfun
+
+		%wfun
 		w
 		% drag coefficient
-		cdfun
+		%cdfun
+
 		% angular frequency of tide
 		omega
 
@@ -42,7 +44,7 @@ classdef River_Tide < handle
 		%zmid
 		%zrange
 		% discharges, one column per frequency
-		Q0fun
+		%Q0fun
 		Q_
 		%qmid
 		%qrange
@@ -64,13 +66,15 @@ classdef River_Tide < handle
 			    );
 
 		% downstream boundary condition
-		z_downstream = [0 sqrt(eps)];
-		bc = [struct('p',[1 0 0], 'rhs',  0, 'q', [1 1]), ... % mwl left
-		      struct('p',[1 0 0], 'rhs',  1, 'q', [1 1]), ... % main species l
-		      struct('p',[0 1 0], 'rhs',  0, 'q', [1 1]); ... % even overtide ;
-		      struct('p',[1 0 0], 'rhs', [], 'q', [1 1]), ... % mwl r
-		      struct('p',[1 0 0], 'rhs',  0, 'q', [1 1]), ... % main species r
-		      struct('p',[1 0 0], 'rhs',  0, 'q', [1 1])  ... % even overtide r
+		z0_downstream = 0; % [0 sqrt(eps)];
+		% river discharge
+		Q0_
+		bc = [struct('p', 1, 'rhs',  0, 'q', []   ,'var','z'), ... % mean (wl or discharge) left
+		      struct('p', 1, 'rhs',  1, 'q', [1 1],'var','Q'), ... % main species left
+		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'); ... % even overtide ;
+		      struct('p', [1 0 0], 'rhs', [], 'q', []   ,'var','Q'), ... % mean (wl or discharge) right
+		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % main species right
+		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q')  ... % even overtide right
 			 ];
 
 		flag = struct('aa',0,'gh',0,'oh',0);
@@ -78,8 +82,11 @@ classdef River_Tide < handle
 		% convergence flag
 		cflag
 		
-		tmp = struct('D1',[]);
-		fun = struct('z0',[],'zb',[]);
+		tmp = struct( 'D1',[]);
+		fun = struct( 'z0',[] ...
+			     ,'zb',[] ...
+			     ,'width',[] ...
+			     ,'cd',[]);
 
 		% finite-volume object,
 		% if the tide is computed by solving the full SWE
@@ -94,9 +101,9 @@ classdef River_Tide < handle
 		issym           = false;
 	end % properties
 	methods (Static)
-		z1 = q2z(x,q1,omega1);
+		%z1 = q2z(x,q1,omega1);
 		[f, F3]  = odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
-		[f ]  = odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
+		[f ]     = odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
 %		[k0, k] = wave_number_analytic(Q0,W,H,cd,omega,az1,Qt);
 	end % static
 	methods
@@ -126,7 +133,7 @@ classdef River_Tide < handle
 		if (isempty(obj.backwater))
 			obj.backwater = Backwater1D('rt',obj);
 		end
-	end % RT
+	end % River_Tide (constructor)
 
 	% quasi members
 	function y = h0(obj, x)
@@ -270,8 +277,19 @@ classdef River_Tide < handle
 			y = interp1(obj.x,y,x);
 		end
 	end
+	function y = velocity(obj,x)
+		Q = obj.Q_;
+		if (nargin()>1)
+			Q = interp1(obj.x,Q,x);
+		else
+			x = obj.x;
+		end
+		w = obj.fun.width(x);
+		h0 = obj.tmp.h0(x);
+		y = bsxfun(@times,Q,1./(w.*h0));
+	end
 
-	function [dy_dx obj] = dy_dx(obj,field,x)
+	function [dy_dx, obj] = dy_dx(obj,field,x)
 		if (iscell(field))
 			if (length(field)>1)
 				y = obj.(field{1})(field(2:end));
@@ -288,7 +306,7 @@ classdef River_Tide < handle
 		end
 	end
 
-	function [absy obj] = amplitude(obj, field, id, x)
+	function [absy, obj] = amplitude(obj, field, id, x)
 		if (iscell(field))
 			if (length(field)>1)
 				y = obj.(field{1})(field(2:end));
@@ -339,7 +357,7 @@ classdef River_Tide < handle
 			py = interp1(obj.x,py,x);
 		end
 	end
-	function [r obj] = damping_modulus(obj,x)
+	function [r, obj] = damping_modulus(obj,x)
 		az1 = obj.amplitude('z1');
 		daz1_dx = obj.dy_dx({'amplitude','z1'});
 		r   = daz1_dx./az1;

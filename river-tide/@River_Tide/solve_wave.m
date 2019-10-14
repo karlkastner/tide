@@ -3,11 +3,13 @@
 %%
 %% function obj   = solve_wave(obj)
 function obj   = solve_wave(obj)
+
 	% solve the system of ode's
 	[x, y, cflag] = feval(obj.opt.solver,@obj.odefun,@obj.bcfun,obj.Xi,obj.opt);
 	
 	% extract unknowns
 	nx = length(x);
+	obj.x  = x;
 	switch (obj.opt.hmode)
 	case {'matrix'}
 		z0 = y(1:nx);
@@ -26,27 +28,26 @@ function obj   = solve_wave(obj)
 		else
 			Q2 = [];
 		end
-	end
+	end % switch
+	obj.Q_ = [obj.fun.Q0(x), Q1, Q2];
 
-	obj.x  = x;
-	obj.w  = obj.wfun(x);
-	obj.Q_ = [obj.Q0fun(x).*Q1.^0,Q1,Q2];
-
-	% TODO sloppy, make this better a non-static function
-	% TODO pass width
-	z1     = obj.q2z(x,Q1./obj.w,obj.omega);
-	if (~isempty(Q2))
-		z2     = obj.q2z(x,Q2./obj.w,2*obj.omega);
-	else
-		z2     = [];
-	end
-	obj.z_  = [z0,z1,z2];
+	obj.z_ = [z0, obj.discharge2level([Q1, Q2])];
 	
 	% TODO awkward
 	obj.zb = obj.fun.zb(x);
 
 	% TODO this is awkward to be stored here
 	obj.initial.z0 = obj.tmp.z0(x);
+
+	% check result
+	if (any(obj.tmp.h0(x)<=0))
+		cflag = -2;
+		warning('negative water depth');
+	end
+	if (any(~isfinite(obj.z_)))
+		cflag = -1;
+		warning('solution is not finite');
+	end
 
 	obj.cflag = cflag;
 end % River_Tide/solve_wave

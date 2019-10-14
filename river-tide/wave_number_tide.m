@@ -1,18 +1,21 @@
 % Fri 17 Nov 09:26:23 CET 2017
 % Karl Kastner, Berlin
 %
-%% damping modulus of the tide without river flow
+%% wave number of the tide without river flow
 %% c.f. friedrichs, ippen harleman
 %
-% function [r r_low r_high] = damping_modulus_tide(omega,cd,h0,az1)
 %% output :
-%% k : wave number
-%% re(k) : rate of phase change
-%% im(k) : damping rate
-function [k, r_low, r_high] = damping_modulus_tide(omega,cd,h0,az1)
+%% k : wave number, such that
+%%                  z(t,x) = z1(t,0) exp(1i*(omega*t-k*x))
+%%
+%%  re(k) : rate of phase change
+%% -im(k) : damping rate
+%%
+%% function [k k_low k_high] = damping_modulus_tide(omega,cd,h0,az1)
+function [k, k_low, k_high] = wave_number_tide(omega,cd,h0,az1)
 	full = true;
 	if (~issym(az1))
-		g  = 9.81; % is eliminated
+		g  = Constant.g; % is eliminated
 		Pi = pi;
 	else
 		syms g Pi
@@ -40,14 +43,19 @@ function [k, r_low, r_high] = damping_modulus_tide(omega,cd,h0,az1)
 		% wave number
 		k = rr+1i*ri;
 	end
+	k = -1i*(k);
 	% cases are separated by
 	% az1 = 3/4*pi*h0^2*omega*(g/h0)^(1/2))/(cd*g)
 	%     = 3*pi/4*h0^2/cd*k
 
 	% asymptotic linearisation for limit az1 -> 0
 	r_low  = 1/2*cd/h0.^2.*8/(3*Pi).*az1;
+	c      = sqrt(g*h0);
+	k0     = omega/c;
+	k_low  = k0 + 1i*r_low; 
 
 	% asymptotic linearisation for limit az1 -> infty
 	r_high = sqrt( (4/(3*Pi))*cd.*omega.*qt./(g*h0.^3) );
+	k_high = (1+1i)*r_high;
 end % damping_modulus_tide
 

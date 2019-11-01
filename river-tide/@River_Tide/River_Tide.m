@@ -124,6 +124,21 @@ classdef River_Tide < handle
 					syms g positive
 					obj.g = g;
 				end
+			case {'fun.cd','cdfun','cd'}
+				cdfun = varargin{idx+1};
+				if(isa(cdfun,'function_handle'))
+					switch (nargin(cdfun))
+			    			case {1}
+							obj.fun.cd = @(x,h) feval(cdfun,x);
+			    			case {2}
+							obj.fun.cd = @(x,h) feval(cdfun,x,h);
+			    		otherwise
+					error('Chezy coefficient function must take 1 (x) or 2 (x and h) arguments.');
+					end
+				else
+					% constant value
+					obj.fun.cd = @(x,h) cdfun;
+				end % else of isa function
 			otherwise
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
 			end
@@ -134,6 +149,9 @@ classdef River_Tide < handle
 			obj.backwater = Backwater1D('rt',obj);
 		end
 	end % River_Tide (constructor)
+
+
+
 
 	% quasi members
 	function y = h0(obj, x)

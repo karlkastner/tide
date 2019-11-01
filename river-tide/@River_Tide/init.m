@@ -6,7 +6,11 @@
 %% function obj = init(obj, Xi)
 % function obj = init(obj, z_downstream, Q0, Xi)
 function obj = init(obj)
+	if (nargin(obj.fun.cd) < 2)
 	Cfun = @(x) drag2chezy(obj.fun.cd(x));
+	else
+	Cfun = @(x,h) drag2chezy(obj.fun.cd(x,h));
+	end
 
 	obj.bc_transformation();
 

@@ -3,7 +3,7 @@
 %% coefficients of the backwater and wave equation for river-tides
 %
 % TODO make q0 an unknown for networks (stacked odes with multiple bcs)
-% TODO precompute cd, h, w, dhdx, dwdx,
+% TODO precompute cD, h, w, dhdx, dwdx,
 %      this requires the bvp solve to accept a predefined mesh as an argument
 % TODO account for inhomogeneous part
 function [f, obj] = odefun(obj,x,y)
@@ -31,8 +31,6 @@ function [f, obj] = odefun(obj,x,y)
 	omega1 = obj.omega;
 	flag   = obj.flag;
 
-	% TODO pass h for stage dependent roughness
-	cd     = feval(obj.fun.cd,x);
 	w      = obj.fun.width(x);
 	%dw_dx  = obj.tmp.D1*w;
 	dw_dx  = derivative1(x,w); %obj.tmp.D1*w;
@@ -87,12 +85,20 @@ function [f, obj] = odefun(obj,x,y)
 		k = 1;
 	case {'iterate'}
 		% recompute the backwater curve
-		C = @(x) drag2chezy(obj.fun.cd(x));
-		Q1fun = @(x_) interp1(x,Q1,x_,obj.opt.imethod,'extrap');
+	if (nargin(obj.fun.cd) < 2)
+	C = @(x_) drag2chezy(obj.fun.cd(x_));
+	else
+	C = @(x_,h_) drag2chezy(obj.fun.cd(x_,h_));
+	end
+		Q1fun = @(x_)  interp1(x,Q1,x_,obj.opt.imethod,'extrap');
 		obj.backwater.sopt.InitialStep = x(2)-x(1);
 		%obj.backwater.sopt.RelTol = 10*eps^0.25;
-		[x_, h0_, z0_] = obj.backwater.solve(Q0(1),Q1fun,C,...
-			obj.fun.width,obj.fun.zb,obj.z0_downstream(1),obj.Xi);
+		[x_, h0_, z0_] = obj.backwater.solve(Q0(1), ...
+					Q1fun, ...
+					C,...
+					obj.fun.width,obj.fun.zb, ...
+					obj.z0_downstream(1), ...
+					obj.Xi);
 		obj.tmp.x   = x_;
 		obj.tmp.h0  = @(x) interp1(x_,h0_,x,obj.opt.imethod);
 		obj.tmp.z0  = @(x) interp1(x_,z0_,x,obj.opt.imethod);
@@ -101,12 +107,13 @@ function [f, obj] = odefun(obj,x,y)
 	case {'matrix'}
 		% depth is reiterated together with Q1
 		z1 = obj.q2z(x,Q1./w,omega1);
-		f  = obj.odefun0(x, z0, z1, zb, w, dw_dx, Q0, Qhr, Q1, cd, cf);
+		f  = obj.odefun0(x, z0, z1, zb, w, dw_dx, Q0, Qhr, Q1, cD, cf);
 		k  = 2;
 	otherwise
 		error('odefun');
 	end
 	h0     = z0 - zb;
+	cD     = obj.fun.cd(x,h0);
 	if (min(h0)<=0)
 		error('negative water depth')
 	end
@@ -117,9 +124,9 @@ function [f, obj] = odefun(obj,x,y)
 	dh0_dx = derivative1(x,h0);
 	dz0_dx = derivative1(x,z0);
 
-	[f(:,:,k)] = obj.odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, cf, omega1, flag);
+	[f(:,:,k)] = obj.odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cD, g, cf, omega1, flag);
 	if (obj.opt.o2 == true)
-		f(:,:,k+1) = obj.odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, cf, omega1, flag);
+		f(:,:,k+1) = obj.odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cD, g, cf, omega1, flag);
 	end
 end % River_Tide/odefun
 

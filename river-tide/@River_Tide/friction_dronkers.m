@@ -26,16 +26,17 @@ function [uau_sum, uau, p, obj] = friction_dronkers(obj,u,Umid,Uhr)
 
 	% dronkers 8.2 and 8.4 (dronkers uses alpha : phi)
 
-%	if (obj.issymbolic) %nargin()>4 && psym)
-%		syms p0 p1 p2 p3
-%		p = [p0, p1, p2, p3];
-%		syms pi_
-%	else
-	alpha = Umid/Uhr;
-	p     = -obj.friction_coefficient_dronkers(alpha);
-%		pi_ = pi;
-%	end
+	if (issym(u)) %obj.issymbolic) %nargin()>4 && psym)
+		syms p0 p1 p2 p3
+		p = [p0, p1, p2, p3];
+		syms pi_
+	else
+		alpha = Umid/Uhr;
+		p     = -obj.friction_coefficient_dronkers(alpha);
+		pi_ = pi;
+	end
 
+	order = obj.opt.friction_order;
 	for idx=1:order+1
 		% uau = 1/pi (p0 U^2 + p1 u U + p2 u^2/U + p3 u^3/U^2)
 		% uau = 1/pi (p0 U + p1 u + p2 u^2 + p3 u^3/U)

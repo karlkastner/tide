@@ -23,12 +23,6 @@ classdef River_Tide < handle
 
 		% bed level
 		zb
-		% width
-
-		%wfun
-		w
-		% drag coefficient
-		%cdfun
 
 		% angular frequency of tide
 		omega
@@ -176,7 +170,11 @@ classdef River_Tide < handle
 	end
 
 	function y = q(obj,id,x)
-		y = obj.Q(id)./obj.w;
+		if (nargin()<3)
+			x = obj.x;
+		end
+		w = obj.fun.width(x);
+		y = obj.Q(id)./w;
 		if (nargin()>2)
 			y = interp1(obj.x,y,x);
 		end

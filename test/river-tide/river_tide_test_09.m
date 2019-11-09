@@ -1,7 +1,6 @@
 % Wed  9 Oct 15:23:10 PST 2019
 function [fail,rmse,name,rt] = river_tide_test_09(rt_map,pflag)
 	tid  = 9;
-	s = 10;
 	name = 'even overtide, uniform flow';
 	% river discharge
 	Qu        = -s;
@@ -29,7 +28,7 @@ function [fail,rmse,name,rt] = river_tide_test_09(rt_map,pflag)
 	bc(2,1).p   = 1;
 	% wave entering from left
 	bc(1,2).var = 'z';
-	z10       = 0.01*s;
+	z10         = 1;
 	bc(1,2).rhs = z10;
 	bc(1,2).p   = [1,0];
 	bc(1,2).q   = [1,0];
@@ -42,7 +41,7 @@ function [fail,rmse,name,rt] = river_tide_test_09(rt_map,pflag)
 	T         = Constant.SECONDS_PER_DAY;
 	omega     = 2*pi/T;
 	% domain size
-	Xi        = [0,1e5*sqrt(s)];
+	Xi        = [0,1e5];
 	% model for river tide
 	opt.model_str = 'wave';
 	% solver of boundary value problem

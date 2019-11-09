@@ -44,22 +44,26 @@ function [f, obj] = odefun(obj,x,y)
 		Q1 = y(nx+1:2*nx);
 		if (obj.opt.o2)
 			Q2 = y(2*nx+1:3*nx);
+			Qt = [Q1,Q2];
 		else
 			Q2 = 0;
+			Qt = Q1;
 		end
 	otherwise
 		z0 = obj.tmp.z0(x);
 		Q1  = y(1:nx);
 		if (obj.opt.o2)
 			Q2 = y(nx+1:2*nx);
+			Qt = [Q1,Q2];
 		else
 			Q2 = 0;
+			Qt = Q1;
 		end
 	end
-	% TODO consider Q2 to determine Qhr and pass it to ODEfun1 and ODEfun2
-	% TODO consider influence of Q2 on z0
-	Qhr    = abs(Q1);
-	Qmid   = Q0;
+	% TODO properly determine range and midrange
+	%Qhr    = sum(abs(Qt),2);
+	%Qmid   = Q0;
+	[Qhr,Qmid] = tidal_range_exp([Q0,Qt]);
 
 	switch (obj.opt.friction_method)
 	case {'neglect-river'} % lorentz
@@ -90,13 +94,15 @@ function [f, obj] = odefun(obj,x,y)
 	else
 	C = @(x_,h_) drag2chezy(obj.fun.cd(x_,h_));
 	end
-		Q1fun = @(x_)  interp1(x,Q1,x_,obj.opt.imethod,'extrap');
+		Qtfun = @(x_)  interp1(x,Qt,x_,obj.opt.imethod,'extrap');
 		obj.backwater.sopt.InitialStep = x(2)-x(1);
 		%obj.backwater.sopt.RelTol = 10*eps^0.25;
-		[x_, h0_, z0_] = obj.backwater.solve(Q0(1), ...
-					Q1fun, ...
+		[x_, h0_, z0_] = obj.backwater.solve( ...
+					Q0(1), ...
+					Qtfun, ...
 					C,...
-					obj.fun.width,obj.fun.zb, ...
+					obj.fun.width, ...
+					obj.fun.zb, ...
 					obj.z0_downstream(1), ...
 					obj.Xi);
 		obj.tmp.x   = x_;
@@ -105,9 +111,9 @@ function [f, obj] = odefun(obj,x,y)
 		z0          = obj.tmp.z0(x);
 		k           = 1;
 	case {'matrix'}
-		% depth is reiterated together with Q1
+		% depth is reiterated together with Qt
 		z1 = obj.q2z(x,Q1./w,omega1);
-		f  = obj.odefun0(x, z0, z1, zb, w, dw_dx, Q0, Qhr, Q1, cD, cf);
+		f  = obj.odefun0(x, z0, z1, zb, w, dw_dx, Q0, Qhr, Qt, cD, cf);
 		k  = 2;
 	otherwise
 		error('odefun');

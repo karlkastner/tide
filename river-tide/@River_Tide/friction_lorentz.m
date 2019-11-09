@@ -1,6 +1,5 @@
 % 2017-04-04 18:11:50.871153511 +0200
-%% compute friction with the method of Godin
-function [uau, obj] = friction_godin(obj,u,Umax)
+function [uau, obj] = friction_lorentz(obj,u,Umax)
 	if (nargin()<2 || isempty(Umax))
 		U   = max(abs(u));
 	end
@@ -12,7 +11,7 @@ function [uau, obj] = friction_godin(obj,u,Umax)
 	%       of which the Chebysheff set is best
 	if (~issym(u))
 		% Godins coefficient are just dronkers for zero river flow
-		c = obj.friction_coefficient_dronkers(0);
+		c = obj.friction_coefficient_lorentz();
 		c = c/pi;
 		% c   = [0.3395 0.6791];
 	%switch (order)

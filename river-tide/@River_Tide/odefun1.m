@@ -58,6 +58,7 @@ function [f, F3]  = odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cD, g
 
 	% inhomogeneous part
 	% lhs is multiplied by Q1 not q1, so rhs must be scaled up by w
-	f(:,4) = -0.*w.*conj(q1).*q2;
+	% interaction with D2 : e1*e2 = a e1 + b e3
+	f(:,4) = -w.*c2.*cD.*conj(q1).*q2./(Pi*h0.^3);
 end % River_Tide/odefun1
 

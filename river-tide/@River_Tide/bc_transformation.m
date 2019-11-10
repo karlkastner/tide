@@ -24,8 +24,8 @@ function obj = bc_transformation(obj)
 		end 
 
 		% for each tidal frequency component
-		for jd=2:2 %size(bc,2)
-			switch (bc(id,2).var)
+		for jd=2:size(bc,2)
+			switch (bc(id,jd).var)
 			case {'z'}
 				% dQ/dx = -1i*o*z
 				w0 = obj.fun.width(obj.Xi(id));

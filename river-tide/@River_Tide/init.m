@@ -22,10 +22,25 @@ function obj = init(obj)
 		% TODO no magic numbers
 		obj.backwater.sopt.RelTol = 1e-4;
 		Qt = 0; % for the initial condition
+		% TODO this fails, if tiver mouth is at right end
+		if (obj.bc(1,1).var == 'z')
+		z0_downstream = obj.bc(1,1).rhs;
+		obj.Q0_
 		[x_, h0_, z0_] = obj.backwater.solve( ...
 						obj.Q0_, Qt, Cfun, ...
 						obj.fun.width, obj.fun.zb, ...
-						obj.z0_downstream(1), obj.Xi);
+						z0_downstream, obj.Xi);
+		else
+		z0_downstream = obj.bc(2,1).rhs;
+		obj.Q0_
+		[x_, h0_, z0_] = obj.backwater.solve( ...
+						obj.Q0_, Qt, Cfun, ...
+						obj.fun.width, obj.fun.zb, ...
+						z0_downstream, [obj.Xi(2),obj.Xi(1)]);
+		x_ = flipud(x_);
+		h0_ = flipud(h0_);
+		z0_ = flipud(z0_);
+		end
 		obj.tmp.x   = x_;
 		obj.tmp.h0  = @(x) interp1(x_,h0_,x,obj.opt.imethod);
 		obj.tmp.z0  = @(x) interp1(x_,z0_,x,obj.opt.imethod);

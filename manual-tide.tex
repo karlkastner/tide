@@ -16,7 +16,7 @@ breaklines=true
 \setlength{\cftsubsecnumwidth}{3.5em}
 
 \title{Manual for Package:
-tide\protect\\Revision 6M
+tide\protect\\Revision 6:8M
 }
 \author{Karl K\"astner}
 %\date{}
@@ -31,7 +31,7 @@ tide\protect\\Revision 6M
 % abstract
 
 
-\section{@T\_Tide}
+\section{e/@T\_Tide}
 \subsection{T\_Tide}
 ${}$
 \begin{lstlisting}
@@ -74,7 +74,7 @@ ${}$
  shift phase according to time zone
 
 \end{lstlisting}
-\section{@Tidal\_Envelope}
+\section{e/@Tidal\_Envelope}
 \subsection{Tidal\_Envelope}
 ${}$
 \begin{lstlisting}
@@ -87,12 +87,7 @@ ${}$
  initialize with data
 
 \end{lstlisting}
-\section{@Tide\_wft}
-\begin{lstlisting}
-wavelet analysis of tidal data
-
-
-\end{lstlisting}
+\section{e/@Tide\_wft}
 \subsection{Tide\_wft}
 ${}$
 \begin{lstlisting}
@@ -123,12 +118,7 @@ ${}$
           h
 
 \end{lstlisting}
-\section{@Tidetable}
-\begin{lstlisting}
-class for generating tidetable data
-
-
-\end{lstlisting}
+\section{e/@Tidetable}
 \subsection{Tidetable}
 ${}$
 \begin{lstlisting}
@@ -172,12 +162,7 @@ ${}$
  plot average neap and spring tide
 
 \end{lstlisting}
-\section{tide}
-\begin{lstlisting}
-analysis prediction of tides in rivers and estuaries by empirical and theoretical methods
-
-
-\end{lstlisting}
+\section{e}
 \subsection{constituents}
 ${}$
 \begin{lstlisting}
@@ -235,104 +220,7 @@ ${}$
  T > 1/|f1-f2|
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide}
-\begin{lstlisting}
-predict tide in a backwater affected river with a sloping/varying bed
-
-Assumptions and capabilities:
-	- tidal dynamics follow the 1D-Shallow-Water-Equation
-	  (depth and cross-sectionally averaged Navier-Stokes-Equation)
-	- rectangular cross section
-	- width can vary along the channel
-	- friction coefficient (cd) constant along channel and over time (Chezy)
-	- advective accelleration term is considered, but can be deactivated
-	- vertical profile of streamwise velocity is constant
-	  (Boussinesq coefficient is unity (1))
-
-Limitations / TODO list:
-	- single channel dynamics only (no tidal networks)
-	- no wind-shear stress (no storm surges)
-	- no tidal flats / intertidal areas (width constant in time)
-	- no flood-plain during high-river flow
-	- no stratification or along-channel salinty gradient
-	- negligible head loss in channel bends
-	- negligible feed-back of the sediment concentration on the propagation of the tide
-	- low Froude Number (no hydraulic jumps due to cataracts or tidal bores)	
-
-- At present, only two tidal components are supported
-  (either D1 with D2 or D2 with D4, in addition to the mean water level z0),
-  for mixed diurnal-semidiurnal cases with dominant semidiurnal component,
-  the class has to be extended to support three components (D1, D2 and D4)
-
-- At present, the tripel overtide is not computed (D3 for diurnal, D6 for semindiurnal tide),
-  note that this is the main overtide for the case of low river flow
-
-- At present, the 1/h non-linearity is only included in the approximations of
-  the backwater curve, but not it's influence on the tidal frequency components
-
-Method:
-
-This class calls numerical solvers for second order ordinary differential
-equation boundary value problems
-
-Tides is represented as exponential series in form of total discharge Q = sum Q_i = Q_0 + Q_1 + Q_2,
-as discharge is conserved (balanced), the equations are simpler than for level z and velocity u,
-and the frequency components of z are straight forward determined by differentiation of Q
-
-Class and function structure:
-	River_Tide :
-		computes river tide, provides the ode coefficients to the boundary value solver
-	bvp2c, bvp2fdm :
-		solve the underlying second order boundary value problem
-	River_Tide_Map :
-		provides convenient batch runs and processing of River_Tide instances
-
-Minimum working example, c.f. example_rive_tide.m and example_river_tide_map.m
-
-	input:
-
-	Q0    : scalar, river discharge (m^3/s)
-	omega : scalar, angular frequency main tidal species in (1/seconds)
-	x     : 2x1 vector, left and right end of computational domain of the river (m)
-	w(x)  : function of width along the river (m)
-	cd(x) : function of drag coefficient along the river (1)
-	zb(x) : function of bed level along the river (m)
-
-	opt   : structure with options
-	opt.model_str = 'wave' (other solver are not supported at the moment)
-	opt.solver = @bvp2c or @bvp2fdm
-	opt.nx : number of grid points along channel
-	opt.ns : base for logarithmic spacing of grid points, 1 : linear spacing	
-
-	bc  : structure array of boundary conditions
-		r, row 1..2 : left and right end, respectively
-		c, column 1 : mean (river) component
-		          2..n : condition form column-1 frequency component
-
-		(       q(1)*(p(1) y^-(x0) + p(2) dy^-/dx(x0) ...
-                     +  q(2)*(p(1) y^+(x0) + p(2) dy^+/dx(x0) ) = bc(c,r).val
-                           = val(0)
-
-	bc(c,r).var : Quantity, either 'z' or 'Q'
-	bc(c,r).val : complex amplitude of chosen variable
-                      (c.f. (1 + 0i) [m] for surface elevation amplitude of 1m)
-		      (value has to be real for mean component)
-		      mean component requires z and Q to be specified at opposit ends
-	bc(c,r).p   : factor for Dirichlet p(1) or Neumann p(2) condition
-		      p = [1,0] : pure Dirichlet 
-		      p = [0,1] : pure Neumann
-		      sum of abs(p) must be nonzero for each end and each frequency component
-	bc(c,r).q   : factor for left and right going wave, only available for bvp2c
-		      q = [1,1] : total water level / discharge
-		      q = [1,0] : only left going wave
-		      q = [0,1] : only right going wave
-		      q has no meaning for the mean component and is ignored
-		      q is only supported by bvp2c,
-                      bvpfdm uses default q = [1,1]
-		      sum of abs(q) for each frequency component must be zero
-
-
-\end{lstlisting}
+\section{e/river-tide/@River\_Tide}
 \subsection{River\_Tide}
 ${}$
 \begin{lstlisting}
@@ -516,6 +404,17 @@ ${}$
  compute friction with the method of Godin
 
 \end{lstlisting}
+\subsection{friction\_lorentz}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{friction\_quadratic}
+${}$
+\begin{lstlisting}
+ friction determined by Dronker's method
+
+\end{lstlisting}
 \subsection{friction\_trigonometric\_dronkers}
 ${}$
 \begin{lstlisting}
@@ -540,6 +439,11 @@ ${}$
  friction computed by the method of Lorent'z
  expressed as coefficients of the frequency components (trigonometric form)
  
+
+\end{lstlisting}
+\subsection{generate\_delft3d}
+${}$
+\begin{lstlisting}
 
 \end{lstlisting}
 \subsection{init}
@@ -651,13 +555,7 @@ ${}$
  function [k, k0, dk0_dx_rel, obj] = wave_numer_aproximation(obj)
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_Cai}
-\begin{lstlisting}
-Prediction of river tide by the method of Cai
-c.f. Cai 2013, Cai 2015
-
-
-\end{lstlisting}
+\section{e/river-tide/@River\_Tide\_Cai}
 \subsection{Gamma}
 ${}$
 \begin{lstlisting}
@@ -689,13 +587,7 @@ ${}$
  making it an equation in one unknown (delta) only
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_Empirical}
-\begin{lstlisting}
-Empirical fit to measurement and prediction (from tide at sea and river discharge)
-of the river tide
-
-
-\end{lstlisting}
+\section{e/river-tide/@River\_Tide\_Empirical}
 \subsection{River\_Tide\_Empirical}
 ${}$
 \begin{lstlisting}
@@ -756,12 +648,7 @@ ${}$
  select the model for fitting
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_JK}
-\begin{lstlisting}
-empirical analysis and prediction of river tides by the method of Jay and Kukulka
-
-
-\end{lstlisting}
+\section{e/river-tide/@River\_Tide\_JK}
 \subsection{River\_Tide\_JK}
 ${}$
 \begin{lstlisting}
@@ -812,12 +699,7 @@ ${}$
  predict tidal range
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_Map}
-\begin{lstlisting}
-hash container for a set of River_Tide predictions for different boundary conditions
-
-
-\end{lstlisting}
+\section{e/river-tide/@River\_Tide\_Map}
 \subsection{River\_Tide\_Map}
 ${}$
 \begin{lstlisting}
@@ -847,11 +729,7 @@ ${}$
  function obj = plot(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,omega,q,opt)
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_Network}
-\begin{lstlisting}
-predict tides in a fluvial channel network
-
-\end{lstlisting}
+\section{e/river-tide/@River\_Tide\_Network}
 \subsection{River\_Tide\_Network}
 ${}$
 \begin{lstlisting}
@@ -910,27 +788,7 @@ ${}$
  predict the surface elevation amplitude
 
 \end{lstlisting}
-\section{river-tide}
-\begin{lstlisting}
-analysis and prediction of river tides
-
-Sub-Classes:
- 
-@River_Tide
-	- prediction of river tide in a backwater affected river with a sloping bed
-@River_Tide_Cai
-	- prediction of river tide, method of Cai
-@River_Tide_Empirical
-	- prediction of river tide, empirical
-@River_Tide_JK
-	- prediction of river tide, empirical after Jay and Kukulka
-@River_Tide_Map
-	- mulitple-scenaria container for River_Tide
-@River_Tide_Network
-	- extension of River_Tide to networks
-
-
-\end{lstlisting}
+\section{e/river-tide}
 \subsection{damped\_wave\_bvp}
 ${}$
 \begin{lstlisting}
@@ -1033,7 +891,7 @@ ${}$
  determine tidal discharge from water level for tidal wave
 
 \end{lstlisting}
-\section{river-tide/test/test}
+\section{e/river-tide/test/test}
 \subsection{test\_bvp2c\_sym}
 ${}$
 \begin{lstlisting}
@@ -1055,6 +913,11 @@ ${}$
 
 \end{lstlisting}
 \subsection{test\_friction\_dronkers}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{test\_friction\_dronkers2}
 ${}$
 \begin{lstlisting}
 
@@ -1114,7 +977,7 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
-\section{river-tide/test}
+\section{e/river-tide/test}
 \subsection{test\_bvp2c2}
 ${}$
 \begin{lstlisting}
@@ -1155,6 +1018,11 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{test\_tide\_slack\_exp}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_wave\_number\_godin}
 ${}$
 \begin{lstlisting}
@@ -1165,31 +1033,16 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
-\section{river-tide}
-\begin{lstlisting}
-analysis and prediction of river tides
-
-Sub-Classes:
- 
-@River_Tide
-	- prediction of river tide in a backwater affected river with a sloping bed
-@River_Tide_Cai
-	- prediction of river tide, method of Cai
-@River_Tide_Empirical
-	- prediction of river tide, empirical
-@River_Tide_JK
-	- prediction of river tide, empirical after Jay and Kukulka
-@River_Tide_Map
-	- mulitple-scenaria container for River_Tide
-@River_Tide_Network
-	- extension of River_Tide to networks
-
-
-\end{lstlisting}
+\section{e/river-tide}
 \subsection{tidal\_ellipse}
 ${}$
 \begin{lstlisting}
  tidal ellipse, numerical ode solution
+
+\end{lstlisting}
+\subsection{tide\_slack\_exp}
+${}$
+\begin{lstlisting}
 
 \end{lstlisting}
 \subsection{wave\_number\_tide}
@@ -1219,7 +1072,7 @@ ${}$
  two pass solution for the linearised wave equation, for surface elevation
 
 \end{lstlisting}
-\section{test/river-tide}
+\section{e/test/river-tide}
 \subsection{example\_river\_tide}
 ${}$
 \begin{lstlisting}
@@ -1289,23 +1142,28 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{river\_tide\_test\_11}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_12}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{river\_tide\_test\_plot}
 ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
-\section{test}
+\section{e/test}
 \subsection{test\_tidal\_harmonic\_analysis}
 ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
-\section{tide}
-\begin{lstlisting}
-analysis prediction of tides in rivers and estuaries by empirical and theoretical methods
-
-
-\end{lstlisting}
+\section{e}
 \subsection{tidal\_constituents}
 ${}$
 \begin{lstlisting}
@@ -1367,7 +1225,17 @@ ${}$
  tidal_harmonic analysis
 
 \end{lstlisting}
-\section{tide-savenije}
+\subsection{tidal\_range\_exp}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{tidal\_range\_tri}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\section{e/tide-savenije}
 \subsection{savenije\_phase\_lag}
 ${}$
 \begin{lstlisting}
@@ -1422,6 +1290,17 @@ ${}$
 
 \end{lstlisting}
 \subsection{tide-savenije}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\section{e}
+\subsection{tide\_low\_high\_exp}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{tide\_low\_high\_tri}
 ${}$
 \begin{lstlisting}
 

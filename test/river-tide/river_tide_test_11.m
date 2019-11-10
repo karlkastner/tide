@@ -78,28 +78,30 @@ function [fail,rmse,name,rt] = river_tide_test_11(rt_map,pflag)
 
 	end
 
-	figure(1);
-	clf();
-	subplot(2,2,1)
 	z = ([rt(1).z(2),rt(2).z(1)]);
-	plot(rt(1).x,abs(z(:,1)));
-	hold on
-	plot(rt(1).x,abs(z(:,2)),'--');
-
-	subplot(2,2,2)
-	z = ([rt(1).z(2),rt(2).z(1)]);
-	plot(rt(1).x,angle(z(:,1)));
-	hold on
-	plot(rt(1).x,angle(z(:,2)),'--');
-
-	subplot(2,2,3)
-	plot(rt(1).x,abs([rt(1).z_]));
-
 	res = z(:,1)-z(:,2);
-	
-
 	rmse = rms(res);
 	fail = (rmse > 0.01*rms(z(:,1)));
+
+	if (pflag)
+		figure(1);
+		clf();
+		subplot(2,2,1)
+		plot(rt(1).x,abs(z(:,1)));
+		hold on
+		plot(rt(1).x,abs(z(:,2)),'--');
+	
+		subplot(2,2,2)
+		z = ([rt(1).z(2),rt(2).z(1)]);
+		plot(rt(1).x,angle(z(:,1)));
+		hold on
+		plot(rt(1).x,angle(z(:,2)),'--');
+	
+		subplot(2,2,3)
+		plot(rt(1).x,abs([rt(1).z_]));
+
+	end	
+
 	% compare to analytical solution
 %	g = Constant.gravity;
 %	c = sqrt(g*h0);

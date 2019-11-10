@@ -1,13 +1,13 @@
 % Wed  9 Oct 15:23:10 PST 2019
 function [fail,rmse,name,rt] = river_tide_test_11(rt_map,pflag)
 	reltol = 1e-2;
-	tid  = 11;
+	tid  = 12;
 	name = 'swap left and right end';
 
 	T   = Constant.SECONDS_PER_DAY;
 
 	% river discharge
-	Q0  = -10
+	Q0  = -10;
 	z10 = [1,sqrt(eps)];
 	z1L = [0,1];
 
@@ -103,30 +103,32 @@ q = 0;
 
 	end
 
-	figure(1);
-	clf();
-	subplot(2,2,1)
 	z = ([rt(1).z(1),flipud(rt(2).z(1))]);
-	plot(rt(1).x,abs(z(:,1)));
-	hold on
-	plot(rt(1).x,abs(z(:,2)),'--');
-	ylabel('|z|');
-
-	subplot(2,2,2)
-	plot(rt(1).x,angle(z(:,1)));
-	hold on
-	plot(rt(1).x,angle(z(:,2)),'--');
-	ylabel('angle(z)');
-
-	subplot(2,2,3)
-	plot(rt(1).x,[rt(1).zb,rt(2).zb],'k');
-	hold on
-	plot(rt(1).x,[rt(1).z(0),rt(2).z(0)],'r--');
-
 	res = z(:,1)-z(:,2);
-
 	rmse = rms(res);
-	fail = (rmse > reltpol*rms(z(:,1)));
+	fail = (rmse > reltol*rms(z(:,1)));
+
+	if (pflag)
+		figure(1);
+		clf();
+		subplot(2,2,1)
+		plot(rt(1).x,abs(z(:,1)));
+		hold on
+		plot(rt(1).x,abs(z(:,2)),'--');
+		ylabel('|z|');
+	
+		subplot(2,2,2)
+		plot(rt(1).x,angle(z(:,1)));
+		hold on
+		plot(rt(1).x,angle(z(:,2)),'--');
+		ylabel('angle(z)');
+	
+		subplot(2,2,3)
+		plot(rt(1).x,[rt(1).zb,rt(2).zb],'k');
+		hold on
+		plot(rt(1).x,[rt(1).z(0),rt(2).z(0)],'r--');
+	end
+
 	% compare to analytical solution
 %	g = Constant.gravity;
 %	c = sqrt(g*h0);

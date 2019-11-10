@@ -5,10 +5,9 @@
 % TODO test name = 'friction decomposition';
 % TODO test to previous revision
 
-clear
 rt_map = River_Tide_Map('./rt-test-map.mat');
 rt_map.recompute = true;
-pflag = 1;
+pflag = 0;
 
 test_C = { ... 
 	  @river_tide_test_01 ...
@@ -25,13 +24,14 @@ test_C = { ...
 	, @river_tide_test_12
 	};
 
-clear out
+%clear out
 nt = length(test_C);
 rmse = zeros(nt,2);
 fail = false(nt,1);
 for idx=1:nt
 	testfun = test_C{idx};
-	[fail(idx,1),rmse(idx,:),name,out(idx)] = testfun(rt_map,pflag);
+	[fail(idx,1),rmse(idx,:),name,out_] = testfun(rt_map,pflag);
+	out(idx,1:length(out_)) = out_;
 	fprintf(['Testing : ', name,'\n']);
 	if (fail(idx))
 		warning(['Test ',name,' failed']);

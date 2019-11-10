@@ -5,6 +5,9 @@
 function [key obj] = key(obj,varargin)
 		key = '';
 		for idx=1:length(varargin)
+			if (isempty(varargin{idx}))
+				key = [key,'-'];
+			else
 			if (ischar(varargin{idx}))
 				key = [key, varargin{idx}];
 			else 
@@ -12,6 +15,7 @@ function [key obj] = key(obj,varargin)
 					error('arguments have to be strings or scalaras');
 				end % if
 				key = [key, sprintf('%e',varargin{idx})];
+			end
 			end
 			if (idx < length(varargin))
 				key = [key,' '];

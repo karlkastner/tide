@@ -21,13 +21,20 @@ function f  = odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cD, g, c, o
 	end
 
 	% q''
-	f(:,1) =   (1i*g)/(2*o1)*ones(n,1);	     % change of surface elevation (z1' ~ Q1'')
+	f(:,1) =   (1i*g)/(2*o1); %*ones(n,1);	     % change of surface elevation (z1' ~ Q1'')
 	% q'
-	f(:,2) =   (-1i*g./(2*o1*w).*dw_dx );	     % change of width
+	f(:,2) =   (-1i*g./(2*o1*w).*dw_dx ... 	     % change of width
+		 + flag.gh*(1i*g*dz0_dx)./(h0*2*o1) ...
+		 + flag.aa*(2*q0)./h0.^2 ...
+		 + flag.oh*( (3i*c2.*cD.*q0.^2) ...
+			    +(3i*cD.*q0.*c1.*qhr) ...
+			    +(3i*cD.*c0.*qhr.^2))./(h0.^4*2*o1*Pi) ...
+			);
 	% q
 	f(:,3) = ( (2i*o1)./h0                   ... % wave travelling
 	 	 + (cD.*c1.*qhr)./(Pi*h0.^3)     ... % tidal damping					
 		 + (2*cD.*c2.*q0 )./(Pi*h0.^3)   ... % damping by river flow				
+		 - flag.aa.*(2*q0.*dh0_dx)./h0.^3 ...
 		 );
 
 	% constant (generating term)

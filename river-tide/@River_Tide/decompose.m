@@ -1,6 +1,7 @@
 % Fri 15 Dec 16:58:52 CET 2017
 %% decompose the tide into a right and left travelling wave,
 %% i.e. into incoming and reflected wave
+%% TODO subtract forcing term
 function [Q1lr, z1lr, obj] = decompose(obj)
 	Q1    = obj.Q(1);
 	x     = obj.x;
@@ -29,16 +30,21 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 	end
 	r  = roots2(c);
 	
+	% match values at segment end points (continuity)
+	% constant coefficients in each segment
+	% Q(-1/2 dx) = Qm exp(-1/2 rm dx) + Qp exp(-1/2 rp dx)
+	% Q(+1/2 dx) = Qm exp(+1/2 rm dx) + Qp exp(+1/2 rp dx)
 	A   = [diag(sparse(exp(-0.5*dx.*r(:,1)))), diag(sparse(exp(-0.5*dx.*(r(:,2)))));
 	       diag(sparse(exp(+0.5*dx.*r(:,1)))), diag(sparse(exp(+0.5*dx.*(r(:,2)))))];
-	Q1_ = [Q1(1:end-1); Q1(2:end)];
+	% subtract constant part
+	Q1_   = [Q1(1:end-1)-c(1:end-1,4); Q1(2:end)-c(2:end,4)];
 	Q1lrc = A \ Q1_;
 	Q1lrc = reshape(Q1lrc,[],2);
 
-	% z = r/(i omega w) Q, as coefficients are constant along elements
+	% z = r/(i omega w) Q, as coefficients are constant along segments
 	z1lrc = [r(:,1)./(1i*omega*wc).*Q1lrc(:,1), r(:,2)./(1i*omega*wc).*Q1lrc(:,2)];
 	
-	% centres to edges
+	% segment centres to end points
 	n = length(x);
 
 	for idx=1:2

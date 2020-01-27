@@ -9,6 +9,7 @@ function tidetable = plot_neap_spring(tidetable,pflag,prefix)
 	if (nargin() < 3)
 		prefix = [];
 	end
+	lw = 1.5;
 
 	% number of groups to split the neap and tide in (for testing)
 	ks = 1;
@@ -56,7 +57,7 @@ function tidetable = plot_neap_spring(tidetable,pflag,prefix)
 	n = round(n);
 	xlim([t(1) t(n)] + 8*30);
 	if (pflag)
-		pdfprint(1,['img/',prefix,'tide-year-2013']);
+		pdfprint(1,['img/',prefix,'-tide-year-2013']);
 	end
 %	figure(5)
 	plot(tidetable.t24,tidetable.range24,'.g');
@@ -186,8 +187,8 @@ function tidetable = plot_neap_spring(tidetable,pflag,prefix)
 %		xlim([-(n-ns) n-ns]);
 		ylim([-1 1]);
 		%title(['Average Spring Tide']); % num2str(round(100*length(fdx_)/l0)) '%']);
-		ylabel('Tidal amplitude (m)');
-		xlabel('Hours since low water');
+		ylabel('Surface elevation (m)');
+		xlabel('Time since low water (h)');
 		xlim([spring_t(1) spring_t(end)])
 		hourtick(6/24);
 %		l = (-30:6:30)/24;
@@ -209,7 +210,7 @@ function tidetable = plot_neap_spring(tidetable,pflag,prefix)
 %	print('-depsc','spring.eps');
 %	system('epstopdf spring.eps');
 	if (pflag)
-		pdfprint(2,['img/',prefix,'spring']);
+		pdfprint(2,['img/',prefix,'-spring']);
 	end
 
 
@@ -274,8 +275,10 @@ function tidetable = plot_neap_spring(tidetable,pflag,prefix)
 		plot(neap_t, neap_mean + neap_std, 'color', [0.75 0.75 0.75]);
 		xlim([neap_t(1),neap_t(end)]);
 		ylim([-1 1]);
-		ylabel('Tidal amplitude (m)');
-		xlabel('Hours since low water');
+		%ylabel('Tidal amplitude (m)');
+		%xlabel('Hours since low water');
+		ylabel('Surface elevation (m)');
+		xlabel('Time since low water (h)');
 		hourtick(6/24);
 
 %		l = -30:6:30;
@@ -295,7 +298,7 @@ function tidetable = plot_neap_spring(tidetable,pflag,prefix)
 	end
 
 	if (pflag)
-		pdfprint(5,['img/',prefix,'neap']);
+		pdfprint(5,['img/',prefix,'-neap']);
 	end
 
 	namedfigure(6,'Average neap and spring tide');
@@ -304,16 +307,18 @@ function tidetable = plot_neap_spring(tidetable,pflag,prefix)
 	pause(1);
 	% actually, the time is hours before low water, we fix this by shifting back 51 min
 	dt = (51/(1440));
-	plot(ax,spring_t+dt,spring_mean);
+	plot(ax,spring_t+dt,spring_mean,'linewidth',lw);
 	hold(ax,'on')
-	plot(ax,neap_t+dt,neap_mean);
+	plot(ax,neap_t+dt,neap_mean,'linewidth',lw);
 	xlim(ax,[neap_t(1)+dt,neap_t(end)]);
 	hourtick(6/24); % ax
 	x  = (0:4)/4;
 	set(ax,'xtick',x,'xticklabel',{'0:00','6:00','12:00','18:00','24:00'});
 
-	ylabel(ax,'Tidal amplitude (m)');
-	xlabel(ax,'Hours since low water');
+	ylabel(ax,'Surface elevation (m)');
+	xlabel(ax,'Time since low water (h)');
+	%ylabel(ax,'Tidal amplitude (m)');
+	%xlabel(ax,'Hours since low water');
 	grid(ax,'on');
 	set(ax, 'xminorgrid','off');
 	set(ax, 'yminorgrid','off');
@@ -341,13 +346,13 @@ function tidetable = plot_neap_spring(tidetable,pflag,prefix)
 %	print('-depsc','neap.eps');
 %	system('epstopdf neap.eps');
 	if (pflag)
-		pdfprint(6,['img/',prefix,'neap-and-spring']);
+		pdfprint(6,['img/',prefix,'-neap-and-spring']);
 	end
 	%legend(ax,'location','northwest','spring','neap');
 	legend(ax,'spring','neap');
 
 	if (pflag)
-		pdfprint(6,['img/',prefix,'neap-and-spring-legend'],3,2/3);
+		pdfprint(6,['img/',prefix,'-neap-and-spring-legend'],3,2/3);
 	end
 end
 

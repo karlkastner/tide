@@ -17,7 +17,8 @@ my $y0;
 my $ye;
 
 # TODO no magic path
-my $root="/home/pia/phd/src/lib/tide";
+#my $root="/home/pia/phd/src/lib/tide";
+my $root="/home/pia/large/phd/gis/tide-tpxo/OTPS1_tpxo7/";
 
 if ($#ARGV > 0)
 {

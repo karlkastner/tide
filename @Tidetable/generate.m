@@ -6,7 +6,6 @@ function obj = generate(obj,foldername,timeshift,latlon,zone,y0,ye);
 
 	% get path
 	w = what('Tidetable');
-	% ROOTFOLDER,'/src/lib/tide/@Tidetable/
 	p = w.path;
 
 	% generate the TPXO input and call TPXO
@@ -22,6 +21,7 @@ function obj = generate(obj,foldername,timeshift,latlon,zone,y0,ye);
 	end
 	
 	% read TPXO output
+	disp('importing');
 	obj.import_tpxo(tpxoname)
 
 	% load coordinates

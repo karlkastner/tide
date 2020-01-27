@@ -6,7 +6,7 @@ set -u +x
 # generates TPXO input and runs TPXO
 
 # TODO no magic file names
-dir_tpxo=~/large/phd/gis/tide-tpxo/OTPS
+dir_tpxo=~/large/phd/gis/tide-tpxo/OTPS1_tpxo7
 export PATH=$PATH:$dir_tpxo
 
 if [ $# -gt 2 ]
@@ -28,7 +28,7 @@ dir_out=$iname
 #${iname%.*}
 echo $dir_out
 #table-pontianak
-mkdir $dir_out
+mkdir -p $dir_out
 
 script=$(readlink -f "$0")
 dir=$(dirname "$script")

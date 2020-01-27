@@ -50,7 +50,7 @@ function [f, F3]  = odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cD, g
 	f(:,3) = ( (1i*o1)./h0 ...			% wave propagation
 		 + (  cD.*c1.*qhr)./(Pi*h0.^3) ...	% self damping
 		 + (2*cD.*c2.*q0 )./(Pi*h0.^3) ...	% damping by river flow
-		 - flag.aa.*(2*q0.*dh0_dx)./h0.^3 ...
+		 - flag.aa.*(2*q0.*dh0_dx)./h0.^3 ...   % advective accleration
 		 );
 	if (nargout() > 1)
 		F3 = [(1i*o1)./h0, (cD.*c1.*qhr)./(h0.^3*Pi), (2*cD.*q0.*c2)./(h0.^3*Pi)];

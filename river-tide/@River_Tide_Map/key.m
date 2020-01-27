@@ -2,7 +2,7 @@
 %% key for storing a scenario
 %%
 %% function [key obj] = key(obj,varargin)
-function [key obj] = key(obj,varargin)
+function [key, obj] = key(obj,varargin)
 		key = '';
 		for idx=1:length(varargin)
 			if (isempty(varargin{idx}))

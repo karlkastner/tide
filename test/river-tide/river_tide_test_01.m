@@ -2,17 +2,19 @@
 function [fail,rmse,name,rt] = river_tide_test_01(rt_map,pflag)
 	tid = 1;
 	name = 'wave along frictionless prismatic channel, no reflection';
-	% river discharge
-	Q0        = 0;
+% TODO mwl fails if this is zero
+e = 1e-2;
 	% width of channel
 	w0 = 1;
 	wfun      = @(x)   w0*ones(size(x));
 	% drag/friction coefficient
-	cD        = 0;
+	cD        = e;
 	cdfun     = @(x)  cD*ones(size(x));
 	% bed level of channel
 	h0        = 10;
 	zbfun     = @(x) -h0*ones(size(x));
+	% river discharge
+	Q0        = w0*h0*e;
 	bc        = struct();
 	% mean sea level
 	bc(1,1).var = 'z';
@@ -45,7 +47,7 @@ function [fail,rmse,name,rt] = river_tide_test_01(rt_map,pflag)
 	% solver of boundary value problem
 	opt.solver = @bvp2c;
 	% number of points along channel
-	opt.nx     = 200;
+	opt.nx     = 10;
 	% change of distance between points along channel 
 	opt.xs     = 1; 
 

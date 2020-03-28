@@ -11,14 +11,11 @@ function [f, obj] = odefun(obj,x,y)
 	if (nargin()<2)
 		switch (obj.opt.hmode)
 		case {'matrix'}
-			k=2;	
+			k = sum(obj.opt.oflag)+1;
 		otherwise
-			k=1;
+			k = sum(obj.opt.oflag);
 		end
-		if (obj.opt.o2)
-			k=k+1;
-		end
-			f = zeros(0,0,k);
+		f = zeros(0,0,k);
 		return;
 	end
 
@@ -32,38 +29,46 @@ function [f, obj] = odefun(obj,x,y)
 	flag   = obj.flag;
 
 	w      = obj.fun.width(x);
-	%dw_dx  = obj.tmp.D1*w;
-	dw_dx  = derivative1(x,w); %obj.tmp.D1*w;
+	dw_dx  = derivative1(x,w);
 
 	Q0     = obj.fun.Q0(x);
 	zb     = obj.fun.zb(x);
 	nx = length(x);
+	y_ = reshape(y,nx,[]);
         switch (obj.opt.hmode)                                                  
 	case {'matrix'}
-		z0 = y(1:nx); 
-		Q1 = y(nx+1:2*nx);
-		if (obj.opt.o2)
-			Q2 = y(2*nx+1:3*nx);
-			Qt = [Q1,Q2];
-		else
-			Q2 = 0;
-			Qt = Q1;
-		end
+		z0 = y_(:,1); % y(1:nx);
+		k_ = 2;
 	otherwise
 		z0 = obj.tmp.z0(x);
-		Q1  = y(1:nx);
-		if (obj.opt.o2)
-			Q2 = y(nx+1:2*nx);
-			Qt = [Q1,Q2];
-		else
-			Q2 = 0;
-			Qt = Q1;
-		end
+		k_ = 1;
 	end
+	Qt = y_(:,k_:end);
+	%Q1 = y(nx+1:2*nx);
+	%if (obj.opt.o2)
+	%		Q2 = y(2*nx+1:3*nx);
+	%		Qt = [Q1,Q2];
+	%	else
+	%		Q2 = 0;
+	%		Qt = Q1;
+	%	end
+	%otherwise
+	%	Q1  = y(1:nx);
+	%	if (obj.opt.o2)
+	%		Q2 = y(nx+1:2*nx);
+	%		Qt = [Q1,Q2];
+	%	else
+	%		Q2 = 0;
+	%		Qt = Q1;
+	%	end
+	%end
 	% TODO properly determine range and midrange
 	%Qhr    = sum(abs(Qt),2);
 	%Qmid   = Q0;
-	[Qhr,Qmid] = tidal_range_exp([Q0,Qt]);
+	%[Qhr,Qmid] = tidal_range_exp([Q0,Qt]);
+	Qhr = sum(abs(Qt),2);
+	Qmid = Q0;
+
 
 	switch (obj.opt.friction_method)
 	case {'neglect-river'} % lorentz
@@ -89,11 +94,11 @@ function [f, obj] = odefun(obj,x,y)
 		k = 1;
 	case {'iterate'}
 		% recompute the backwater curve
-	if (nargin(obj.fun.cd) < 2)
-	C = @(x_) drag2chezy(obj.fun.cd(x_));
-	else
-	C = @(x_,h_) drag2chezy(obj.fun.cd(x_,h_));
-	end
+		if (nargin(obj.fun.cd) < 2)
+			C = @(x_) drag2chezy(obj.fun.cd(x_));
+		else
+			C = @(x_,h_) drag2chezy(obj.fun.cd(x_,h_));
+		end
 		Qtfun = @(x_)  interp1(x,Qt,x_,obj.opt.imethod,'extrap');
 		obj.backwater.sopt.InitialStep = x(2)-x(1);
 		%obj.backwater.sopt.RelTol = 10*eps^0.25;
@@ -126,14 +131,6 @@ function [f, obj] = odefun(obj,x,y)
 			z0_ = flipud(z0_);
 		end
 
-		%[x_, h0_, z0_] = obj.backwater.solve( ...
-		%			Q0(1), ...
-		%			Qtfun, ...
-		%			C,...
-		%			obj.fun.width, ...
-		%			obj.fun.zb, ...
-		%			obj.z0_downstream(1), ...
-		%			obj.Xi);
 		obj.tmp.x   = x_;
 		obj.tmp.h0  = @(x) interp1(x_,h0_,x,obj.opt.imethod);
 		obj.tmp.z0  = @(x) interp1(x_,z0_,x,obj.opt.imethod);
@@ -141,7 +138,10 @@ function [f, obj] = odefun(obj,x,y)
 		k           = 1;
 	case {'matrix'}
 		% depth is reiterated together with Qt
-		z1 = obj.q2z(x,Q1./w,omega1);
+		z1 = obj.discharge2level(Qt(:,1),x);
+		h0     = z0 - zb;
+		cD     = obj.fun.cd(x,h0);
+		% TODO make cd a function
 		f  = obj.odefun0(x, z0, z1, zb, w, dw_dx, Q0, Qhr, Qt, cD, cf);
 		k  = 2;
 	otherwise
@@ -153,16 +153,20 @@ function [f, obj] = odefun(obj,x,y)
 	if (min(h0)<=0)
 		error('negative water depth')
 	end
-	% TODO h and z were mixed up here
-	%dh0_dx = obj.tmp.D1*h0;
-	%dz0_dx = obj.tmp.D1*z0;
 	% TODO store interpolators of dh and dz
 	dh0_dx = derivative1(x,h0);
 	dz0_dx = derivative1(x,z0);
 
-	[f(:,:,k)] = obj.odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cD, g, cf, omega1, flag);
-	if (obj.opt.o2 == true)
-		f(:,:,k+1) = obj.odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cD, g, cf, omega1, flag);
+	Q  = [Q0,Qt];
+	QQ = fourier_quadratic_interaction_coefficients(Q,size(Q,2),2);
+
+	% frequency components of the tide
+	for idx=1:length(obj.opt.oflag)
+	if (obj.opt.oflag(idx))
+		f(:,:,k) = obj.odefunk(idx, Q, QQ, Qhr, h0, dh0_dx, dz0_dx, w, dw_dx, cD, cf);
+		k=k+1;
 	end
+	end
+
 end % River_Tide/odefun
 

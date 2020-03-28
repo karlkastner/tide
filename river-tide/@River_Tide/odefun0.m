@@ -28,10 +28,11 @@ function c = odefun0(obj,x,z0,z1,zb,w,dw_dx,Q0,Qhr,Qt,cd,fc)
 
 		% TODO
 		% This quick fix recovering zero depth does not work well,
-		% spurious oscillations emerge
+		% spurious oscillations emerge, better return nan
 if (1)
 		fdx      = h<0;
 		fdx      = find(fdx);
+		if (~isempty(fdx))
 		c(fdx,:) = 0;
 		%c(fdx,1) = 1;
 		c(fdx,3) = 1;
@@ -46,7 +47,14 @@ if (1)
 		end
 		h = (sqrt(cd(fdx)./g).*abs(Q0)./(w(fdx).*sqrt(abs(dzb_dx)))).^(2/3);
 		c(fdx,4) = -(zb(fdx)+h);
+		end
 end
+	cd
+	c
+	w
+	h
+	fc
+pause
 
 end % River_Tide/odefun0
 

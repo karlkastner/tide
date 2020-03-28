@@ -12,8 +12,10 @@
 %% TODO allow Q as input
 %% TODO rename into Q1_to_z1
 %% Mon  7 Oct 19:04:14 PST 2019 : added correction for change of width
-function z = discharge2level(obj,Q)
-	x     = obj.x;
+function z = discharge2level(obj,Q,x)
+	if (nargin()<3)
+		x     = obj.x;
+	end
 	w     = obj.fun.width(x);
 	omega = obj.omega;
 	%q = bsxfun(@rdivide,Q,w);

@@ -55,21 +55,26 @@ classdef River_Tide < handle
 			     ,'friction_method', 'dronkers' ...
 			     ,'friction_order', 2 ...
 			     ,'hmode', 'iterate' ... % 'no-tide' ...
+			     ... % ,'hmode', 'matrix' ... % 'no-tide' ...
 			     , 'imethod', 'spline' ...
-			     , 'o2', false ...
+			     , 'oflag', [true,false(1,3)] ...
 			    );
 
 		% downstream boundary condition
 		z0_downstream = 0; % [0 sqrt(eps)];
 		% river discharge
 		Q0_
-		bc = [struct('p', 1, 'rhs',  0, 'q', []   ,'var','z'), ... % mean (wl or discharge) left
-		      struct('p', 1, 'rhs',  1, 'q', [1 1],'var','Q'), ... % main species left
-		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'); ... % even overtide ;
-		      struct('p', [1 0 0], 'rhs', [], 'q', []   ,'var','Q'), ... % mean (wl or discharge) right
-		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % main species right
-		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q')  ... % even overtide right
-			 ];
+		bc = [struct('p', 1, 'rhs',  0, 'q', []   ,'var','z'), ...       % 0 mean (wl or discharge) left
+		      struct('p', 1, 'rhs',  1, 'q', [1 1],'var','Q'), ...       % 1 main species left
+		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 2 even overtide left
+		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 3 overtide left
+		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'); ... % 4 overtide left
+		      struct('p', [1 0 0], 'rhs', [], 'q', []   ,'var','Q'), ... % 0 mean (wl or discharge) right
+		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 1 main species right
+		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 2 even overtide right
+		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 3 overtide right
+		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 4 overtide right
+		];
 
 		flag = struct('aa',0,'gh',0,'oh',0);
 
@@ -96,8 +101,8 @@ classdef River_Tide < handle
 	end % properties
 	methods (Static)
 		%z1 = q2z(x,q1,omega1);
-		[f, F3]  = odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
-		[f ]     = odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
+		%[f, F3]  = odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
+		%[f ]     = odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
 %		[k0, k] = wave_number_analytic(Q0,W,H,cd,omega,az1,Qt);
 	end % static
 	methods
@@ -127,7 +132,7 @@ classdef River_Tide < handle
 			    			case {2}
 							obj.fun.cd = @(x,h) feval(cdfun,x,h);
 			    		otherwise
-					error('Chezy coefficient function must take 1 (x) or 2 (x and h) arguments.');
+						error('Chezy coefficient function must take 1 (x) or 2 (x and h) arguments.');
 					end
 				else
 					% constant value
@@ -136,6 +141,7 @@ classdef River_Tide < handle
 			otherwise
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
 			end
+		obj.fun
                 end %for idx
 		% object has to be created here,
 		% as otherwise matlab does not allow for parallel objects

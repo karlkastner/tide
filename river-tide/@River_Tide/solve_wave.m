@@ -10,28 +10,19 @@ function obj   = solve_wave(obj)
 	% extract unknowns
 	nx = length(x);
 	obj.x  = x;
+	y_ = reshape(y,nx,[]);
 	switch (obj.opt.hmode)
 	case {'matrix'}
-		z0 = y(1:nx);
-		Q1 = y(nx+1:2*nx);
-		if (obj.opt.o2)
-			Q2 = y(2*nx+1:3*nx);
-		else
-			Q2 = [];
-		end
+		z0 = y_(:,1);
+		Qt = y_(:,2:end);
 	otherwise
 		% TODO compute h0 by function as zs0 and zb are stored
 		z0 = obj.tmp.z0(x);
-		Q1 = y(1:nx);
-		if (obj.opt.o2)
-			Q2 = y(nx+1:2*nx);
-		else
-			Q2 = [];
-		end
+		Qt = y_;
 	end % switch
-	obj.Q_ = [obj.fun.Q0(x), Q1, Q2];
+	obj.Q_ = [obj.fun.Q0(x), Qt];
 
-	obj.z_ = [z0, obj.discharge2level([Q1, Q2])];
+	obj.z_ = [z0, obj.discharge2level(Qt)];
 	
 	% TODO awkward
 	obj.zb = obj.fun.zb(x);

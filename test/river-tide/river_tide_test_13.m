@@ -1,11 +1,11 @@
 % Wed  9 Oct 15:23:10 PST 2019
 function [fail,rmse,name,rt] = river_tide_test_09(rt_map,pflag)
-	tid  = 9;
+	tid  = 13;
 	s    = 10;
-	name = 'even overtide, uniform flow';
+	name = 'quarter-diurnal tide, uniform flow';
 	% river discharge
 	Qu        = -s;
-	Q0        =  Qu;
+	Q0        =  0.4*Qu;
 	% width of channel
 	w0        = 1;
 	wfun      = @(x)   w0*ones(size(x));
@@ -14,12 +14,12 @@ function [fail,rmse,name,rt] = river_tide_test_09(rt_map,pflag)
 	cdfun     = @(x)  cD*ones(size(x));
 	% bed level of channel
 	h0        = 0.5*s;
-	S0         = normal_flow_slope(-Qu,w0,h0,drag2chezy(cD));
+	S0         = normal_flow_slope(Q0,w0,h0,drag2chezy(cD));
 	zbfun     = @(x) -h0 + S0*x;
 	bc        = struct();
 	% mean sea level
 	bc(1,1).var = 'z';
-	bc(1,1).rhs = 0;
+	bc(1,1).rhs =  0;
 	% Dirichlet condition
 	bc(1,1).p   = 1;
 	% river discharge
@@ -42,17 +42,17 @@ function [fail,rmse,name,rt] = river_tide_test_09(rt_map,pflag)
 	T         = Constant.SECONDS_PER_DAY;
 	omega     = 2*pi/T;
 	% domain size
-	Xi        = [0,1e5];
+	Xi        = [0,2e5];
 	% model for river tide
 	opt.model_str = 'wave';
 	% solver of boundary value problem
 	opt.solver = @bvp2c;
 	% number of points along channel
-	opt.nx     = 200;
-	% change of distance between points along channel 
+	opt.nx     = 100;
+	%bp change of distance between points along channel 
 	opt.xs     = 1; 
 	%opt.o2     = true;
-	opt.oflag   = [true,true,false(1,2)];
+	opt.oflag   = [true(1,4)];
 
 	% solve with model
 	[rt]  = rt_map.fun({Xi} ... % Q0,
@@ -85,7 +85,7 @@ function [fail,rmse,name,rt] = river_tide_test_09(rt_map,pflag)
 	% r = (1+1i)*sqrt(-cD.*omega.*Q0/w0./(g*h0.^3));
 	% z = z10*exp(-r*x);
 
-	rmse(2)  = norm(z2_-z2);
+	rmse(2)  = inf; %norm(z2_-z2);
 
 	% err ~ C*df^2/dx^2*dx^2, where C sufficiently large constant
 	nres_ = rms(cdiff(z2_,2))

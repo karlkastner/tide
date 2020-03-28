@@ -19,16 +19,16 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 		case {'matrix'}
 			y = [obj.z0; Q1];
 		otherwise
-			y = Q1;
+			y = obj.Q_;
 		end
-		if (obj.opt.o2)
-			y = [y;obj.Q(2)];
-		end
+		%if (obj.opt.oflag(2))
+		%	y = [y;obj.Q_];
+		%end
 
 		c = obj.odefun(x,y);
-		c = 0.5*(c(1:end-1,:)+c(2:end,:));	
+		c_ = 0.5*(c(1:end-1,:)+c(2:end,:));	
 	end
-	r  = roots2(c);
+	r  = roots2(c_);
 	
 	% match values at segment end points (continuity)
 	% constant coefficients in each segment

@@ -68,24 +68,26 @@ function river_tide_test_plot(tid,rt,z,name,pflag)
 		ylim(pi*[-1,1]);
 
 		if (size(z,2)>2)
-		namedfigure(200+tid,['Test: ',name]);
-		clf();
-		subplot(2,2,1);
-		%[zbfun(x),rt.z_(:,1)]);
-		plot(rt.x,abs(z(:,3)));
-		hold on;
-		plot(rt.x,abs(rt.z_(:,3)),'--');
-		%plot(rt.x,z2_./z2,'-.');
-		legend('|z_2|');
-	
-		subplot(2,2,3);
-		%[zbfun(x),rt.z_(:,1)]);
-		plot(rt.x,angle(z(:,3)));
-		hold on;
-		plot(rt.x,angle(rt.z_(:,3)),'--');
-		%plot(rt.x,z2_./z2,'-.');
-		legend('arg(z_2)');
-		end
+			namedfigure(200+tid,['Test: ',name]);
+			clf();
+			for jdx=2:min(size(z,2),5)
+				subplot(2,4,jdx-1);
+				plot(rt.x,abs(rt.z_(:,jdx)));
+				hold on;
+				if (size(z,2)>=jdx)
+					plot(rt.x,abs(z(:,jdx)),'--');
+				end
+				legend(sprintf('|z_%d|',jdx-1));
+			
+				subplot(2,4,4+jdx-1);
+				plot(rt.x,angle(rt.z_(:,jdx)));
+				hold on;
+				if (size(z,2)>=jdx)
+					plot(rt.x,angle(z(:,jdx)),'--');
+				end
+				legend(sprintf('arg(z_%d)',jdx-1));
+			end
+		end % if
 	end % if pflag
-end
+end % river_tide_test_plot
 

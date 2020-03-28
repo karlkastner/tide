@@ -16,7 +16,7 @@ breaklines=true
 \setlength{\cftsubsecnumwidth}{3.5em}
 
 \title{Manual for Package:
-tide\protect\\Revision 6:12M
+tide\protect\\Revision 6:13M
 }
 \author{Karl K\"astner}
 %\date{}
@@ -599,11 +599,42 @@ ${}$
  TODO merge with backwater
 
 \end{lstlisting}
-\subsection{odefun1}
+\subsection{odefun\_advective\_acceleration}
 ${}$
 \begin{lstlisting}
 
- coefficients of the differential equation of the main tidal species
+\end{lstlisting}
+\subsection{odefun\_advective\_acceleration\_old}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{odefun\_friction}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{odefun\_ghof}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{odefun\_swe\_jacobian}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{odefun\_width}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{odefunk}
+${}$
+\begin{lstlisting}
+
+ coefficients of the ordinary differential equation of the k-th freqeuncy
+ component of the tide
 
  f1 Q'' + f2 Q' + f3 Q + f4 = 0
 
@@ -613,10 +644,19 @@ ${}$
 
 
 \end{lstlisting}
-\subsection{odefun2}
+\subsection{odefunk\_old}
 ${}$
 \begin{lstlisting}
- coefficients of the ordinary differential quation of the even overtide
+
+ coefficients of the ordinary differential equation of the k-th freqeuncy
+ component of the tide
+
+ f1 Q'' + f2 Q' + f3 Q + f4 = 0
+
+ TODO rename f into c
+ TODO better pass dzb_dx instead of dz0_dx
+ TODO aa, oh and gh terms are not tested for width ~= 1
+
 
 \end{lstlisting}
 \subsection{solve}
@@ -1327,6 +1367,11 @@ ${}$
 
 \end{lstlisting}
 \subsection{river\_tide\_test\_12}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_13}
 ${}$
 \begin{lstlisting}
 

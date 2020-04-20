@@ -16,12 +16,14 @@ function z = discharge2level(obj,Q,x)
 	if (nargin()<3)
 		x     = obj.x;
 	end
-	w     = obj.fun.width(x);
+	w     = obj.width(x);
 	omega = obj.omega;
 	%q = bsxfun(@rdivide,Q,w);
 	z = zeros(size(Q));
+	D1_dx = obj.D1_dx(x);
 	for idx=1:size(Q,2)
-	z(:,idx) = 1i./(idx*omega*w) .* derivative1(x,Q(:,idx));
+		z(:,idx) = 1i./(idx*omega*w) .* (D1_dx*Q(:,idx));
+		%derivative1(x,Q(:,idx));
 	    	  %*(         derivative1(x,q) ...
 	          % + q./w.*derivative1(x,w) );
 	end

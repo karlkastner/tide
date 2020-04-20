@@ -26,7 +26,7 @@ function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
 	Xi = obj.Xi;
 	switch (obj.opt.hmode)
 	case {'matrix'}
-		[rhs, p, q] = bc(x,y,ccdx+1);
+		[rhs, p, q] = bc(x,y,ccdx);
 	case {'iterate'}
 		[rhs, p, q] = bc(x,y,ccdx+1);
 	otherwise

@@ -28,7 +28,7 @@ function [f, F3]  = odefunk(obj, k, Q, QQ, Qhr, h0, dh0_dx, dz0_dx, w0, dw0_dx, 
 	end
 
 	% forcing by friction
-	f = obj.odefun_friction(f,k,Q,QQ,Qhr,h0,w0,cD,c);
+	f = obj.odefun_friction(f,k,Q,QQ,Qhr,h0,w0,cD,c,D1_dx);
 
 	% forcing by width variation
 	f = obj.odefun_width(f,k,w0,dw0_dx);

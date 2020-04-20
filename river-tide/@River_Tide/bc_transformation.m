@@ -13,12 +13,14 @@ function obj = bc_transformation(obj)
 		case {'z','z0'}
 			obj.z0_downstream = bc(id,1).rhs;
 			n_z0 = n_z0+1;
+			%bc(id,1).rhs = bc(id,1).rhs;
 		case {'Q','Q0'}
 			obj.Q0_ = bc(id,1).rhs;
 			n_Q0 = n_Q0+1;
+			bc(id,1).rhs = [];
 		otherwise
-			error('bcfun')
-		end
+			error('bcfun');
+		end % switch
 		if (bc(id,1).p ~= 1)
 			error('only dirichlet condition supported for mwl so far');
 		end 
@@ -28,7 +30,7 @@ function obj = bc_transformation(obj)
 			switch (bc(id,jd).var)
 			case {'z'}
 				% dQ/dx = -1i*o*z
-				w0 = obj.fun.width(obj.Xi(id));
+				w0 = obj.width(obj.Xi(id));
 				omega_j = (jd-1)*obj.omega;
 				bc(id,jd).rhs = -1i*omega_j*w0*bc(id,jd).rhs;
 				if ( bc(id,jd).p(2) ~= 0)

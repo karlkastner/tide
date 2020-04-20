@@ -2,16 +2,19 @@
 function [fail,rmse,name,rt] = river_tide_test_02(rt_map,pflag)
 	tid = 2;
 	name = 'wave along frictionless width-converging channel, no reflection';
-	% river discharge
-	Q0        = 0;
-	% width of channel
+	e         = 1e-4;
+	h0        = 10;
 	Lw        = 1e6;
 	w0        = 1e5;
+	% river discharge
+	
+	Q0        = -w0*exp(-1e6/Lw)*h0*e; % was 0
+	% width of channel
 	wfun      = @(x)   w0*exp(-x/Lw); %1*ones(size(x));
 	% drag/friction coefficient
-	cdfun     = @(x)  0*ones(size(x));
+	% TODO zero does not work in matrix mode
+	cdfun     = @(x)  e*2.5e-3*ones(size(x));
 	% bed level of channel
-	h0        = 10;
 	zbfun     = @(x) -h0*ones(size(x));
 	bc        = struct();
 	% mean sea level
@@ -40,14 +43,10 @@ function [fail,rmse,name,rt] = river_tide_test_02(rt_map,pflag)
 	omega     = 2*pi/T;
 	% domain size
 	Xi        = [0,1e6];
-	% model for river tide
-	opt.model_str = 'wave';
-	% solver of boundary value problem
-	opt.solver = @bvp2c;
-	% number of points along channel
-	opt.nx     = 200;
-	% change of distance between points along channel 
-	opt.xs     = 1; 
+
+	meta = river_tide_test_metadata();
+	opt  = meta.opt;
+	%opt.hmode = 'iterate'; 
 
 	% solve with model
 	[rt]  = rt_map.fun({Xi} ... % Q0,
@@ -62,6 +61,7 @@ function [fail,rmse,name,rt] = river_tide_test_02(rt_map,pflag)
 
 	% check ode
 	rmse = rt.check_continuity();
+
 	% compare to analytical solution
 	g = Constant.gravity;
 	c0 = sqrt(g*h0);

@@ -2,19 +2,20 @@
 function [fail,rmse,name,rt] = river_tide_test_01(rt_map,pflag)
 	tid = 1;
 	name = 'wave along frictionless prismatic channel, no reflection';
-% TODO mwl fails if this is zero
-e = 1e-2;
+
+	e = 0;
+%	e = 0.0001;
+%	e = 1;
 	% width of channel
 	w0 = 1;
 	wfun      = @(x)   w0*ones(size(x));
 	% drag/friction coefficient
-	cD        = e;
-	cdfun     = @(x)  cD*ones(size(x));
+	cdfun     = @(x)  2.5e-3*e*ones(size(x));
 	% bed level of channel
 	h0        = 10;
 	zbfun     = @(x) -h0*ones(size(x));
 	% river discharge
-	Q0        = w0*h0*e;
+	Q0        = -w0*h0*e;
 	bc        = struct();
 	% mean sea level
 	bc(1,1).var = 'z';
@@ -28,7 +29,7 @@ e = 1e-2;
 	bc(2,1).p   = 1;
 	% wave entering from left
 	bc(1,2).var = 'z';
-	z10       = 1;
+	z10         = 1;
 	bc(1,2).rhs = z10;
 	bc(1,2).p   = [1,0];
 	bc(1,2).q   = [1,0];
@@ -42,14 +43,12 @@ e = 1e-2;
 	omega     = 2*pi/T;
 	% domain size
 	Xi        = [0,1e6];
-	% model for river tide
-	opt.model_str = 'wave';
-	% solver of boundary value problem
-	opt.solver = @bvp2c;
-	% number of points along channel
-	opt.nx     = 10;
-	% change of distance between points along channel 
-	opt.xs     = 1; 
+
+	meta = river_tide_test_metadata();
+	opt = meta.opt;
+%	Xi(2) = 1e3;
+%	opt.nx = 4;
+%	opt.relaxation = 0.5;
 
 	% solve with model
 	[rt]  = rt_map.fun({Xi} ... % Q0,

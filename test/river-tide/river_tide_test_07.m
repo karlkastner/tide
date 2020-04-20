@@ -1,7 +1,7 @@
 % Wed  9 Oct 15:23:10 PST 2019
 function [fail,rmse,name,rt] = river_tide_test_07(rt_map,pflag)
-	tid  = 7;
-	name = 'backwater curve, no tide';
+	tid       = 7;
+	name      = 'backwater curve, no tide';
 	% river discharge
 	Qu        = -100;
 	Q0        = 0.5*Qu;
@@ -42,14 +42,9 @@ function [fail,rmse,name,rt] = river_tide_test_07(rt_map,pflag)
 	omega     = 2*pi/T;
 	% domain size
 	Xi        = [0,1e6];
-	% model for river tide
-	opt.model_str = 'wave';
-	% solver of boundary value problem
-	opt.solver = @bvp2c;
-	% number of points along channel
-	opt.nx     = 200;
-	% change of distance between points along channel 
-	opt.xs     = 1; 
+
+	meta = river_tide_test_metadata();
+	opt = meta.opt;
 
 	% solve with model
 	[rt]  = rt_map.fun({Xi} ... % Q0,
@@ -92,7 +87,7 @@ function [fail,rmse,name,rt] = river_tide_test_07(rt_map,pflag)
 		subplot(2,3,1);
 		plot(rt.x,[zbfun(x),rt.z_(:,1)]);
 		hold on;
-		plot(x_,z0_,'--');
+		plot(rt.x,z0,'--');
 		legend('z_b','z_0');
 
 		subplot(2,3,4);

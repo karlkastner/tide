@@ -1,7 +1,7 @@
 % Wed  9 Oct 15:23:10 PST 2019
 function [fail,rmse,name,rt] = river_tide_test_05(rt_map,pflag)
-	tid = 5;
-	name = 'small tidal wave in prismatic channel without river flow';
+	tid       = 5;
+	name      = 'small tidal wave in prismatic channel without river flow';
 	% river discharge
 	Q0        = 0;
 	% width of channel
@@ -40,14 +40,9 @@ function [fail,rmse,name,rt] = river_tide_test_05(rt_map,pflag)
 	omega     = 2*pi/T;
 	% domain size
 	Xi        = [0,1e6];
-	% model for river tide
-	opt.model_str = 'wave';
-	% solver of boundary value problem
-	opt.solver = @bvp2c;
-	% number of points along channel
-	opt.nx     = 200;
-	% change of distance between points along channel 
-	opt.xs     = 1; 
+
+	meta = river_tide_test_metadata();
+	opt = meta.opt;
 
 	% solve with model
 	[rt]  = rt_map.fun({Xi} ... % Q0,

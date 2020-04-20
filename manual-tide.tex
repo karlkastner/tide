@@ -16,7 +16,7 @@ breaklines=true
 \setlength{\cftsubsecnumwidth}{3.5em}
 
 \title{Manual for Package:
-tide\protect\\Revision 6:13M
+tide\protect\\Revision 6:14M
 }
 \author{Karl K\"astner}
 %\date{}
@@ -448,6 +448,11 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{friction\_coefficient}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{friction\_coefficient\_dronkers}
 ${}$
 \begin{lstlisting}
@@ -569,6 +574,11 @@ ${}$
  function obj = init(obj, Xi)
 
 \end{lstlisting}
+\subsection{initial\_value}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{mwl\_offset}
 ${}$
 \begin{lstlisting}
@@ -600,11 +610,6 @@ ${}$
 
 \end{lstlisting}
 \subsection{odefun\_advective\_acceleration}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{odefun\_advective\_acceleration\_old}
 ${}$
 \begin{lstlisting}
 
@@ -644,27 +649,17 @@ ${}$
 
 
 \end{lstlisting}
-\subsection{odefunk\_old}
-${}$
-\begin{lstlisting}
-
- coefficients of the ordinary differential equation of the k-th freqeuncy
- component of the tide
-
- f1 Q'' + f2 Q' + f3 Q + f4 = 0
-
- TODO rename f into c
- TODO better pass dzb_dx instead of dz0_dx
- TODO aa, oh and gh terms are not tested for width ~= 1
-
-
-\end{lstlisting}
 \subsection{solve}
 ${}$
 \begin{lstlisting}
  call stationary or non-stationary solver respectively
 
  function obj   = solve(obj)
+
+\end{lstlisting}
+\subsection{solve\_backwater}
+${}$
+\begin{lstlisting}
 
 \end{lstlisting}
 \subsection{solve\_swe}
@@ -1090,7 +1085,12 @@ ${}$
  determine tidal discharge from water level for tidal wave
 
 \end{lstlisting}
-\section{river-tide/test/test}
+\section{river-tide/test}
+\subsection{test\_bvp2c2}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_bvp2c\_sym}
 ${}$
 \begin{lstlisting}
@@ -1106,7 +1106,22 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{test\_complex\_even\_overtide}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_dronkers\_compound}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{test\_fourier\_power\_exp}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{test\_friction}
 ${}$
 \begin{lstlisting}
 
@@ -1136,6 +1151,11 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{test\_reflection}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_reflection\_coefficient\_gradual}
 ${}$
 \begin{lstlisting}
@@ -1156,53 +1176,17 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{test\_rt\_wave\_number}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_rt\_zs0}
 ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
 \subsection{test\_swe}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{test\_utm2latlon}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{test\_wave\_twopass}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\section{river-tide/test}
-\subsection{test\_bvp2c2}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{test\_complex\_even\_overtide}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{test\_fourier\_power\_exp}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{test\_friction}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{test\_reflection}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{test\_rt\_wave\_number}
 ${}$
 \begin{lstlisting}
 
@@ -1222,12 +1206,22 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{test\_utm2latlon}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_wave\_number\_godin}
 ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
 \subsection{test\_wave\_numer\_aproximation}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{test\_wave\_twopass}
 ${}$
 \begin{lstlisting}
 
@@ -1302,11 +1296,6 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
-\subsection{river\_tide\_test}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
 \subsection{river\_tide\_test\_01}
 ${}$
 \begin{lstlisting}
@@ -1372,6 +1361,16 @@ ${}$
 
 \end{lstlisting}
 \subsection{river\_tide\_test\_13}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_batch}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_metadata}
 ${}$
 \begin{lstlisting}
 

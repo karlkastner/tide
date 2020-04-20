@@ -1,6 +1,6 @@
 % Wed  9 Oct 15:23:10 PST 2019
 function [fail,rmse,name,rt] = river_tide_test_06(rt_map,pflag)
-	tid = 6;
+	tid  = 6;
 	name = 'infinitessimal wave along river with uniform flow';
 	% river discharge
 	Q0        = -100;
@@ -41,14 +41,9 @@ function [fail,rmse,name,rt] = river_tide_test_06(rt_map,pflag)
 	omega     = 2*pi/T;
 	% domain size
 	Xi        = [0,1e6];
-	% model for river tide
-	opt.model_str = 'wave';
-	% solver of boundary value problem
-	opt.solver = @bvp2c;
-	% number of points along channel
-	opt.nx     = 200;
-	% change of distance between points along channel 
-	opt.xs     = 1; 
+
+	meta = river_tide_test_metadata();
+	opt = meta.opt;
 
 	% solve with model
 	[rt]  = rt_map.fun({Xi} ... % Q0,

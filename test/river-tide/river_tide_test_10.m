@@ -54,14 +54,9 @@ function [fail,rmse,name,rt] = river_tide_test_10(rt_map,pflag)
 	bc(2,2).q   = [0,1];
 	% domain size
 	Xi        = [0,1e6];
-	% model for river tide
-	opt.model_str = 'wave';
-	% solver of boundary value problem
-	opt.solver = @bvp2c;
-	% number of points along channel
-	opt.nx     = 200;
-	% change of distance between points along channel 
-	opt.xs     = 1; 
+
+	meta = river_tide_test_metadata();
+	opt = meta.opt;
 
 	% solve with model
 	[rt]  = rt_map.fun({Xi} ... % Q0,

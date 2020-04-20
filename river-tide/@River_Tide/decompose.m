@@ -10,16 +10,16 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 
 	% element edges to centres
 	xc = 0.5*(x(1:end-1)+x(2:end));
-	wc = obj.fun.width(xc);
+	wc = obj.width(xc);
 	if (0)
 		Q1c = 0.5*(Q1(1:end-1)+Q1(2:end));
 		c  = obj.odefun(xc,Q1c);
 	else
 		switch (obj.opt.hmode)
 		case {'matrix'}
-			y = [obj.z0; Q1];
+			y = [obj.z(0); Q1];
 		otherwise
-			y = obj.Q_;
+			y = obj.Q_(:,1);
 		end
 		%if (obj.opt.oflag(2))
 		%	y = [y;obj.Q_];

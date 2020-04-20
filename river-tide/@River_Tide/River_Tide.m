@@ -22,48 +22,49 @@ classdef River_Tide < handle
 		g = Constant.gravity;
 
 		% bed level
-		zb
+		% zb
 
-		% angular frequency of tide
+		% angular frequency of the main tidal species
 		omega
 
-		% domain start and end point
+		% domain left and right end
 		Xi
 
-		% discretisation of Xi
+		% gris spanning Xi
 		x
-		% TODO store Q and z as matrices
+
 		% water level, one column per frequency
 		z_
-		%zmid
-		%zrange
+
 		% discharges, one column per frequency
-		%Q0fun
 		Q_
-		%qmid
-		%qrange
+
+		% river discharge (scalar)
+		Q0_
 
 		% Backwater1D object to solve for tidally averaged water level
+		% superfluous if matrix mode is chosen
 		backwater
 
 		% numerical options
 		opt = struct( 'nx',     1024 ...
 			     ,'xs',     10 ... % stretch factor of mesh
 			     ,'model_str',  'wave' ...
-			     ,'solver', @bvp2fdm ...
+			     ,'solver', @bvp2c ...
 			     ... %,'solver', @bvp2fdm ...
 			     ,'friction_method', 'dronkers' ...
 			     ,'friction_order', 2 ...
-			     ,'hmode', 'iterate' ... % 'no-tide' ...
-			     ... % ,'hmode', 'matrix' ... % 'no-tide' ...
+			     ... %,'hmode', 'iterate' ... % 'no-tide' ...
+			     , 'hmode', 'matrix' ... % 'no-tide' ...
 			     , 'imethod', 'spline' ...
 			     , 'oflag', [true,false(1,3)] ...
 			    );
 
 		% downstream boundary condition
-		z0_downstream = 0; % [0 sqrt(eps)];
-		% river discharge
-		Q0_
+		% superfluous if matrix mode is chosen
+		z0_downstream = 0;
+		neq = 0;
+
 		bc = [struct('p', 1, 'rhs',  0, 'q', []   ,'var','z'), ...       % 0 mean (wl or discharge) left
 		      struct('p', 1, 'rhs',  1, 'q', [1 1],'var','Q'), ...       % 1 main species left
 		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 2 even overtide left
@@ -79,9 +80,11 @@ classdef River_Tide < handle
 		flag = struct('aa',0,'gh',0,'oh',0);
 
 		% convergence flag
-		cflag
+		out=struct();
+		%cflag
 		
-		tmp = struct( 'D1',[]);
+		tmp = struct( 'D1_dx',[],'zb',[],'width',[], ...
+			      'c', struct('D1_dx',[],'zb',[],'width',[]));
 		fun = struct( 'z0',[] ...
 			     ,'zb',[] ...
 			     ,'width',[] ...
@@ -90,6 +93,7 @@ classdef River_Tide < handle
 		% finite-volume object,
 		% if the tide is computed by solving the full SWE
 		fv
+
 		% quantities in time, if full SWE
 		T
 		H
@@ -98,12 +102,10 @@ classdef River_Tide < handle
 		initial;
 
 		issym           = false;
+
+		hmin = 0.2;
 	end % properties
 	methods (Static)
-		%z1 = q2z(x,q1,omega1);
-		%[f, F3]  = odefun1(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
-		%[f ]     = odefun2(Q0, Qhr, Q1, Q2, h0, dh0_dx, dz0_dx, w, dw_dx, cd, g, c, omega1, flag);
-%		[k0, k] = wave_number_analytic(Q0,W,H,cd,omega,az1,Qt);
 	end % static
 	methods
 	function obj = River_Tide(varargin)
@@ -141,7 +143,6 @@ classdef River_Tide < handle
 			otherwise
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
 			end
-		obj.fun
                 end %for idx
 		% object has to be created here,
 		% as otherwise matlab does not allow for parallel objects
@@ -152,13 +153,12 @@ classdef River_Tide < handle
 
 
 
-
 	% quasi members
 	function y = h0(obj, x)
-		y = obj.z(0)-obj.zb;
-		if (nargin()>1)
-			y = interp1(obj.x,y,x);
-		end
+		y = obj.z(0,x)-obj.zb(x);
+		%if (nargin()>1)
+		%	y = interp1(obj.x,y,x);
+		%end
 	end
 
 	function y = z(obj,id,x)
@@ -307,7 +307,7 @@ classdef River_Tide < handle
 			x = obj.x;
 		end
 		w = obj.fun.width(x);
-		h0 = obj.tmp.h0(x);
+		h0 = obj.h0(x);
 		y = bsxfun(@times,Q,1./(w.*h0));
 	end
 
@@ -344,13 +344,6 @@ classdef River_Tide < handle
 		end
 	end
 	
-	function [zs,obj] = animate(obj,T)
-		zs = repmat(obj.z0,1,length(T));
-		for idx=1:length(T)
-			zs(:,idx) = real(obj.z1.*exp(1i*obj.omega*T(idx)));
-		end
-	end
-
 	function [ay, obj] = admittance(obj, varargin)
 		absy = obj.amplitude(varargin{:});
 		ay = absy./absy(1);
@@ -390,8 +383,8 @@ classdef River_Tide < handle
 	end
 
 	function dz0_dx = dz0_dx(obj,x)
-		x_      = obj.tmp.x;
-		z0_     = obj.tmp.z0(x_);
+		x_       = obj.x;
+		z0_      = obj.z0(x_);
 		xc       = 0.5*(x_(2:end)+x_(1:end-1));
 		dx       = x_(2:end)-x_(1:end-1);
 		dz0      = z0_(2:end)-z0_(1:end-1);
@@ -400,8 +393,8 @@ classdef River_Tide < handle
 	end
 	
 	function dh0_dx = dh0_dx(obj,x)
-		x_       = obj.tmp.x;
-		h0_      = obj.tmp.h0(x_);
+		x_       = obj.x;
+		h0_      = obj.h0(x_);
 
 		xc       = 0.5*(x_(2:end)+x_(1:end-1));
 		dx       = x_(2:end)-x_(1:end-1);
@@ -409,6 +402,73 @@ classdef River_Tide < handle
 		dh0_dx_c = dh0./dx;
 		dh0_dx  = interp1(xc,dh0_dx_c,x,'pspline','extrap');
 	end
+
+	% cd may depend on the depth and thus cannot be precomputed
+	function cd = cd(obj,x,h0)
+		if (nargin()<3)
+			h0 = obj.fun.h0(x);
+		end
+		cd = obj.fun.cd(x,h0);
+	end
+
+	function zb = zb(obj,x)
+		switch (length(x))
+			case {obj.opt.nx}
+				if (isempty(obj.tmp.zb))
+					obj.tmp.zb = obj.fun.zb(x);
+				end
+				zb = obj.tmp.zb;
+			case {obj.opt.nx-1}
+				if (isempty(obj.tmp.c.zb))
+					obj.tmp.c.zb = obj.fun.zb(x);
+				end
+				zb = obj.tmp.c.zb;
+			otherwise
+				zb = obj.fun.zb(x);
+		end
+	end
+
+	function width = width(obj,x)
+		switch (length(x))
+			case {obj.opt.nx}
+				if (isempty(obj.tmp.width))
+					obj.tmp.width = obj.fun.width(x);
+				end
+				width = obj.tmp.width;
+			case {obj.opt.nx-1}
+				if (isempty(obj.tmp.c.width))
+					obj.tmp.c.width = obj.fun.width(x);
+				end
+				width = obj.tmp.c.width;
+			otherwise
+				width = obj.fun.width(x);
+		end
+	end % width
+
+	function D1_dx = D1_dx(obj,x)
+		switch (length(x))
+		case {obj.opt.nx}
+			if (isempty(obj.tmp.D1_dx))
+				obj.tmp.D1_dx = derivative_matrix_1_1d(x,[],2);
+			end
+			D1_dx = obj.tmp.D1_dx;
+		case {obj.opt.nx-1}
+			if (isempty(obj.tmp.c.D1_dx))
+				obj.tmp.c.D1_dx = derivative_matrix_1_1d(x,[],2);
+			end
+			D1_dx = obj.tmp.c.D1_dx;
+		otherwise	
+			D1_dx = 0;
+		end
+	end % D1_dx
+
+	function [zs,obj] = animate(obj,T)
+		zs = repmat(obj.z0,1,length(T));
+		for idx=1:length(T)
+			zs(:,idx) = real(obj.z1.*exp(1i*obj.omega*T(idx)));
+		end
+	end
+
 
 	end % methods
 end % class River_Tide

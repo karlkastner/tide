@@ -16,7 +16,7 @@ breaklines=true
 \setlength{\cftsubsecnumwidth}{3.5em}
 
 \title{Manual for Package:
-tide\protect\\Revision 6:14M
+tide\protect\\Revision 6:15M
 }
 \author{Karl K\"astner}
 %\date{}
@@ -649,6 +649,16 @@ ${}$
 
 
 \end{lstlisting}
+\subsection{postprocess}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{qt}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{solve}
 ${}$
 \begin{lstlisting}
@@ -685,12 +695,20 @@ ${}$
  valid for both tidally, river dominated and low friction conditions
  and converging channels
 
- k      : complex wave number in a reach with constant width and bed slope
+ k10    : complex wave number for k and z in a reach with constant width and bed slope
  im(k)  : damping modulus (rate of amplitude change)
  re(k)  : actual wave number (rate of phase change)
 
+ kq     : wave number for Q for a reach with changing width and depth
+ kz     : wave number for z for a reach with changing width and depth
+
  c.f. derive_wave_number
 
+
+\end{lstlisting}
+\subsection{wave\_number\_analytic\_removed}
+${}$
+\begin{lstlisting}
 
 \end{lstlisting}
 \subsection{wave\_number\_approximation}
@@ -899,6 +917,27 @@ ${}$
  function obj = plot(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,omega,q,opt)
 
 \end{lstlisting}
+\section{river-tide/@River\_Tide\_Morphodynamics}
+\subsection{River\_Tide\_Morphodynamics}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{dzb\_dt}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{evolve\_bed\_level}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_transport}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \section{river-tide/@River\_Tide\_Network}
 \begin{lstlisting}
 predict tides in a fluvial channel network
@@ -960,6 +999,17 @@ ${}$
 ${}$
 \begin{lstlisting}
  predict the surface elevation amplitude
+
+\end{lstlisting}
+\section{river-tide/@River\_Tide\_Network\_2}
+\subsection{River\_Tide\_Network\_2}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{solve}
+${}$
+\begin{lstlisting}
 
 \end{lstlisting}
 \section{river-tide}
@@ -1050,6 +1100,11 @@ ${}$
 \begin{lstlisting}
  reflection coefficient for gradual varying cross section geometry
  without damping
+
+\end{lstlisting}
+\subsection{rt\_transport}
+${}$
+\begin{lstlisting}
 
 \end{lstlisting}
 \subsection{rt\_wave\_equation}
@@ -1285,6 +1340,29 @@ ${}$
  two pass solution for the linearised wave equation, for surface elevation
 
 \end{lstlisting}
+\section{tide}
+\begin{lstlisting}
+analysis prediction of tides in rivers and estuaries by empirical and theoretical methods
+
+
+\end{lstlisting}
+\subsection{river\_tide\_transport\_scale}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\section{test/river-tide-morphodynamics}
+\subsection{river\_tide\_morphodynamics\_test\_01}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\section{test/river-tide-network}
+\subsection{river\_tide\_network\_test\_01}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \section{test/river-tide}
 \subsection{example\_river\_tide}
 ${}$
@@ -1381,6 +1459,11 @@ ${}$
 
 \end{lstlisting}
 \section{test}
+\subsection{test\_rt\_transport}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_tidal\_harmonic\_analysis}
 ${}$
 \begin{lstlisting}

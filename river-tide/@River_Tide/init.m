@@ -5,6 +5,7 @@
 %% TODO Q0 should not be a function
 %% function obj = init(obj, Xi)
 function obj = init(obj)
+	obj.clear();
 
 	switch (obj.opt.hmode)
 	case {'matrix'}

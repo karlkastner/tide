@@ -12,8 +12,8 @@ function [fail,rmse,name,rt] = river_tide_test_06(rt_map,pflag)
 	cdfun     = @(x)  cD*ones(size(x));
 	% bed level of channel
 	h0        = 10;
-	S0         = normal_flow_slope(-Q0,w0,h0,drag2chezy(cD));
-	zbfun     = @(x) -h0 + S0*x; %*ones(size(x));
+	S0         = normal_flow_slope(-Q0,h0,w0,drag2chezy(cD));
+	zbfun     = @(x) -h0 + S0*x;
 	bc        = struct();
 	% mean sea level
 	bc(1,1).var = 'z';
@@ -27,7 +27,7 @@ function [fail,rmse,name,rt] = river_tide_test_06(rt_map,pflag)
 	bc(2,1).p   = 1;
 	% wave entering from left
 	bc(1,2).var = 'z';
-	z10       = sqrt(eps);
+	z10         = 1e-2; %sqrt(eps);
 	bc(1,2).rhs = z10;
 	bc(1,2).p   = [1,0];
 	bc(1,2).q   = [1,0];

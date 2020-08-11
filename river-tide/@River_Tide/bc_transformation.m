@@ -12,12 +12,14 @@ function obj = bc_transformation(obj)
 		switch (bc(id,1).var)
 		case {'z','z0'}
 			obj.z0_downstream = bc(id,1).rhs;
-			n_z0 = n_z0+1;
+			n_z0              = n_z0+1;
 			%bc(id,1).rhs = bc(id,1).rhs;
+			bc(id,1).set = true;
 		case {'Q','Q0'}
 			obj.Q0_ = bc(id,1).rhs;
-			n_Q0 = n_Q0+1;
-			bc(id,1).rhs = [];
+			n_Q0    = n_Q0+1;
+			% bc(id,1).rhs = [];
+			bc(id,1).set = false;
 		otherwise
 			error('bcfun');
 		end % switch
@@ -31,25 +33,30 @@ function obj = bc_transformation(obj)
 			case {'z'}
 				% dQ/dx = -1i*o*z
 				w0 = obj.width(obj.Xi(id));
-				omega_j = (jd-1)*obj.omega;
-				bc(id,jd).rhs = -1i*omega_j*w0*bc(id,jd).rhs;
+				omega_j              =  (jd-1)*obj.omega;
+				bc(id,jd).rhs        = -1i*omega_j*w0*bc(id,jd).rhs;
 				if ( bc(id,jd).p(2) ~= 0)
 					error('bc of type dz/dx not yet implemented');
 				end
-				p = [0, bc(id,jd).p(1), 0];
+				p             = [0, bc(id,jd).p(1), 0];
 				bc(id,jd).p   = p;
+				% change type from level to discharge
+				bc(id,jd).var = 'Q';
 			case {'Q'}
 				% nothing to do, native format
-				bc(id,jd).rhs = bc(id,jd).rhs;
+				% bc(id,jd).rhs = bc(id,jd).rhs;
 			case {'q'}
 				% Q = w*q
 				bc(id,jd).rhs = bc(id,jd).rhs*W0;
+				% change type from q to Q
+				bc(id,jd).var = 'Q';
 			case {'u'}
 				error('u condition not yet implemented');
 				% TODO Q = (z0-zb)*w0*u
 			otherwise
 				error('bc');
 			end % switch
+			bc(id,jd).set = true;
 		end % for jd, frequency components
 	end % for id, left and right end of doamin
 	if (~isreal(obj.z0_downstream) || ~isreal(obj.Q0_))

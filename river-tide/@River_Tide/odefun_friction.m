@@ -1,6 +1,6 @@
 % Sun 15 Mar 15:03:27 +08 2020
 % TODO : change h0.^3 to h0.^p for arbitrary power (manning)
-% TODO 1/h nonlinearity !
+% TODO : 1/h nonlinearity !
 function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,cD,c,D1_dx)
 	g     = obj.g;
 	omega = obj.omega;
@@ -27,7 +27,7 @@ function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,cD,c,D1_dx)
 	% TODO the cubic interaction is more complicated,
 	% because Q*Q^2 terms results in the same frequency in addition to Q*Q0^2
 	% for the time being, it ends all up in the rhs,
-	% which works, as the terms are small
+	% which converges, as the terms are small
 	DQ2k1 = fourier_multiplicative_interaction_coefficients(D1_dx*Qk,Q,size(Q,2),1);
 
 	%DQ2k1 = fourier_multiplicative_interaction_coefficients(Q,D1_dx*Qk,size(Q,2),1);

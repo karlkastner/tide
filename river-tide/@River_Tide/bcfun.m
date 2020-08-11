@@ -22,28 +22,30 @@
 %%
 %%
 %% function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
-function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
+function [rhs, p, q, set, obj] = bcfun(obj,x,y,ccdx)
 	Xi = obj.Xi;
 	switch (obj.opt.hmode)
 	case {'matrix'}
-		[rhs, p, q] = bc(x,y,ccdx);
+		[rhs, p, q, set] = bc(x,y,ccdx);
 	case {'iterate'}
-		[rhs, p, q] = bc(x,y,ccdx+1);
+		[rhs, p, q, set] = bc(x,y,ccdx+1);
 	otherwise
 		error('bcfun');
 	end % switch
 
-	function [rhs, p, q] = bc(x,~,id)
+	function [rhs, p, q, set] = bc(x,~,id)
 		switch (x)
 		% TODO end should better be selected by index 1,2, rather than xl ,xr
 		case {Xi(1)}
 			rhs = obj.bc(1,id).rhs;
 			p   = obj.bc(1,id).p;
 			q   = obj.bc(1,id).q;
+			set = obj.bc(1,id).set;
 		case {Xi(2)}
 			rhs = obj.bc(2,id).rhs;
 			p   = obj.bc(2,id).p;
 			q   = obj.bc(2,id).q;
+			set = obj.bc(2,id).set;
 		otherwise
 			error('bcfun');
 		end % switch

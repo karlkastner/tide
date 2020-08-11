@@ -155,23 +155,26 @@ classdef River_Tide < handle
 
 	% quasi members
 	function y = h0(obj, x)
+		if (nargin()<2)
+			x= obj.x;
+		end
 		y = obj.z(0,x)-obj.zb(x);
 		%if (nargin()>1)
-		%	y = interp1(obj.x,y,x);
+		%	y = interp1(obj.x,y,x,'linear');
 		%end
 	end
 
 	function y = z(obj,id,x)
 		y = obj.z_(:,id+1);
 		if (nargin()>2)
-			y = interp1(obj.x,y,x);
+			y = interp1(obj.x,y,x,'linear');
 		end
 	end
 	
 	function y = Q(obj,id,x)
 		y = obj.Q_(:,id+1);
 		if (nargin()>2)
-			y = interp1(obj.x,y,x);
+			y = interp1(obj.x,y,x,'linear');
 		end
 	end
 
@@ -182,127 +185,46 @@ classdef River_Tide < handle
 		w = obj.fun.width(x);
 		y = obj.Q(id)./w;
 		if (nargin()>2)
-			y = interp1(obj.x,y,x);
+			y = interp1(obj.x,y,x,'linear');
 		end
 	end
 	function y = u(obj,id,x)
 		y  = obj.q(id)./obj.h0;
 		if (nargin()>2)
-			y = interp1(obj.x,y,x);
+			y = interp1(obj.x,y,x,'linear');
 		end
 	end
 
-%	function y = z0(obj,x)
-%		y = obj.z(:,1);
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%	function y = z1(obj,x)
-%		y = obj.z(:,2);
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%	function y = z2(obj,x)
-%		y = obj.z(:,3);
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%
-%	function y = Q0(obj,x)
-%		y = obj.Q(:,1);
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%
-%	function y = Q1(obj,x)
-%		y = obj.Q(:,2);
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%
-%	function y = Q2(obj,x)
-%		y = obj.Q2(:,3);
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%
-%	function y = q0(obj, x)
-%		y = obj.Q0./obj.w;
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%
-%	function y = q1(obj, x)
-%		y = obj.Q1./obj.w;
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%
-%	function y = q2(obj, x)
-%		y = obj.Q2./obj.w;
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%	
-%	function y = u0(obj, x)
-%		y  = obj.q0./obj.h0;
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%
-%	function [y obj] = u1(obj, x)
-%		y   = obj.q1./obj.h0;
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
-%
-%	function [y obj] = u2(obj, x)
-%		y   = obj.q2./obj.h0;
-%		if (nargin()>1)
-%			y = interp1(obj.x,y,x);
-%		end
-%	end
 
 	% TODO consider q1 not work any more with two frequency components
 	function y = zrange(obj,x)
 		y = 2*abs(obj.z1);
 		if (nargin()>1)
-			y = interp1(obj.x,y,x);
+			y = interp1(obj.x,y,x,'linear');
 		end
 	end
 	function y = Qrange(obj,x)
 		y = 2*abs(obj.Q1);
 		if (nargin()>1)
-			y = interp1(obj.x,y,x);
+			y = interp1(obj.x,y,x,'linear');
 		end
 	end
 	function y = zmid(obj,x)
 		y = obj.z0;
 		if (nargin()>1)
-			y = interp1(obj.x,y,x);
+			y = interp1(obj.x,y,x,'linear');
 		end
 	end
 	function y = Qmid(obj,x)
 		y = obj.Q0;
 		if (nargin()>1)
-			y = interp1(obj.x,y,x);
+			y = interp1(obj.x,y,x,'linear');
 		end
 	end
 	function y = velocity(obj,x)
 		Q = obj.Q_;
 		if (nargin()>1)
-			Q = interp1(obj.x,Q,x);
+			Q = interp1(obj.x,Q,x,'linear');
 		else
 			x = obj.x;
 		end
@@ -324,7 +246,7 @@ classdef River_Tide < handle
 		%dy_dx = cdiff(y)./cdiff(obj.x);
 		dy_dx = derivative1(obj.x,y);
 		if (nargin()>2)
-			dy_dx = interp1(obj.x,dy_dx,x);
+			dy_dx = interp1(obj.x,dy_dx,x,'linear');
 		end
 	end
 
@@ -340,7 +262,7 @@ classdef River_Tide < handle
 		end
 		absy  = abs(y);
 		if (nargin()>3)
-			absy = interp1(obj.x,absy,x);
+			absy = interp1(obj.x,absy,x,'linear');
 		end
 	end
 	
@@ -369,7 +291,7 @@ classdef River_Tide < handle
 		end
 		py  = angle(y);
 		if (nargin()>3)
-			py = interp1(obj.x,py,x);
+			py = interp1(obj.x,py,x,'linear');
 		end
 	end
 	function [r, obj] = damping_modulus(obj,x)
@@ -378,7 +300,7 @@ classdef River_Tide < handle
 		r   = daz1_dx./az1;
                 %dz1_dx0(kdx,jdx) = (az1(2)-az1(1))/(x(2)-x(1))*1/arg.z1_downstream;
 		if (nargin()>1)
-			r = interp1(obj.x,r,x);
+			r = interp1(obj.x,r,x,'linear');
 		end
 	end
 
@@ -405,8 +327,11 @@ classdef River_Tide < handle
 
 	% cd may depend on the depth and thus cannot be precomputed
 	function cd = cd(obj,x,h0)
+		if (nargin()<2)
+			x = obj.x;
+		end
 		if (nargin()<3)
-			h0 = obj.fun.h0(x);
+			h0 = obj.h0(x);
 		end
 		cd = obj.fun.cd(x,h0);
 	end
@@ -429,6 +354,9 @@ classdef River_Tide < handle
 	end
 
 	function width = width(obj,x)
+		if (nargin()<2)
+			x = obj.x;
+		end
 		switch (length(x))
 			case {obj.opt.nx}
 				if (isempty(obj.tmp.width))
@@ -446,6 +374,9 @@ classdef River_Tide < handle
 	end % width
 
 	function D1_dx = D1_dx(obj,x)
+		if (nargin()<2)
+			x = obj.x;
+		end
 		switch (length(x))
 		case {obj.opt.nx}
 			if (isempty(obj.tmp.D1_dx))
@@ -468,7 +399,10 @@ classdef River_Tide < handle
 			zs(:,idx) = real(obj.z1.*exp(1i*obj.omega*T(idx)));
 		end
 	end
-
+	function clear(obj)
+		obj.tmp = struct( 'D1_dx',[],'zb',[],'width',[], ...
+			      'c', struct('D1_dx',[],'zb',[],'width',[]));
+	end
 
 	end % methods
 end % class River_Tide

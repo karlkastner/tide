@@ -9,7 +9,8 @@
 % TODO test case: where does the wobble come from?                              
 % TODO scale RMSE2 by max of o2, verify h in backwater computation  
 
-rt_map = River_Tide_Map('./rt-test-map.mat');
+%rt_map = River_Tide_Map('./rt-test-map.mat');
+rt_map = River_Tide_Map('/tmp/rt-test-map.mat');
 rt_map.recompute = true;
 pflag = 1;
 

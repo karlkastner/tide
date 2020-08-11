@@ -17,7 +17,7 @@
 	cdfun       = @(x)  cD*ones(size(x));
 	% bed level of channel
 	h0          = 10;
-	S0          = normal_flow_slope(-Qu,w0,h0,drag2chezy(cD));
+	S0          = normal_flow_slope(-Qu,h0,w0,drag2chezy(cD));
 	zbfun       = @(x) -h0 + S0*x; %*ones(size(x));
 	% mean component
 	bc          = struct();

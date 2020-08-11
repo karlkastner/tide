@@ -22,7 +22,7 @@ function [fail,rmse,name,rt] = river_tide_test_11(rt_map,pflag)
 	cdfun     = @(x)  cD*ones(size(x));
 	% bed level of channel
 	h0        = 10;
-	S0         = normal_flow_slope(-Qu,w0,h0,drag2chezy(cD))
+	S0         = normal_flow_slope(-Qu,h0,w0,drag2chezy(cD))
 %	figure(1)
 	if (1==idx)
 	clf

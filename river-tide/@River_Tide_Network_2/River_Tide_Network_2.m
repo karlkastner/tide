@@ -36,7 +36,7 @@ classdef River_Tide_Network_2 < handle
 		season = struct('iorder',1,'Qmin',[],'Qmax',[]);
 	
 		% temporary storage, for reuse of initial conditions
-		tmp	
+		tmp = struct();	
 	end % properties 
 	methods
 		function obj = River_Tide_Network_2(rt)
@@ -46,7 +46,20 @@ classdef River_Tide_Network_2 < handle
 			obj.division_rule = @obj.sediment_division_geometric;
 		end
 
+		function y = inifun(obj,cdx,varargin)
+			y = obj.rt(cdx).opt.ifun(varargin{:});
+		end
+			
+		function [rhs, p, q, set, obj] = bcfun(obj,cdx,varargin)
+			[rhs, p, q, set, obj] = obj.rt(cdx).bcfun(varargin{:});
+		end
+		
+		function c = odefun(obj,cdx,varargin)
+			c = obj.rt(cdx).odefun(varargin{:});
+		end
+
 		% pseudo members
+		% TODO, this is not working, when channels have a different number of points
 		function Q = Q(obj,id)
 			Q = [];
 			for idx=1:length(obj.rt)
@@ -61,11 +74,7 @@ classdef River_Tide_Network_2 < handle
 			end	
 		end	
 
-		function init(obj)
-			for idx=1:length(obj.rt)
-				obj.rt(idx).init();
-			end
-		end
+
 	end % methods
 end % class River_Tide_Network_2
 

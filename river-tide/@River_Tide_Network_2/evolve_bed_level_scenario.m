@@ -3,7 +3,9 @@ function [t,zb] = evolve_bed_level_scenario(obj...
 		 , z10  ...	% [1]     amplitude of incoming wave
 		 , pz1r ...	% [1]     reflected wave factor
 		 , omega ...	% [rad/s] anguluar frequency of tide
-		 , Q0 ...	% [m^3/s] discharge at inflow bc
+		 , Qmin ...	% [m^3/s] discharge at inflow bc
+		 , Qmax ...	% [m^3/s] discharge at inflow bc
+		 , iorder ...
 		 , S0 ...	% [1]	  upstream slope
 		 , d_mm ...
 		 , L ...	% [m]     doamin length
@@ -37,9 +39,18 @@ function [t,zb] = evolve_bed_level_scenario(obj...
 %	Cd = 2.5e-3;
 %	Cd_ = 2.5e-3;
 
-	h0 = normal_flow_depth(Q0,w0(1),Cd,S0,'cd');
+	Q0 = formative_discharge(Qmin,Qmax);
 
+	h0 = normal_flow_depth(Q0,w0(1),Cd,S0,'cd');
 	L_ = h0/S0;
+
+	obj.season.Qlim = [Qmin,Qmax];
+	obj.season.S0   = S0;
+	obj.season.w0   = w0(1);
+	obj.season.Cd   = Cd(1);
+	obj.season.iorder = iorder;
+
+
 %	S0  = -normal_flow_slope(Q0,h0,w0(1),drag2chezy(Cd));
 %	S0_  = -normal_flow_slope(Q0_,h0,w0(1),drag2chezy(Cd_));
 %	L = h0/S0_;

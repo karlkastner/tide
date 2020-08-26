@@ -5,6 +5,9 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 
 	% river discharge
 	Q0   = -10;
+	Qlim = [-2,-20];
+	iorder = 1;
+
 	z10  =  1;
 
 	% slope
@@ -39,7 +42,9 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 	rtn = map.fun(   {z1} ...
 		 , {pz1} ...	% [1]     reflected wave factor
 		 , {omega} ...	% [rad/s] anguluar frequency of tide
-		 , {Q0} ...	% [m^3/s] discharge at inflow bc
+		 , {Qlim(1)} ...	% [m^3/s] discharge at inflow bc
+		 , {Qlim(2)} ...	% [m^3/s] discharge at inflow bc
+		 , {iorder} ...
 		 , {S0} ...	% [1]	  upstream slope
 		 , {d_mm} ...	% 
 		 , {Xi} ...	% [m]     doamin length

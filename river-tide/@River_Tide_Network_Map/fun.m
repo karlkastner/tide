@@ -6,7 +6,9 @@ function [rtn, key, obj] = fun( ...
 		, z1 ...	% [1]     amplitude of incoming wave
 		, pz1 ...	% [1]     incoming or total wave
 		, omega ...	% [rad/s] anguluar frequency of tide
-		, Q0 ...	% [m^3/s] discharge at inflow bc
+		, Qmin ...	% [m^3/s] discharge at inflow bc
+		, Qmax ...	% [m^3/s] discharge at inflow bc
+		, iorder ...
 		, S0 ...
 		, d_mm ...	% [mm]	  median sediment grain size
 		, L ...		% [m]     doamin length
@@ -39,7 +41,9 @@ function [rtn, key, obj] = fun( ...
 		  z1{1} ...	% [1]     amplitude of incoming wave
 		, pz1{1} ...	% [1]     incoming or total wave
 		, omega{1} ...	% [rad/s] anguluar frequency of tide
-		, Q0{1} ...	% [m^3/s] discharge at inflow bc
+		, Qmin{1} ...	% [m^3/s] discharge at inflow bc
+		, Qmax{1} ...	% [m^3/s] discharge at inflow bc
+		, iorder{1} ...
 		, S0{1} ...
 		, d_mm{1} ...		% [mm]	  median sediment grain size
 		, L{1} ...		% [m]     doamin length
@@ -72,7 +76,9 @@ function [rtn, key, obj] = fun( ...
 		   z1{1}  ...	% [1]     amplitude of incoming wave
 		 , pz1{1} ...	% [1]     reflected wave factor
 		 , omega{1} ...	% [rad/s] anguluar frequency of tide
-		 , Q0{1} ...	% [m^3/s] discharge at inflow bc
+		 , Qmin{1} ...	% [m^3/s] discharge at inflow bc
+		 , Qmax{1} ...	% [m^3/s] discharge at inflow bc
+		 , iorder{1} ... %
 		 , S0{1} ...	% [1]	  upstream slope
 		 , d_mm{1} ...	% 
 		 , L{1} ...	% [m]     doamin length

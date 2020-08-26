@@ -5,10 +5,9 @@ function [t,zb,zi] = evolve_bed_level(obj)
 	% evaluation of zb requires a mesh
 	% but meshing requires a call to "solve"
 	% meshing should be done in "init"
-	% TODO bvp2c should be an object, storing the mesh
 
 	obj.init();
-	y0 = obj.solve();
+	obj.solve();
 
 	zi = [];
 
@@ -22,16 +21,12 @@ function [t,zb,zi] = evolve_bed_level(obj)
 		end
 	end
 
-%	obj.opt.ifun = @(x) y0;
-%	zi     = obj.z_;
-%	nci = obj.nci;
 	zb0 = [];%zeros(nci(end)-1,1);
 	ni = 0;
 	for idx=1:length(obj.rt)
 		% TODO fetch xc
 		x      = obj.rt(idx).x;
 		nxc    = length(x)-1;
-		%zb0(nci(idx):nci(idx+1)-1) = obj.rt(idx).zb(mid(x));	
 		zb0(ni+(1:nxc),1) = obj.rt(idx).zb(mid(x));
 		ni = ni+nxc;
 	end

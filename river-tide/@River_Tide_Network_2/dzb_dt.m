@@ -60,7 +60,9 @@ function [dzb_dt,dt_max] = dzb_dt(obj,t,zb,ddir)
 
 	% reuse solution of last time step as initial condition
 	for idx=1:length(obj.rt)
-		obj.rt(idx).opt.ifun = @(x) obj.tmp(idx).ypm(:,sdx);
+		if (isfield(obj.tmp(1),'ypm') && ~isempty(obj.tmp(idx).ypm))
+			obj.rt(idx).opt.ifun = @(x) obj.tmp(idx).ypm(:,sdx);
+		end
 	end
 
 	obj.solve();

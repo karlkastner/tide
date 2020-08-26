@@ -53,7 +53,7 @@ classdef River_Tide < handle
 		opt = struct( 'nx',     1024 ...
 			     ,'xs',     10 ... % stretch factor of mesh
 			     ,'model_str',  'wave' ...
-			     ,'solver', @bvp2c ...
+... %			     ,'solver', @bvp2c ...
 			     ... %,'solver', @bvp2fdm ...
 			     ,'friction_method', 'dronkers' ...
 			     ,'friction_order', 2 ...
@@ -64,6 +64,8 @@ classdef River_Tide < handle
 			     , 'ifun', [] ...
 			     , 'dischargeisvariable', false ...
 			    );
+
+		odesolver;
 
 		% downstream boundary condition
 		% TUDO remove, superfluous if matrix mode is chosen
@@ -130,6 +132,8 @@ classdef River_Tide < handle
 	function obj = River_Tide(varargin)
                 for idx=1:2:length(varargin)
 			switch(varargin{idx})
+			case {'odesolver'}
+				obj.odesolver = varargin{idx+1};
 			case {'opt'}
 			    % this keeps default options that are not set
 		            obj.opt = copy_fields(varargin{idx+1},obj.opt);
@@ -167,6 +171,9 @@ classdef River_Tide < handle
 		% as otherwise matlab does not allow for parallel objects
 		if (isempty(obj.backwater))
 			obj.backwater = Backwater1D('rt',obj);
+		end
+		if (isempty(obj.odesolver))
+			obj.odesolver = BVPS_Characteristic();
 		end
 	end % River_Tide (constructor)
 

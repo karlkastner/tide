@@ -30,16 +30,19 @@ classdef River_Tide < handle
 		% domain left and right end
 		Xi
 
-		% gris spanning Xi
+		% grid spanning dmoain Xi
 		x
 
 		% water level, one column per frequency
 		z_
+		zc_
 
 		% discharges, one column per frequency
 		Q_
+		Qc_
 
 		% river discharge (scalar)
+		% TODO remove this
 		Q0_
 
 		% Backwater1D object to solve for tidally averaged water level
@@ -58,10 +61,12 @@ classdef River_Tide < handle
 			     , 'hmode', 'matrix' ... % 'no-tide' ...
 			     , 'imethod', 'spline' ...
 			     , 'oflag', [true,false(1,3)] ...
+			     , 'ifun', [] ...
+			     , 'dischargeisvariable', false ...
 			    );
 
 		% downstream boundary condition
-		% superfluous if matrix mode is chosen
+		% TUDO remove, superfluous if matrix mode is chosen
 		z0_downstream = 0;
 		neq = 0;
 
@@ -85,6 +90,7 @@ classdef River_Tide < handle
 		
 		tmp = struct( 'D1_dx',[],'zb',[],'width',[], ...
 			      'c', struct('D1_dx',[],'zb',[],'width',[]));
+
 		fun = struct( 'z0',[] ...
 			     ,'zb',[] ...
 			     ,'width',[] ...
@@ -104,6 +110,19 @@ classdef River_Tide < handle
 		issym           = false;
 
 		hmin = 0.2;
+
+
+		% sediment properties for transport
+		sediment = struct( 'd_mm', 0.2, ... % m      grain diameter
+				   'p',    0.6, ... % 1      packing density
+				   'rho', 2650 ...  % kg/m^3 material density
+				 );
+
+		% time stepper for determining morphodynamics
+		morsolver;
+
+		% boundary condition for sediment transport (kg/s)
+		bc_Qs;
 	end % properties
 	methods (Static)
 	end % static

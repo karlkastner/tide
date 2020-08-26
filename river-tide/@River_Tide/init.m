@@ -17,11 +17,13 @@ function obj = init(obj)
 	obj.bc_transformation();
 
 	% initial condition function
+	if (isempty(obj.opt.ifun))
 	switch (obj.opt.hmode)
 	case {'matrix'}
 		obj.opt.ifun = @obj.initial_value; 
 	otherwise
 		% use default setting of solver
+	end
 	end
 
 end % River_Tide/init

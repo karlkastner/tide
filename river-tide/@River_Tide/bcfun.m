@@ -22,33 +22,21 @@
 %%
 %%
 %% function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
-function [rhs, p, q, set, obj] = bcfun(obj,x,y,ccdx)
-	Xi = obj.Xi;
-	switch (obj.opt.hmode)
-	case {'matrix'}
-		[rhs, p, q, set] = bc(x,y,ccdx);
-	case {'iterate'}
-		[rhs, p, q, set] = bc(x,y,ccdx+1);
-	otherwise
-		error('bcfun');
-	end % switch
-
-	function [rhs, p, q, set] = bc(x,~,id)
-		switch (x)
-		% TODO end should better be selected by index 1,2, rather than xl ,xr
-		case {Xi(1)}
-			rhs = obj.bc(1,id).rhs;
-			p   = obj.bc(1,id).p;
-			q   = obj.bc(1,id).q;
-			set = obj.bc(1,id).set;
-		case {Xi(2)}
-			rhs = obj.bc(2,id).rhs;
-			p   = obj.bc(2,id).p;
-			q   = obj.bc(2,id).q;
-			set = obj.bc(2,id).set;
-		otherwise
-			error('bcfun');
-		end % switch
-	end % bc
+%
+%function [rhs, p, q, set, obj] = bcfun(obj,x,y,ccdx,varargin)
+function [rhs, p, q, set, obj] = bcfun(obj,bid,cid,varargin)
+	if (isa(obj.bc(bid,cid).rhs,'function_handle'))
+		rhs = feval(obj.bc(bid,cid).rhs,varargin{:});
+		% TODO, retransform here, if necessary
+	else
+		rhs = obj.bc(bid,cid).rhs;
+	end
+	p   = obj.bc(bid,cid).p;
+	q   = obj.bc(bid,cid).q;
+	if (~obj.opt.dischargeisvariable)
+		set = obj.bc(bid,cid).set;
+	else
+		set = obj.bc(bid,cid).var;
+	end
 end % River_tide/bcfun
 

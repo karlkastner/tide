@@ -16,7 +16,7 @@ breaklines=true
 \setlength{\cftsubsecnumwidth}{3.5em}
 
 \title{Manual for Package:
-tide\protect\\Revision 6:15M
+tide\protect\\Revision 6:16M
 }
 \author{Karl K\"astner}
 %\date{}
@@ -421,8 +421,7 @@ ${}$
  =>     z = -1/(io) dq/dx
  =>     z = 1i/o dq/dx
 
- TODO allow Q as input
- TODO rename into Q1_to_z1
+ TODO rename into Qt_to_zt
  Mon  7 Oct 19:04:14 PST 2019 : added correction for change of width
 
 \end{lstlisting}
@@ -443,7 +442,22 @@ ${}$
  TODO rederive with g symbolic
 
 \end{lstlisting}
+\subsection{dzb\_dt}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{even\_overtide\_analytic}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{evolve\_bed\_level}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{extract}
 ${}$
 \begin{lstlisting}
 
@@ -602,11 +616,9 @@ ${}$
  coefficients of the backwater and wave equation for river-tides
 
 \end{lstlisting}
-\subsection{odefun0}
+\subsection{odefunQ0}
 ${}$
 \begin{lstlisting}
- coefficients of the backwater equation for the river tide
- TODO merge with backwater
 
 \end{lstlisting}
 \subsection{odefun\_advective\_acceleration}
@@ -649,12 +661,24 @@ ${}$
 
 
 \end{lstlisting}
+\subsection{odefunz0}
+${}$
+\begin{lstlisting}
+ coefficients of the backwater equation for the river tide
+ TODO merge with backwater
+
+\end{lstlisting}
 \subsection{postprocess}
 ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
 \subsection{qt}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_transport}
 ${}$
 \begin{lstlisting}
 
@@ -891,7 +915,7 @@ hash container for a set of River_Tide predictions for different boundary condit
 \subsection{River\_Tide\_Map}
 ${}$
 \begin{lstlisting}
- container class to store individual river tide scenarios
+ container class to store multiple river-tide scenarios
 
 \end{lstlisting}
 \subsection{fun}
@@ -899,14 +923,6 @@ ${}$
 \begin{lstlisting}
  compute river tide for a scenario with specific boundary conditions and store it in the hash,
  or retrive the scenario, if it was already computed
-
-\end{lstlisting}
-\subsection{key}
-${}$
-\begin{lstlisting}
- key for storing a scenario
-
- function [key obj] = key(obj,varargin)
 
 \end{lstlisting}
 \subsection{plot}
@@ -917,32 +933,7 @@ ${}$
  function obj = plot(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,omega,q,opt)
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_Morphodynamics}
-\subsection{River\_Tide\_Morphodynamics}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{dzb\_dt}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{evolve\_bed\_level}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{sediment\_transport}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
 \section{river-tide/@River\_Tide\_Network}
-\begin{lstlisting}
-predict tides in a fluvial channel network
-
-\end{lstlisting}
 \subsection{River\_Tide\_Network}
 ${}$
 \begin{lstlisting}
@@ -1005,11 +996,73 @@ ${}$
 \subsection{River\_Tide\_Network\_2}
 ${}$
 \begin{lstlisting}
+ tide in a fluvial delta channel network, extension of 1D river tide
+ the network is a directed graph
+ TODO convert from trig-to exponential form
+
+\end{lstlisting}
+\subsection{confluence\_rule}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{dzb\_dt}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{evolve\_bed\_level}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{evolve\_bed\_level\_scenario}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{init}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{inner2outer\_bvp2c}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_division}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_division\_geometric}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_transport}
+${}$
+\begin{lstlisting}
 
 \end{lstlisting}
 \subsection{solve}
 ${}$
 \begin{lstlisting}
+
+\end{lstlisting}
+\section{river-tide/@River\_Tide\_Network\_Map}
+\subsection{River\_Tide\_Network\_Map}
+${}$
+\begin{lstlisting}
+ container class to store multiple river-tide morphodyanics scenarios
+
+\end{lstlisting}
+\subsection{fun}
+${}$
+\begin{lstlisting}
+ morphodynamics of a tidal river
+ either retrive a precomputed scenario or compute and store a new scenario
 
 \end{lstlisting}
 \section{river-tide}
@@ -1140,7 +1193,202 @@ ${}$
  determine tidal discharge from water level for tidal wave
 
 \end{lstlisting}
-\section{river-tide/test}
+\subsection{tidal\_ellipse}
+${}$
+\begin{lstlisting}
+ tidal ellipse, numerical ode solution
+
+\end{lstlisting}
+\subsection{tide\_slack\_exp}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{wave\_number\_tide}
+${}$
+\begin{lstlisting}
+ wave number of the tide without river flow
+ c.f. friedrichs, ippen harleman
+ output :
+ k : wave number, such that
+                  z(t,x) = z1(t,0) exp(1i*(omega*t-k*x))
+
+  re(k) : rate of phase change
+ -im(k) : damping rate
+
+ function [k k_low k_high] = damping_modulus_tide(omega,cd,h0,az1)
+
+\end{lstlisting}
+\subsection{wavetrainz}
+${}$
+\begin{lstlisting}
+ determine river tide by iterated integration of the surface elevation
+
+\end{lstlisting}
+\subsection{wavetwopassz}
+${}$
+\begin{lstlisting}
+ two pass solution for the linearised wave equation, for surface elevation
+
+\end{lstlisting}
+\section{tide}
+\begin{lstlisting}
+analysis prediction of tides in rivers and estuaries by empirical and theoretical methods
+
+
+\end{lstlisting}
+\subsection{river\_tide\_transport\_scale}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\section{test/river-tide-morphodynamics}
+\subsection{river\_tide\_morphodynamics\_test\_01}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_morphodynamics\_test\_02}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_morphodynamics\_test\_03}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_morphodynamics\_test\_04\_seasons}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{rtm\_plot}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\section{test/river-tide-network}
+\subsection{river\_tide\_network\_test\_01}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_network\_test\_02}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_network\_test\_03}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_network\_test\_04}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_network\_test\_05}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\section{test/river-tide}
+\subsection{example\_river\_tide}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{example\_river\_tide\_map}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_01}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_02}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_03}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_04}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_05}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_06}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_07}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_08}
+${}$
+\begin{lstlisting}
+		hold on;
+		plot(x,abs(z),'--');
+		hold on;
+		plot(x,angle(z),'--');
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_09}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_10}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_11}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_12}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_13}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_batch}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_metadata}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{river\_tide\_test\_plot}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_bvp2c2}
 ${}$
 \begin{lstlisting}
@@ -1277,183 +1525,6 @@ ${}$
 
 \end{lstlisting}
 \subsection{test\_wave\_twopass}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\section{river-tide}
-\begin{lstlisting}
-analysis and prediction of river tides
-
-Sub-Classes:
- 
-@River_Tide
-	- prediction of river tide in a backwater affected river with a sloping bed
-@River_Tide_Cai
-	- prediction of river tide, method of Cai
-@River_Tide_Empirical
-	- prediction of river tide, empirical
-@River_Tide_JK
-	- prediction of river tide, empirical after Jay and Kukulka
-@River_Tide_Map
-	- mulitple-scenaria container for River_Tide
-@River_Tide_Network
-	- extension of River_Tide to networks
-
-
-\end{lstlisting}
-\subsection{tidal\_ellipse}
-${}$
-\begin{lstlisting}
- tidal ellipse, numerical ode solution
-
-\end{lstlisting}
-\subsection{tide\_slack\_exp}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{wave\_number\_tide}
-${}$
-\begin{lstlisting}
- wave number of the tide without river flow
- c.f. friedrichs, ippen harleman
- output :
- k : wave number, such that
-                  z(t,x) = z1(t,0) exp(1i*(omega*t-k*x))
-
-  re(k) : rate of phase change
- -im(k) : damping rate
-
- function [k k_low k_high] = damping_modulus_tide(omega,cd,h0,az1)
-
-\end{lstlisting}
-\subsection{wavetrainz}
-${}$
-\begin{lstlisting}
- determine river tide by iterated integration of the surface elevation
-
-\end{lstlisting}
-\subsection{wavetwopassz}
-${}$
-\begin{lstlisting}
- two pass solution for the linearised wave equation, for surface elevation
-
-\end{lstlisting}
-\section{tide}
-\begin{lstlisting}
-analysis prediction of tides in rivers and estuaries by empirical and theoretical methods
-
-
-\end{lstlisting}
-\subsection{river\_tide\_transport\_scale}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\section{test/river-tide-morphodynamics}
-\subsection{river\_tide\_morphodynamics\_test\_01}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\section{test/river-tide-network}
-\subsection{river\_tide\_network\_test\_01}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\section{test/river-tide}
-\subsection{example\_river\_tide}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{example\_river\_tide\_map}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_01}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_02}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_03}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_04}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_05}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_06}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_07}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_08}
-${}$
-\begin{lstlisting}
-		hold on;
-		plot(x,abs(z),'--');
-		hold on;
-		plot(x,angle(z),'--');
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_09}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_10}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_11}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_12}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_13}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_batch}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_metadata}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_plot}
 ${}$
 \begin{lstlisting}
 

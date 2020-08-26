@@ -1,23 +1,24 @@
 % Wed 11 Oct 10:18:54 CEST 2017
-function postprocess(obj,x,y)	
+function postprocess(obj,x,y,yc)	
 	% extract unknowns
-	nx    = length(x);
-	obj.x = x;
+	nx         = length(x);
+	nxc	   = nx-1;
+	obj.x      = x;
+	xc         = mid(x);
 	obj.opt.nx = length(x);
-	y_    = reshape(y,nx,[]);
 
-	switch (obj.opt.hmode)
-	case {'matrix'}
-		z0 = y_(:,1);
-		Qt = y_(:,2:end);
-	otherwise
-		z0 = obj.tmp.z0;
-		Qt = y_;
-	end % switch
+	[z0,   Q0, Qt] = obj.extract(x,y);
+	[z0c, Q0c, Qtc] = obj.extract(xc,yc);
+
+	
+	obj.Q0_ = Q0;
 
 	% stack
-	obj.Q_ = [obj.Q0_*ones(size(x)), Qt];
-	obj.z_ = [z0, obj.discharge2level(Qt)];
+	obj.Q_  = [Q0*ones(size(x)), Qt];
+	obj.z_  = [z0, obj.discharge2level(Qt)];
+
+	obj.Qc_ = [Q0*ones(nxc,1), Qtc];
+	obj.zc_ = [z0c, obj.discharge2level(Qtc,mid(x))];
 	
 	% check result
 	cflag = 0;

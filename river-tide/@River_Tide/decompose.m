@@ -2,8 +2,12 @@
 %% decompose the tide into a right and left travelling wave,
 %% i.e. into incoming and reflected wave
 %% TODO subtract forcing term
+%
+% function [Q1lr, z1lr, obj] = decompose(obj)
+%
 function [Q1lr, z1lr, obj] = decompose(obj)
 	Q1    = obj.Q(1);
+	Q0    = obj.Q(0);
 	x     = obj.x;
 	dx    = diff(x);
 	omega = obj.omega;
@@ -17,16 +21,23 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 	else
 		switch (obj.opt.hmode)
 		case {'matrix'}
-			y = [obj.z(0); Q1];
+			if (obj.opt.dischargeisvariable)
+				y = [obj.z(0); Q0(1); Q1];
+				k=2;
+			else
+				y = [obj.z(0); Q1];
+				k = 2;
+			end
 		otherwise
 			y = obj.Q_(:,1);
+			k = 1;
 		end
 		%if (obj.opt.oflag(2))
 		%	y = [y;obj.Q_];
 		%end
 
 		c = obj.odefun(x,y);
-		c_ = 0.5*(c(1:end-1,:)+c(2:end,:));	
+		c_ = 0.5*(c(1:end-1,:,k)+c(2:end,:,k));	
 	end
 	r  = roots2(c_);
 	

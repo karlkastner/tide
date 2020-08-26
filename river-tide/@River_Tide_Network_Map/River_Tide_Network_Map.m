@@ -1,5 +1,6 @@
-% Sat 14 Oct 16:39:01 CEST 2017
-%% container class to store multiple river-tide scenarios
+% Mon 24 Aug 10:24:24 +08 2020
+%
+%% container class to store multiple river-tide morphodyanics scenarios
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -14,13 +15,13 @@
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
 %
-classdef River_Tide_Map < Compute_Map
+classdef River_Tide_Network_Map < Compute_Map
 	properties
 	end % properties
 	methods
-		function obj = River_Tide_Map(varargin)
+		function obj = River_Tide_Network_Map(varargin)
 		         obj = obj@Compute_Map(varargin{:});
-		end % constructor
+		end % River_Tide_Network_Map
 	end % methods
-end % class River_Tide_Map
+end % class River_Tide_Network_Map
 

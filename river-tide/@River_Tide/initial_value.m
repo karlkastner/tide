@@ -1,11 +1,13 @@
 % Mon 20 Apr 15:35:09 +08 2020
 function y0 = ifun(obj,x)
 	x = cvec(x);
+	% TODO, no magic numbers
+	Q0_dummy = -10;
 	h0_dummy = 10;
-	W = obj.width(x);
-	S = obj.D1_dx(x)*obj.zb(x);
+	W  = obj.width(x);
+	S  = obj.D1_dx(x)*obj.zb(x);
 	cz = drag2chezy(obj.cd(x,h0_dummy));
-	h0 =	normal_flow_depth(   obj.Q0_ ...
+	h0 =	normal_flow_depth(   Q0_dummy ...%obj.Q0_ ...
 				   , W ...
 				   , cz ...
 				   , S ...
@@ -17,6 +19,12 @@ function y0 = ifun(obj,x)
 	h0 = max(obj.z0_downstream+h0_dummy, h0);
  
 	z0 = obj.zb(x) + h0;
-	y0 = [z0, rand(length(x),obj.neq-1)];
+
+	if (~obj.opt.dischargeisvariable)
+		y0 = [z0; rand(length(x),obj.neq-1)];
+	else
+		%y0 = [z0; Q0_dummy; sqrt(eps)*randn(length(x)*(obj.neq-1),1)];
+		y0 = [z0+h0_dummy*randn(size(z0)); Q0_dummy*(1 + randn()); 1e-3*randn(length(x)*(obj.neq-1),1)];
+	end
 end
 

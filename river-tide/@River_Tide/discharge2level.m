@@ -9,8 +9,7 @@
 %% =>     z = -1/(io) dq/dx
 %% =>     z = 1i/o dq/dx
 %%
-%% TODO allow Q as input
-%% TODO rename into Q1_to_z1
+%% TODO rename into Qt_to_zt
 %% Mon  7 Oct 19:04:14 PST 2019 : added correction for change of width
 function z = discharge2level(obj,Q,x)
 	if (nargin()<3)

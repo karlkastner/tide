@@ -2,17 +2,29 @@
 %
 %% coefficients of the backwater and wave equation for river-tides
 %
-% TODO make q0 an unknown for networks (stacked odes with multiple bcs)
-% TODO precompute cD, h, w, dhdx, dwdx,
+% TODO precompute Cd, h, w, dhdx, dwdx,
 %      this requires the bvp solve to accept a predefined mesh as an argument
-% TODO account for inhomogeneous part
+% TODO heed identity abs(Qi)^2 = abs(Qi^2) = conj(Qi)*Qi
+%      to move coupling terms from rhs (b) to lhs (A)
 function [f, obj] = odefun(obj,x,y)
-	%switch (obj.opt.hmode)
-	%case {'matrix'}
-	%	k = sum(obj.opt.oflag)+1;
-	%otherwise
-	%	k = sum(obj.opt.oflag);
-	%end
+	% without any input, order of coupled odes is returned
+	if (nargin()<2 || isempty(x))
+		f(1) = 1;
+		%if (obj.opt.dischargeisvariable)
+		%	f(2) = -1;
+		%	k = 2;
+		%else
+			k = 1;
+		%end
+		for idx=1:length(obj.opt.oflag)
+			if (obj.opt.oflag(idx))
+				k    = k+1;
+				f(k) = 2;
+			end
+		end
+		return;
+	end
+
 	k = obj.neq;
 
 	g      = obj.g;
@@ -23,27 +35,11 @@ function [f, obj] = odefun(obj,x,y)
 	D1_dx  = obj.D1_dx(x);
 	dw_dx  = D1_dx*w;
 
-	Q0     = obj.Q0_*ones(size(x));
 	zb     = obj.zb(x);
 	nx     = length(x);
 
-	if (isscalar(y))
-	        % TODO quick fix	
-		y_ = repmat(y,1,k);
-	else
-		y_ = reshape(y,nx,k);
-	end
-
-        switch (obj.opt.hmode)                                                  
-	case {'matrix'}
-		z0 = y_(:,1); % y(1:nx);
-		k_ = 2;
-	otherwise
-		% z0 is computed below
-		%z0 = obj.z0(x);
-		k_ = 1;
-	end
-	Qt = y_(:,k_:end);
+	[z0,Q0,Qt] = obj.extract(x,y);
+	Q0         = repmat(Q0,nx,1);
 
 	% TODO properly determine range and midrange
 	%Qhr    = sum(abs(Qt),2);
@@ -52,7 +48,13 @@ function [f, obj] = odefun(obj,x,y)
 	Qhr = sum(abs(Qt),2);
 	Qmid = Q0;
 
-	cf = obj.friction_coefficient(Qmid,Qhr);
+	cf = -obj.friction_coefficient(Qmid,Qhr);
+
+%	if (obj.opt.dischargeisvariable)
+%		f = zeros(nx,4,obj.neq+1);
+%	else
+		f = zeros(nx,4,obj.neq);
+%	end
 
 	% TODO rename, iterate is idiosynchratic
 	switch (obj.opt.hmode)
@@ -70,12 +72,20 @@ function [f, obj] = odefun(obj,x,y)
 		k           = 1;
 	case {'matrix'}
 		% depth is reiterated together with Qt
-		z1     = obj.discharge2level(Qt(:,1),x);
+		if (~isempty(Qt))
+			z1     = obj.discharge2level(Qt(:,1),x);
+		else
+			z1 = 0;
+		end
 		h0     = z0 - zb;
 		h0     = max(h0,obj.hmin);
-		cD     = obj.cd(x,h0);
+		Cd     = obj.cd(x,h0);
 		% TODO make cd a function
-		f  = obj.odefun0(x, h0, z1, zb, w, dw_dx, Q0, Qhr, Qt, cD, cf);
+		if (~obj.opt.dischargeisvariable)
+		f(:,:,1)  = obj.odefunz0(x, h0, z1, zb, w, dw_dx, Q0, Qhr, Qt, Cd, cf);
+		else
+		f(:,:,1)  = obj.odefunQ0(x, h0, z1, zb, w, dw_dx, Q0, Qhr, Qt, Cd, cf);
+		end
 		k  = 2;
 	otherwise
 		error('odefun');
@@ -88,18 +98,23 @@ function [f, obj] = odefun(obj,x,y)
 	end
 
 	h0     = max(h0,obj.hmin);
-	cD     = obj.cd(x,h0);
+	Cd     = obj.cd(x,h0);
 	dh0_dx = D1_dx*h0;
 	dz0_dx = D1_dx*z0;
 
 	Q  = [Q0,Qt];
 	QQ = fourier_quadratic_interaction_coefficients(Q,size(Q,2),2);
 
+%	if (obj.opt.dischargeisvariable)
+%		f(:,:,k) = obj.odefunQ0(x,h0,z1,zb,w,dw_dx,Q0,Qhr,Qt,Cd,cf);
+%		k = 3;
+%	end
+
 	% frequency components of the tide
 	for idx=1:length(obj.opt.oflag)
 	    if (obj.opt.oflag(idx))
 		f(:,:,k) = obj.odefunk(idx, Q, QQ, Qhr, h0, dh0_dx, dz0_dx, ...
-						      w, dw_dx, cD, cf, D1_dx);
+						      w, dw_dx, Cd, cf, D1_dx);
 	    	k=k+1;
 	    end % if
 	end % for 

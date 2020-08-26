@@ -1,0 +1,16 @@
+	function y = inner2outer_bvp2c(ypm)
+		y = zeros(nx*neq,1);
+		for ne=1:neq
+		     n0  = m*nxc*(ne-1);
+		     n0_ = nx*(ne-1);
+		     l = ll(:,:,ne);
+		     y(n0_+1:n0_+nx) = [(  ypm(n0+1:m:n0+m*nxc-m+1).*myexp(-0.5*l(:,1).*dx(1:nxc)) ...
+		  	                   + ypm(n0+2:m:n0+m*nxc-m+2) ...
+	                                   + ypm(n0+3:m:n0+m*nxc).*myexp(-0.5*l(:,2).*dx(1:nxc)) );
+		                        (  ypm(n0+m*nxc-m+1)*myexp(0.5*l(nxc,1)*dx(nxc)) ...
+			                   + ypm(n0+m*nxc-m+2) ...
+	                                   + ypm(n0+m*nxc)*myexp(0.5*l(nxc,2)*dx(nxc))) ...
+			               ];
+		end
+	end
+

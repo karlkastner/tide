@@ -34,7 +34,8 @@ function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,cD,c,D1_dx)
 	DQ3k1 = fourier_multiplicative_interaction_coefficients(DQ2k1,Q,size(Q,2),1);
 
 	% f3 : Q : self damping
-	f(:,3) = f(:,3) + s.*(c(:,2).*Qhr + 2.*c(:,3).*Q(:,1) );
+	% TODO, why the minus in front of c(2)?
+	f(:,3) = f(:,3) + s.*(-c(:,2).*Qhr + 2.*c(:,3).*Q(:,1) );
 
 	% f4 : constant term, damping by interaction
 	% sign changed according to test case 8

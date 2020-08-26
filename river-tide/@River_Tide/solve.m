@@ -2,10 +2,10 @@
 %% call stationary or non-stationary solver respectively
 %%
 %% function obj   = solve(obj)
-function obj   = solve(obj)
+function [y, obj]   = solve(obj)
 	switch (obj.opt.model_str)
 	case {'wave'}
-		obj.solve_wave();
+		y = obj.solve_wave();
 	case {'swe'}
 		obj.solve_swe();
 	end

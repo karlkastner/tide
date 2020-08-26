@@ -1,9 +1,10 @@
-% Wed  9 Oct 15:23:10 PST 2019
-function [out] = river_tide_test_06(rt_map,pflag)
-	tid  = 6;
-	name = 'infinitessimal wave along river with uniform flow';
+% Tue 18 Aug 09:27:08 +08 2020
+function [out] = river_tide_network_test_01(rt_map,pflag)
+	tid  = 1;
+	name = 'single channel'
 
 	z10 = [1,2];
+%,2];
 %	L   = [5e3,
 
 	for idx=1:length(z10)
@@ -18,7 +19,8 @@ function [out] = river_tide_test_06(rt_map,pflag)
 	cdfun     = @(x)  cD*ones(size(x));
 	% bed level of channel
 	h0        = 10;
-	S0         = normal_flow_slope(-Q0,h0,w0,drag2chezy(cD));
+	S0_ = -normal_flow_slope(-10,h0,w0,drag2chezy(cD))
+	S0        = -normal_flow_slope(Q0,h0,w0,drag2chezy(cD));
 	zbfun     = @(x) -h0 + S0*x;
 	bc        = struct();
 	% mean sea level
@@ -28,7 +30,7 @@ function [out] = river_tide_test_06(rt_map,pflag)
 	bc(1,1).p   = 1;
 	% river discharge
 	bc(2,1).var = 'Q';
-	bc(2,1).rhs = -Q0;
+	bc(2,1).rhs = Q0;
 	% Dirichlet condition
 	bc(2,1).p   = 1;
 	% wave entering from left
@@ -46,15 +48,15 @@ function [out] = river_tide_test_06(rt_map,pflag)
 	T         = Constant.SECONDS_PER_DAY;
 	omega     = 2*pi/T;
 	% domain size
-	Xi        = [0,2*h0/S0];
+	Xi        = [0,2*h0/S0_];
 
 
 	meta = river_tide_test_metadata();
 	opt = meta.opt;
-	optmaxiter =  100;
-	opt.nx = 50
-	opt.sopt.maxiter = 100;
-
+%	opt.nx = 50
+	opt.nx = 100
+	opt.sopt.maxiter = 200;
+	
 	out(idx) = River_Tide( ...
 				   'fun.zb',      zbfun ...
 				 , 'fun.cd',      cdfun ...
@@ -63,14 +65,47 @@ function [out] = river_tide_test_06(rt_map,pflag)
 				 , 'opt',         opt ...
 				 , 'Xi',          Xi ...
 				);
+	out(idx).opt.dischargeisvariable = true;
+%	out(idx).opt.dischargeisvariable = false;
 	out(idx).bc = bc;
 
 	end
 	rtn = River_Tide_Network_2(out);
-
 	rtn.init();
-
 	rtn.solve();
+%	out(1).init;
+%	out(1).solve;
+%	rt = out(1);
+
+	for idx=1:length(rtn.rt)
+		rt = rtn.rt(idx)'
+		x = rt.x;
+
+		subplot(length(rtn.rt),4,4*(idx-1)+1);
+		z0 = rt.z(0);
+		zb = rt.zb(x);
+		plot(x,[zb,z0]);
+		ylabel('z0');
+		
+		subplot(length(rtn.rt),4,4*(idx-1)+2);
+		Q0 = rt.Q(0);
+		plot(x,Q0);
+		ylabel('Q0')
+
+		k = 1;
+		subplot(length(rtn.rt),4,4*(idx-1)+3);
+		z = rt.z(k);
+		[Qlr,zlr]=rt.decompose();
+		plot(x,[abs(z),abs(zlr)])
+		%plot(x,[abs(z),real(z),imag(z)]);
+		title('z1');	
+	
+		subplot(length(rtn.rt),4,4*(idx-1)+4);
+		Q = rt.Q(k);
+		plot(x,abs(Q));
+		title('Q1');	
+
+	end
 
 %	% solve with model
 %	[rt]  = rt_map.fun({Xi} ... % Q0,

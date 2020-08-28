@@ -1,4 +1,6 @@
 % Sun  8 Oct 13:08:39 CEST 2017
+% Karl Kastner, Berlin
+%
 function cf = friction_coefficient(obj,Qmid,Qhr)
 	switch (obj.opt.friction_method)
 	case {'neglect-river'} % lorentz

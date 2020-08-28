@@ -1,4 +1,6 @@
 % Sun 15 Mar 15:03:27 +08 2020
+% Karl Kastner, Berlin
+%
 % TODO : change h0.^3 to h0.^p for arbitrary power (manning)
 % TODO : 1/h nonlinearity !
 function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,cD,c,D1_dx)

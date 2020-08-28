@@ -1,5 +1,6 @@
 % Sun  8 Oct 13:08:39 CEST 2017
-% Sun 22 Apr 11:36:45 CEST 2018
+% Karl Kastner, Berlin
+%
 %%
 %% coefficients of the ordinary differential equation of the k-th freqeuncy
 %% component of the tide

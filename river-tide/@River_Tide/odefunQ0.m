@@ -1,4 +1,6 @@
 % Fri 14 Aug 15:48:04 +08 2020
+% Karl Kastner, Berlin
+%
 % coefficients of the backwater equation
 % for coupling z0 and Q0 for determining the latter
 function c = odefunQ0(obj,x,h0,z1,zb,w,dw_dx,Q0,Qhr,Qt,Cd,fc)

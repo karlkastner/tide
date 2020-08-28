@@ -1,6 +1,8 @@
 % Sun 11 Mar 13:17:36 CET 2018
+% Karl Kastner, Berlin
+%
 %% coefficients of the backwater equation for the river tide
-%% TODO merge with backwater
+%% TODO merge with backwater class
 function c = odefunz0(obj,x,h0,z1,zb,w,dw_dx,Q0,Qhr,Qt,Cd,fc)
 	if (nargin() < 2)
 		c = zeros(0,0,1);

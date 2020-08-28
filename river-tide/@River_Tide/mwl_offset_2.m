@@ -1,4 +1,6 @@
 % 2018-04-25 14:14:53.330209405 +0200
+% Karl Kastner, Berlin
+%
 function z0t = rt_mwl_simplified(x,Q0,Q1,z10,h0,w,cd,omega,dzb_dx)
 	g = obj.g;
 	X = [x(1),x(end)];

@@ -1,4 +1,6 @@
 % 2017-04-04 18:11:50.871153511 +0200
+% Karl Kastner, Berlin
+%
 %% compute friction with the method of Godin
 function [uau, obj] = friction_godin(obj,u,Umax)
 	if (nargin()<2 || isempty(Umax))

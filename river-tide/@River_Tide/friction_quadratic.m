@@ -1,4 +1,6 @@
 % Thu 23 Mar 09:51:57 CET 2017
+% Karl Kastner, Berlin
+%
 %% friction determined by Dronker's method
 % function [uau_sum uau p] = friction_dronkers(u,Umid,Uhr,order)
 function [uau_sum, uau, p, obj] = friction_quadratic(obj,u)

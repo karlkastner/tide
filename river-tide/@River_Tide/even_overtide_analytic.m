@@ -1,12 +1,8 @@
 % Wed 25 Apr 15:09:11 CEST 2018
+% Karl Kastner, Berlin
+%
 function z2 = even_overtide_analytic(obj,x,z10,h0,w0,Q0,Cd,omega)
 	g     = Constant.gravity;	
-%	x  = obj.x(cdx);
-%	cD = obj.cd(cdx,x(1));
-%	w0 = obj.width(cdx,x(1));
-%	h0 = obj.h0(cdx,x(1));
-%	Q0 = obj.Q0(cdx,x(1));
-%	omega = obj.omega;
 
 	r1 = sqrt(omega*Cd*Q0/(g*w0*h0^3));
 	k1 = (1-1i)*r1;

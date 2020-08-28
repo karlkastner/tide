@@ -1,5 +1,7 @@
 % Fri  1 Dec 14:21:20 CET 2017
-%% analytic expression of the wave number
+% Karl Kastner, Berlin
+%
+%% analytic expression of the wave number of river tides
 %%
 %% valid for both tidally, river dominated and low friction conditions
 %% and converging channels

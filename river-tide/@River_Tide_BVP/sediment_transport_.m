@@ -1,6 +1,9 @@
 % Fri  7 Aug 19:07:20 +08 2020
 % Karl Kastner, Berlin
-function [Qs, Qs0] = sediment_transport(obj,cdx,t,iscentral)
+%
+%% compute sediment transport for a single channel
+%
+function [Qs, Qs0] = sediment_transport_(obj,cdx,t,iscentral)
 	d_mm = obj.sediment.d_mm;
 
 	% discharge and channel properties at segment centres
@@ -48,5 +51,5 @@ function [Qs, Qs0] = sediment_transport(obj,cdx,t,iscentral)
 		Qs(end) = p*val + (1-p)*(2*Qs(end-1)-Qs(end-2));
 	end
 
-end % sediment_transport
+end % River_Tide_BVP_/sediment_transport
 

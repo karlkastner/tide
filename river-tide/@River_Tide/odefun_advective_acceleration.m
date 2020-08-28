@@ -1,4 +1,6 @@
 % Sun  8 Oct 13:08:39 CEST 2017
+% Karl Kastner, Berlin
+%
 % advective acceleration, ignoring the 1/h nonlinearity
 %
 % aa = d/dx (Q^2/A)

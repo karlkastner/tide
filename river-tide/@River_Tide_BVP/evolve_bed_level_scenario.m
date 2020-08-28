@@ -1,4 +1,8 @@
 % Mon 24 Aug 11:25:05 +08 2020
+% Karl Kastner, Berlin
+%
+%% shortcut function for batch simulation runs
+%
 function [t,zb] = evolve_bed_level_scenario(obj...
 		 , z10  ...	% [1]     amplitude of incoming wave
 		 , pz1r ...	% [1]     reflected wave factor

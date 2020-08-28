@@ -1,4 +1,8 @@
 % Thu 20 Aug 10:25:58 +08 2020
+% Karl Kastner, Berlin
+%
+%% change of bed level over time, when width constant over time
+%% dzb/dt + 1/(p rho w) dQs/dx = 0
 %
 % function dzb_dt = dzb_dt(obj,t,zb)
 %
@@ -7,44 +11,56 @@ function [dzb_dt,dt_max] = dzb_dt(obj,t,zb,ddir)
 	p          = obj.sediment.p;
 	rho        = obj.sediment.rho;
 
-	nci = 0;
+
+	% TODO BVPSC should have global xc
+	nci = 1;
+	xc = [];
 	for cdx=1:obj.nc
 		x   = obj.x(cdx);
-		xc  = mid(x);
-		nxc = length(xc);
-error('here')
-		obj.fun.zb = @(cdx,xi) interp1(xc,zb(nci+(1:nxc)),xi,'linear','extrap');
-		nci = nci+nxc;
+		xc  = [xc;mid(x)];
+		nxc = length(x)-1;
+		ncii(cdx) = nci;
+		nci       = nci+nxc;
+		obj.tmp(cdx).zb   = [];
+		obj.tmp(cdx).c.zb = [];
 	end % for idx
+	ncii(obj.nc+1) = nci;
+	obj.fun.zb = @(cdx,xi) interp1(xc(ncii(cdx):ncii(cdx+1)-1),zb(ncii(cdx):ncii(cdx+1)-1),xi,'linear','extrap');
 
 	% allocate storage
-	dzb_dt = zeros(nci,1);
+	dzb_dt = zeros(nci-1,1);
 
 	% determin discharge values and weights for integration over the seasons
 	% TODO Qlim should be part of the boundary conditions
-	if (isa(obj.season.Qlim,'function_handle'))
-		Qlim = obj.season.Qlim(t);
+	if (isfield(obj.season,'Qlim') && ~isempty(obj.season.Qlim))
+		if (isa(obj.season.Qlim,'function_handle'))
+			Qlim = obj.season.Qlim(t);
+		else
+			Qlim = obj.season.Qlim;
+		end
+		if (obj.season.iorder > 1)
+			% integrate over the seasons,
+			% without updating the bed-level during the year
+			[weight, b] = int_1d_gauss(obj.season.iorder);
+			Q0          = inv_hydrograph(  b*[0;1] ...
+				 		     , Qlim(1) ...
+						     , Qlim(2) ...
+						    );
+		else
+			% single formative discharge, for which Qs ~ <Qs> ~ <Q^2>
+			weight = 1;
+			Q0     = formative_discharge(  Qlim(1) ...
+						     , Qlim(2) ...
+						    );
+		end
+		h0 = normal_flow_depth(Q0,obj.season.w0,obj.season.Cd,obj.season.S0,'Cd');
+		Qs = total_transport_engelund_hansen(drag2chezy(obj.season.Cd), ...
+			obj.rt(1).sediment.d_mm,Q0./(h0*obj.season.w0),h0,obj.season.w0);
 	else
-		Qlim = obj.season.Qlim;
-	end
-	if (obj.season.iorder > 1)
-		% integrate over the seasons,
-		% without updating the bed-level during the year
-		[weight, b] = int_1d_gauss(obj.season.iorder);
-		Q0          = inv_hydrograph(  b*[0;1] ...
-			 		     , Qlim(1) ...
-					     , Qlim(2) ...
-					    );
-	else
-		% single formative discharge, for which Qs ~ <Qs> ~ <Q^2>
 		weight = 1;
-		Q0     = formative_discharge(  Qlim(1) ...
-					     , Qlim(2) ...
-					    );
+		Q0 = obj.bc(2,1,1).rhs;
+		Qs = obj.bc_Qs(2,1).val;
 	end
-	h0 = normal_flow_depth(Q0,obj.season.w0,obj.season.Cd,obj.season.S0,'Cd');
-	Qs = total_transport_engelund_hansen(drag2chezy(obj.season.Cd), ...
-		obj.rt(1).sediment.d_mm,Q0./(h0*obj.season.w0),h0,obj.season.w0);
 
 	% compute seasonally averaged rate of bed level change
 	c = 0;
@@ -54,32 +70,24 @@ error('here')
 
 		% TODO, this is a quick fix
 		% use channel specific values
-		obj.rt(1).bc(2,1,1).rhs  = Q0(sdx);
-		obj.rt(1).bc_Qs(2,1).val = Qs(sdx);
-	
-		obj.init();
+		obj.bc(2,1,1).rhs  = Q0(sdx);
+		obj.bc_Qs(2,1).val = Qs(sdx);
 	
 		% reuse solution of last time step as initial condition
-		for cdx=1:obj.nc
-			if (isfield(obj.tmp(1),'ypm') && ~isempty(obj.tmp(cdx).ypm))
-	error('here')
-				obj.opt.ifun = @(cdx,x) obj.tmp(cdx).ypm(:,sdx);
-			end
+		if (isfield(obj.tmp(1),'ypm')) % && ~isempty(obj.tmp(cdx).ypm))
+			obj.hydrosolver.inifun = @(cdx,x) obj.tmp(cdx).ypm(:,sdx);
 		end
-	
+
 		obj.solve();
 		
-		%z0 = obj.rt(1).z(0);
-	
 		% TODO, the cflag belong to the network, not branches
-		if (obj.out.cflag ~= 1)
+		if (obj.hydrosolver.out(1).cflag ~= 1)
 			error('no-convergence');
 		end
 	
 		% save initial condition for reuse during next time step
 		for cdx=1:obj.nc
-	%length(obj.rt)
-			obj.tmp(cdx).ypm(:,sdx) = obj.odesolver.out(cdx).ypm;
+			obj.tmp(cdx).ypm(:,sdx) = obj.hydrosolver.out(cdx).ypm;
 		end
 	
 		% get transport at segment interfaces

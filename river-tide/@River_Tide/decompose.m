@@ -1,4 +1,6 @@
 % Fri 15 Dec 16:58:52 CET 2017
+% Karl Kastner, Berlin
+%
 %% decompose the tide into a right and left travelling wave,
 %% i.e. into incoming and reflected wave
 %% TODO subtract forcing term

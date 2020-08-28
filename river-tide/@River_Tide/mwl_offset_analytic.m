@@ -1,4 +1,6 @@
 % Wed 18 Apr 15:26:01 CEST 2018
+% Karl Kastner, Berlin
+%
 % analytic solution:
 %	    prasmatic channel with uniform flow (tidal average)
 %           z0' << h0

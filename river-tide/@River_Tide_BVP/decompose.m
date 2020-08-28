@@ -1,10 +1,12 @@
 % Fri 15 Dec 16:58:52 CET 2017
+% Karl Kastner, Berlin
+%
 %% decompose the tide into a right and left travelling wave,
 %% i.e. into incoming and reflected wave
-%% TODO subtract forcing term
 %
 % function [Q1lr, z1lr, obj] = decompose(obj)
 %
+%% TODO subtract forcing term
 function [Q1lr, z1lr, obj] = decompose(obj,cdx)
 	z1    = obj.z(1,cdx);
 	Q1    = obj.Q(1,cdx);

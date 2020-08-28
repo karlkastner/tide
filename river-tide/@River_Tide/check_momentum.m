@@ -1,4 +1,5 @@
 % Thu 10 Oct 11:36:29 PST 2019
+% Karl Kastner, Berlin
 function [rmse,res] = check_momentum(obj,obj,x,w,h0,Q0,zt,Qt,omega)	
 	% TODO use flags for 1/h and advective acceleration
 	aa  = 0;

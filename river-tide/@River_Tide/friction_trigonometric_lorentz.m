@@ -1,4 +1,6 @@
 % Tue  4 Apr 15:55:45 CEST 2017
+% Karl Kastner, Berlin
+%
 %% friction computed by the method of Lorent'z
 %% expressed as coefficients of the frequency components (trigonometric form)
 %% 

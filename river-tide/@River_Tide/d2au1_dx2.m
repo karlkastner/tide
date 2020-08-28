@@ -1,4 +1,6 @@
 % Tue 17 Apr 14:25:43 CEST 2018
+% Karl Kastner, Berlin
+%
 %% second derivative of the tidal velocity magnitude
 %%
 %% note: this is for finding zeros,

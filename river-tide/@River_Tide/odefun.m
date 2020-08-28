@@ -1,4 +1,6 @@
 % Sun  8 Oct 13:08:39 CEST 2017
+% Karl Kastner, Berlin
+%
 %
 %% coefficients of the backwater and wave equation for river-tides
 %

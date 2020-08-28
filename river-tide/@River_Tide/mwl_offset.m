@@ -1,4 +1,6 @@
 % Wed 18 Apr 13:24:05 CEST 2018
+% Karl Kastner, Berlin
+%
 % TODO, this should go to the IVP class
 %% offset of the tidally averaged surface elevation caused by tidal friction
 %% Linear estimate of the mean water level offset (ignoring feed-back of tide)

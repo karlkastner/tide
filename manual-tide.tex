@@ -16,7 +16,7 @@ breaklines=true
 \setlength{\cftsubsecnumwidth}{3.5em}
 
 \title{Manual for Package:
-tide\protect\\Revision 6:17M
+tide\protect\\Revision 6:19M
 }
 \author{Karl K\"astner}
 %\date{}
@@ -235,6 +235,27 @@ ${}$
  T > 1/|f1-f2|
 
 \end{lstlisting}
+\section{river-tide/@Bifurcation}
+\subsection{Bifurcation}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{confluence\_rule}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_division}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_division\_geometric}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \section{river-tide/@River\_Tide}
 \begin{lstlisting}
 predict tide in a backwater affected river with a sloping/varying bed
@@ -339,38 +360,19 @@ ${}$
  river tide in a single 1D channel
  TODO split in two classes:
  one that stores data (RT_Solve), one that provides equations (RT_Analytic)
-
-\end{lstlisting}
-\subsection{bc\_transformation}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{bcfun}
-${}$
-\begin{lstlisting}
- Robin (mixed) boundary conditions for the river tide,
- supplied for each frequency component,
- wrapper that copies values are from the member struct "bc"
-
-       q*(p*Q_1^- + (1-p)*dQ_1^-/dx 
- input :
-	x       : coordinate (left or right end)
-	id,ccdx : frequency component index
-                (1 = 0 omega (mean), 2 : 1 omega, 3 : 2 omega, ...
- columns of bc : frequency
- rows of bc, left, right boundary
- output :
- 	p : [2x1] linear combination of Dirichlet and Neumann boundary condition
-          p(1) -> weight Dirichlet boundary condition
-	    p(2) -> weight Neumann boundary condition
-      q linear combination of left and right travelling (incoming and outgoing) wave
-	    q(1) weight left going wave
-          q(2) weight right going wave
- 	rhs = 0 -> homogeneous boundary condition
-
-
- function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
+	function out = out(obj)
+		out = obj.odesolver.out;
+	end
+ TODO
+		Q = obj.Q_;
+		if (nargin()>1)
+			Q = interp1(obj.x,Q,x,'linear');
+		else
+			x = obj.x;
+		end
+		w = obj.fun.width(x);
+		h0 = obj.h0(x);
+		y = bsxfun(@times,Q,1./(w.*h0));
 
 \end{lstlisting}
 \subsection{check\_continuity}
@@ -409,22 +411,6 @@ ${}$
  TODO subtract forcing term
 
 \end{lstlisting}
-\subsection{discharge2level}
-${}$
-\begin{lstlisting}
- tidal component of surface elevation determined from tidal discharge
-
- by continuity :
-
- dz/dt + dq/dx = 0
- => i o z = - dq/dx
- =>     z = -1/(io) dq/dx
- =>     z = 1i/o dq/dx
-
- TODO rename into Qt_to_zt
- Mon  7 Oct 19:04:14 PST 2019 : added correction for change of width
-
-\end{lstlisting}
 \subsection{dkq\_dx}
 ${}$
 \begin{lstlisting}
@@ -442,22 +428,7 @@ ${}$
  TODO rederive with g symbolic
 
 \end{lstlisting}
-\subsection{dzb\_dt}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
 \subsection{even\_overtide\_analytic}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{evolve\_bed\_level}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{extract}
 ${}$
 \begin{lstlisting}
 
@@ -573,26 +544,6 @@ ${}$
  
 
 \end{lstlisting}
-\subsection{generate\_delft3d}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{init}
-${}$
-\begin{lstlisting}
- provide initial condition by solving the backwater equation for surface level
- TODO this should not be solved as a ivp but included in the bvp iteration
- TODO generate the mesh here and precompute fixed values instead of passing functions
- TODO Q0 should not be a function
- function obj = init(obj, Xi)
-
-\end{lstlisting}
-\subsection{initial\_value}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
 \subsection{mwl\_offset}
 ${}$
 \begin{lstlisting}
@@ -668,49 +619,6 @@ ${}$
  TODO merge with backwater
 
 \end{lstlisting}
-\subsection{postprocess}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{qt}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{sediment\_transport}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{solve}
-${}$
-\begin{lstlisting}
- call stationary or non-stationary solver respectively
-
- function obj   = solve(obj)
-
-\end{lstlisting}
-\subsection{solve\_backwater}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{solve\_swe}
-${}$
-\begin{lstlisting}
- determine river tide by the fully non-stationary FVM and then extract the tide
-  this is experimental and not yet fully working
-
-\end{lstlisting}
-\subsection{solve\_wave}
-${}$
-\begin{lstlisting}
- solve for the oscillatory (tidal) componets
-
- function obj   = solve_wave(obj)
-
-\end{lstlisting}
 \subsection{wave\_number\_analytic}
 ${}$
 \begin{lstlisting}
@@ -730,11 +638,6 @@ ${}$
 
 
 \end{lstlisting}
-\subsection{wave\_number\_analytic\_removed}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
 \subsection{wave\_number\_approximation}
 ${}$
 \begin{lstlisting}
@@ -743,6 +646,147 @@ ${}$
  TODO merge with wave_number_analytic
 
  function [k, k0, dk0_dx_rel, obj] = wave_numer_aproximation(obj)
+
+\end{lstlisting}
+\section{river-tide/@River\_Tide\_BVP}
+\subsection{River\_Tide\_BVP}
+${}$
+\begin{lstlisting}
+ river tide in a single 1D channel
+ TODO split in two classes:
+ one that stores data (RT_Solve), one that provides equations (RT_Analytic)
+
+\end{lstlisting}
+\subsection{bc\_transformation}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{bcfun}
+${}$
+\begin{lstlisting}
+ Robin (mixed) boundary conditions for the river tide,
+ supplied for each frequency component,
+ wrapper that copies values are from the member struct "bc"
+
+       q*(p*Q_1^- + (1-p)*dQ_1^-/dx 
+ input :
+	x       : coordinate (left or right end)
+	id,ccdx : frequency component index
+                (1 = 0 omega (mean), 2 : 1 omega, 3 : 2 omega, ...
+ columns of bc : frequency
+ rows of bc, left, right boundary
+ output :
+ 	p : [2x1] linear combination of Dirichlet and Neumann boundary condition
+          p(1) -> weight Dirichlet boundary condition
+	    p(2) -> weight Neumann boundary condition
+      q linear combination of left and right travelling (incoming and outgoing) wave
+	    q(1) weight left going wave
+          q(2) weight right going wave
+ 	rhs = 0 -> homogeneous boundary condition
+
+
+ function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
+
+\end{lstlisting}
+\subsection{check\_continuity}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{check\_momentum}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{decompose}
+${}$
+\begin{lstlisting}
+ decompose the tide into a right and left travelling wave,
+ i.e. into incoming and reflected wave
+ TODO subtract forcing term
+
+\end{lstlisting}
+\subsection{discharge2level}
+${}$
+\begin{lstlisting}
+ tidal component of surface elevation determined from tidal discharge
+
+ by continuity :
+
+ dz/dt + dq/dx = 0
+ => i o z = - dq/dx
+ =>     z = -1/(io) dq/dx
+ =>     z = 1i/o dq/dx
+
+ TODO rename into Qt_to_zt
+ Mon  7 Oct 19:04:14 PST 2019 : added correction for change of width
+
+\end{lstlisting}
+\subsection{dzb\_dt}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{evolve\_bed\_level}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{evolve\_bed\_level\_scenario}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{extract}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{generate\_delft3d}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{init}
+${}$
+\begin{lstlisting}
+ provide initial condition by solving the backwater equation for surface level
+ TODO this should not be solved as a ivp but included in the bvp iteration
+ TODO generate the mesh here and precompute fixed values instead of passing functions
+ TODO Q0 should not be a function
+ function obj = init(obj, Xi)
+
+\end{lstlisting}
+\subsection{initial\_value}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{odefun}
+${}$
+\begin{lstlisting}
+ coefficients of the backwater and wave equation for river-tides
+
+\end{lstlisting}
+\subsection{postprocess}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_transport}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_transport\_}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{solve}
+${}$
+\begin{lstlisting}
 
 \end{lstlisting}
 \section{river-tide/@River\_Tide\_Cai}
@@ -850,6 +894,12 @@ ${}$
  select the model for fitting
 
 \end{lstlisting}
+\section{river-tide/@River\_Tide\_IVP}
+\subsection{solve}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \section{river-tide/@River\_Tide\_JK}
 \begin{lstlisting}
 empirical analysis and prediction of river tides by the method of Jay and Kukulka
@@ -933,8 +983,22 @@ ${}$
  function obj = plot(obj,Xi,Q0,W0,S0,z1_downstream,cd,zb_downstream,omega,q,opt)
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_Network}
-\subsection{River\_Tide\_Network}
+\section{river-tide/@River\_Tide\_Morphodynamics\_Map@}
+\subsection{River\_Tide\_Morphodynamics\_Map}
+${}$
+\begin{lstlisting}
+ container class to store multiple river-tide morphodyanics scenarios
+
+\end{lstlisting}
+\subsection{fun}
+${}$
+\begin{lstlisting}
+ morphodynamics of a tidal river
+ either retrive a precomputed scenario or compute and store a new scenario
+
+\end{lstlisting}
+\section{river-tide/@River\_Tide\_Network\_Simple}
+\subsection{River\_Tide\_Network\_Simple}
 ${}$
 \begin{lstlisting}
  tide in a fluvial delta channel network, extension of 1D river tide
@@ -992,77 +1056,12 @@ ${}$
  predict the surface elevation amplitude
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_Network\_2}
-\subsection{River\_Tide\_Network\_2}
-${}$
-\begin{lstlisting}
- tide in a fluvial delta channel network, extension of 1D river tide
- the network is a directed graph
- TODO convert from trig-to exponential form
-
-\end{lstlisting}
-\subsection{confluence\_rule}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{dzb\_dt}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{evolve\_bed\_level}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{evolve\_bed\_level\_scenario}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{init}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{inner2outer\_bvp2c}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{sediment\_division}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{sediment\_division\_geometric}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{sediment\_transport}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
+\section{river-tide/@River\_Tide\_SWE}
 \subsection{solve}
 ${}$
 \begin{lstlisting}
-
-\end{lstlisting}
-\section{river-tide/@River\_Tide\_Network\_Map}
-\subsection{River\_Tide\_Network\_Map}
-${}$
-\begin{lstlisting}
- container class to store multiple river-tide morphodyanics scenarios
-
-\end{lstlisting}
-\subsection{fun}
-${}$
-\begin{lstlisting}
- morphodynamics of a tidal river
- either retrive a precomputed scenario or compute and store a new scenario
+ determine river tide by the fully non-stationary FVM and then extract the tide
+  this is experimental and not yet fully working
 
 \end{lstlisting}
 \section{river-tide}

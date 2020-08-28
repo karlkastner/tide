@@ -12,17 +12,19 @@ function [t,ozb,z_,out] = river_tide_morphodyanmics_test_01(x0,zb0,pflag) %rt_ma
 
 	% river discharge
 	Q0        = -10;
+	% tidal amplitude
+	z10       = 1;
 	% width of channel
 	w0        = 1;
-	wfun      = @(x)   w0*ones(size(x));
+	wfun      = @(~,x)   w0*ones(size(x));
 	% drag/friction coefficient
 	cD        = 2.5e-3;
-	cdfun     = @(x)  cD*ones(size(x));
+	cdfun     = @(~,x,~)  cD*ones(size(x));
 	% initial bed level of channel
 	h0        = 10;
 	h00 = h0;
 	S0         = -normal_flow_slope(Q0,h0,w0,drag2chezy(cD));
-	zbfun     = @(x) -h0 + S0*x + 0*1e-1*randn(size(x));
+	zbfun     = @(~,x) -h0 + S0*x + 0*1e-1*randn(size(x));
 
 %	if (nargin()>0)
 %		zbfun = @(xi) interp1(x0,zb0,xi,'linear');
@@ -41,7 +43,6 @@ function [t,ozb,z_,out] = river_tide_morphodyanmics_test_01(x0,zb0,pflag) %rt_ma
 	bc(2,1).p     = 1;
 	% wave entering from left
 	bc(1,2).var = 'z';
-	z10           = 1.5;
 	bc(1,2).rhs = z10;
 	bc(1,2).p   = [1,0];
 	bc(1,2).q   = [1,0];
@@ -61,35 +62,39 @@ function [t,ozb,z_,out] = river_tide_morphodyanmics_test_01(x0,zb0,pflag) %rt_ma
 	meta             = river_tide_test_metadata();
 	opt              = meta.opt;
 	opt.maxiter      = 100;
-	opt.nx           = 50;
+	nx               = 50;
 	opt.sopt.maxiter = 800;
 	opt.dischargeisvariable = dischargeisvariable;
 
+	hydrosolver = BVPS_Characteristic();
+	hydrosolver.xi = Xi;
+	hydrosolver.nx = nx;
+
 	% save struct, z1 Q0, L,nx, T,nt, uw/lf
-	out = River_Tide( ...
+	out = River_Tide_BVP( ...
 				   'fun.zb',      zbfun ...
 				 , 'fun.cd',      cdfun ...
 				 , 'fun.width',   wfun ...
 				 , 'omega',       omega ...
 				 , 'opt',         opt ...
-				 , 'Xi',          Xi ...
+				 , 'hydrosolver',   hydrosolver ...
 				);
 
 	out.bc    = bc;
 	%out.bc_Qs = total_transport_engelund_hansen(drag2chezy(cD),out.sediment.d_mm,Q0./(h0*w0),h0,w0)
 	bc_Qs        = struct();
-	bc_Qs(1).p   = 0;
-	bc_Qs(1).val = 0;
-	bc_Qs(2).p   = 1;
-	bc_Qs(2).val = total_transport_engelund_hansen(drag2chezy(cD),out.sediment.d_mm,Q0./(h0*w0),h0,w0)
-	out.bc_Qs    = bc_Qs;
+	bc_Qs(1,1).p   = 0;
+	bc_Qs(1,1).val = 0;
+	bc_Qs(2,1).p   = 1;
+	bc_Qs(2,1).val = total_transport_engelund_hansen(drag2chezy(cD),out.sediment.d_mm,Q0./(h0*w0),h0,w0)
+	out.bc_Qs      = bc_Qs;
 
-	secpyear   =  86400*365.25;
+	secpyear         =  86400*365.25;
 
 	morsolver        = Time_Stepper();
 	morsolver.Ti     = [0,1000*secpyear];
 	% leapfrog-trapezoidal stable for 0.5, but oscillations persist until 0.25
-	morsolver.cfl    = 0.49/2;
+	%morsolver.cfl    = 0.49/2;
 	morsolver.cfl    = 0.99;
 	
 	morsolver.scheme = 'upwind';
@@ -98,22 +103,22 @@ function [t,ozb,z_,out] = river_tide_morphodyanmics_test_01(x0,zb0,pflag) %rt_ma
 	out.morsolver    = morsolver;
 %	out.scheme = 'leapfrog-trapezoidal';
 tic
-	[t,zb,z_] = out.evolve_bed_level();
-%,T,nt,clf);
+	[t,zb] = out.evolve_bed_level();
 toc
 	%xc = mid(out.x);
 	%zbfun = @(x) interp1(xc,zb(:,end),x,'linear');
 
-	z1     = out.z(1);
-	z0     = out.z(0);
-	z0i    = z_(:,1);
-	x      = out.x;
+	z1     = out.z(1,1);
+	z0     = out.z(0,1);
+%	z0i    = z_(:,1);
+	z0i = NaN;
+	x      = out.x(1);
 	z00    = S0*x;
 
 	figure(1)
 	clf();
 	subplot(2,2,1)
-	plot(mid(x),[zb(:,1),zb(:,end),zbfun(mid(x))])
+	plot(mid(x),[zb(:,1),zb(:,end),zbfun(1,mid(x))])
 %	ylabel('zb')
 	legend('zb(0),zb(T)');
 	
@@ -133,17 +138,17 @@ toc
 	title(['N = ' num2str(length(t))]);
 
 	subplot(2,2,4)
-	plot(mid(x),[diff(z0)./diff(out.x)]-S0)
+	plot(mid(x),[diff(z0)./diff(x)]-S0)
 	hold on;
-	plot(mid(x),[abs(diff(z1))./diff(out.x)])
-	plot(mid(x),[diff(inner2outer(zb(:,end)))./diff(out.x)]-S0)
+	plot(mid(x),[abs(diff(z1))./diff(x)])
+	plot(mid(x),[diff(inner2outer(zb(:,end)))./diff(x)]-S0)
 %	hline(S0);
 %	ylabel();		
 	legend('dz0/dx-S0','dz1/dx','dzb/dx-S0');
 
 	figure(2);
 	subplot(2,1,1);
-	[Qs,Qs0] = out.sediment_transport(0,0);
+	[Qs,Qs0] = out.sediment_transport_(0,0);
 	Qs = Qs(2:end-1,:);
 	plot(x,[Qs,Qs0,Qs-Qs0]);
 %	abs(Qs([1:2 end-1:end])./Qs(end))

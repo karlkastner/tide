@@ -15,13 +15,13 @@
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
 %
-classdef River_Tide_Network_Map < Compute_Map
+classdef River_Tide_Morphodynamics_Map < Compute_Map
 	properties
 	end % properties
 	methods
-		function obj = River_Tide_Network_Map(varargin)
+		function obj = River_Tide_Morphodynamics_Map(varargin)
 		         obj = obj@Compute_Map(varargin{:});
-		end % River_Tide_Network_Map
+		end % River_Tide_Morphodynamics_Map
 	end % methods
-end % class River_Tide_Network_Map
+end % class River_Tide_Morphodynamics_Map
 

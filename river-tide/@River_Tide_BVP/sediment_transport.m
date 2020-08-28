@@ -1,9 +1,12 @@
 % Fri  7 Aug 19:07:20 +08 2020
 % Karl Kastner, Berlin
+%
+%% compute sediment transport for the channel network, including routing at
+%% junctions
 function [out] = sediment_transport(obj,t,iscentral)
 	out = struct();
 	for cdx=1:obj.nc
-		[out(cdx).Qs,out(cdx).Qs0] = obj.sediment_transport_(t,iscentral);
+		[out(cdx).Qs,out(cdx).Qs0] = obj.sediment_transport_(cdx,t,iscentral);
 	end
 
 	% apply junction conditions
@@ -35,7 +38,7 @@ else
 			Qt_j(cdx) = obj.out(cid(cdx)).Qc(id,2);
 			w_j(cdx)  = obj.width(cid(cdx),x_j);
 			h_j(cdx)  = obj.h0(cid(cdx),x_j);
-			Cd_j(cdx) = obj.cd(cid(cdx),x_j);
+			Cd_j(cdx) = obj.cd(cid(cdx),x_j,h_j(cdx));
 			Cz_j(cdx) = drag2chezy(Cd_j(cdx));
 end
 			xmid  = mean(obj.rt(cid(cdx)).Xi);

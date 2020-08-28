@@ -1,4 +1,6 @@
 % Thu 23 Mar 09:51:57 CET 2017
+% Karl Kastner, Berlin
+%
 %% friction determined by Dronker's method
 %%
 %% input :

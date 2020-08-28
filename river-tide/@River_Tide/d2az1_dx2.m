@@ -1,4 +1,6 @@
 % Tue 17 Apr 14:28:26 CEST 2018
+% Karl Kastner, Berlin
+%
 %% second derivative of the tidal surface elevation
 %%
 %% note: this is for finding zeros,

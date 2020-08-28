@@ -1,4 +1,6 @@
 % Tue 17 Apr 14:49:20 CEST 2018
+% Karl Kastner, Berlin
+%
 %% along-channel derivative of the wave number of the discharge
 %% neglects width variation
 %%

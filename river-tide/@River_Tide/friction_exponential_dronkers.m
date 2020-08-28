@@ -1,4 +1,6 @@
 % Thu 23 Mar 10:51:00 CET 2017
+% Karl Kastner, Berlin
+%
 %% friction coefficicients for the frequency components computed by Dronkers method
 %% c.f. Dronker's 1964 eq 8.2 and 8.4
 %% Note: Cai dennominates alpha as phi

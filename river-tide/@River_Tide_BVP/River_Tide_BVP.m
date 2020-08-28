@@ -1,7 +1,6 @@
 % Wed 11 Oct 10:56:52 CEST 2017
-%% river tide in a single 1D channel
-%% TODO split in two classes:
-%% one that stores data (RT_Solve), one that provides equations (RT_Analytic)
+%
+%% hydrodynamics and morphodynamics of 1D tidal channel networks
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -16,68 +15,18 @@
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
 %
+% TODO integrate seasonal variation into boundary conditions
+% TODO implement multigrid-like solver for morphodynamics
+% TODO move non-linear forcing terms to lhs, let odefun return the coefficients
 classdef River_Tide_BVP < River_Tide
 	properties
-		% acceleration by gravity
-%		g = Constant.gravity;
-
-		% bed level
-		% zb
-
-		% angular frequency of the main tidal species
-%		omega
-
-		% domain left and right end
-%		Xi
-
-		% grid spanning domain Xi
-%		x
-
 		% water level and discharge, one column per frequency
-		out = struct('z','zc','Q','Qc');
+		out = struct('z',[],'zc',[],'Q',[],'Qc',[]);
 
-%		z_
-%		zc_
-%		Q_
-%		Qc_
+		% hydrodynamic solver
+		hydrosolver;
 
-		% river discharge (scalar)
-		% TODO remove this
-%		Q0_
-
-		% Backwater1D object to solve for tidally averaged water level
-		% superfluous if matrix mode is chosen
-		% TODO, move this to own class
-%		backwater
-
-		% numerical options
-%		opt = struct( 'nx',     1024 ...
-%			     ,'xs',     10 ... % stretch factor of mesh
-%			     ,'model_str',  'wave' ...
-%... %			     ,'solver', @bvp2c ...
-%			     ... %,'solver', @bvp2fdm ...
-%			     ,'friction_method', 'dronkers' ...
-%			     ,'friction_order', 2 ...
-%			     ... %,'hmode', 'iterate' ... % 'no-tide' ...
-%			     , 'hmode', 'matrix' ... % 'no-tide' ...
-%			     , 'imethod', 'spline' ...
-%			     , 'oflag', [true,false(1,3)] ...
-%			     , 'ifun', [] ...
-%			     , 'dischargeisvariable', false ...
-%			    );
-
-		% TODO make part of opt
-%		flag = struct('aa',0,'gh',0,'oh',0);
-
-		odesolver;
-
-		bifurcation;
-
-		% downstream boundary condition
-		% TUDO remove, superfluous if matrix mode is chosen
-%		z0_downstream = 0;
-%		neq = 0;
-
+		% hydrodynamic boundary conditions
 		bc = [struct('p', 1, 'rhs',  0, 'q', []   ,'var','z'), ...       % 0 mean (wl or discharge) left
 		      struct('p', 1, 'rhs',  1, 'q', [1 1],'var','Q'), ...       % 1 main species left
 		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 2 even overtide left
@@ -90,33 +39,18 @@ classdef River_Tide_BVP < River_Tide
 		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 4 overtide right
 		];
 
+		% boundary condition for sediment transport (kg/s)
+		bc_Qs;
 
-		% convergence flag
-		%cflag
-
-		tmp = struct( 'D1_dx',[],'zb',[],'width',[], ...
-			      'c', struct('D1_dx',[],'zb',[],'width',[]));
-
-		fun = struct( 'z0',[] ...
-			     ,'zb',[] ...
-			     ,'width',[] ...
-			     ,'cd',[], ...
+		% functions for channel properties
+		fun = struct(  'z0', [] ...
+			     , 'zb', [] ...
+			     , 'width', [] ...
+			     , 'cd', [] ...
 			    );
-
-		% finite-volume object,
-		% if the tide is computed by solving the full SWE
-%		fv
-
-		% quantities in time, if full SWE
-%		T
-%		H
-%		U
 		
-%		initial;
-
-%		issym           = false;
-
-		hmin = 0.2;
+		% minimum water depth (m)
+		hmin = 0.1;
 
 		% sediment properties for transport
 		sediment = struct( 'd_mm', 0.2, ... % m      grain diameter
@@ -127,14 +61,14 @@ classdef River_Tide_BVP < River_Tide
 		% time stepper for determining morphodynamics
 		morsolver;
 
-		% boundary condition for sediment transport (kg/s)
-		bc_Qs;
+		% object performing transport coupling at junctions
+		bifurcation;
 
-		% coupling conditions at channel junctions
+		% hydrodynamic coupling conditions at channel junctions
 		junction_condition = {};
 
+		% sediment transport coupling conditions
 		junction_Qs
-		%opt = struct('ignorertfordivision',false);
 
 		% history over time
 		evolution = struct('t', [], 'zb', []);
@@ -142,21 +76,26 @@ classdef River_Tide_BVP < River_Tide
 		% seasonal hydrograph
 		% TODO Qmin, Qmax have go to bc
 		season = struct('iorder',1,'Qmin',[],'Qmax',[]);
-	
-		% temporary storage, for reuse of initial conditions
-		tmp = struct();	
+
+		% temporary storage
+		tmp = struct( 'D1_dx',[] ...
+			      ,'zb',[] ...
+			      ,'width',[] ...
+			      ,'c', struct( 'D1_dx',[] ...
+					   ,'zb',[] ...
+					   ,'width',[]) ...
+			    );
 	end % properties
-	methods (Static)
-	end % static
 	methods
-	function obj = River_Tide(varargin)
+	function obj = River_Tide_BVP(varargin)
 		obj.opt.imethod = 'spline';
-		obj.fun.initial_value = @obj.initial_value;
+		obj.bifurcation = Bifurcation();
+		obj.bifurcation.division_rule = @obj.bifurcation.sediment_division_geometric;
 
                 for idx=1:2:length(varargin)
 			switch(varargin{idx})
-			case {'odesolver'}
-				obj.odesolver = varargin{idx+1};
+			case {'hydrosolver'}
+				obj.hydrosolver = varargin{idx+1};
 			case {'opt'}
 			    % this keeps default options that are not set
 		            obj.opt = copy_fields(varargin{idx+1},obj.opt);
@@ -175,12 +114,12 @@ classdef River_Tide_BVP < River_Tide
 				cdfun = varargin{idx+1};
 				if(isa(cdfun,'function_handle'))
 					switch (nargin(cdfun))
-			    			case {1}
-							obj.fun.cd = @(x,h) feval(cdfun,x);
 			    			case {2}
-							obj.fun.cd = @(x,h) feval(cdfun,x,h);
+							obj.fun.cd = @(cid,x,h) feval(cdfun,x);
+			    			case {3}
+							obj.fun.cd = @(cid,x,h) feval(cdfun,x,h);
 			    		otherwise
-						error('Chezy coefficient function must take 1 (x) or 2 (x and h) arguments.');
+						error('Chezy coefficient function must take 3 (cid,x) or 3 (cid, x and h) arguments.');
 					end
 				else
 					% constant value
@@ -188,45 +127,41 @@ classdef River_Tide_BVP < River_Tide
 				end % else of isa function
 			otherwise
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
-			end
+			end % switch
                 end %for idx
-		% object has to be created here,
-		% as otherwise matlab does not allow for parallel objects
-		%if (isempty(obj.backwater))
-		%	obj.backwater = Backwater1D('rt',obj);
-		%end
-		if (isempty(obj.odesolver))
-			obj.odesolver = BVPS_Characteristic();
+		
+		obj.hydrosolver.inifun = @obj.initial_value;
+
+		if (isempty(obj.hydrosolver))
+			obj.hydrosolver = BVPS_Characteristic();
 		end
-		obj.bifurcation = @Bifurcation;
-		obj.bifurcation.division_rule = @obj.Bifurcation.sediment_division_geometric;
 	end % River_Tide (constructor)
 
-
 	% quasi/pseudo members
+	function nc = nc(obj)
+		nc = obj.hydrosolver.nc;
+	end
+
+
 	function x = x(obj,cid)
-		x = obj.odesolver.out(cid).x;
+		x = obj.hydrosolver.out(cid).x;
 	end
 	
-%	function nc = nc(obj)
-%		nc = 1;
-%	end
-	
 	function Xi = Xi(obj,cid,eid)
-		Xi = obj.odesolver.xi(cid,:);
+		Xi = obj.hydrosolver.xi(cid,:);
 		%Xi = obj.opt.Xi(cid, :);
-		%if (nargin>2)
-		%	Xi = Xi(eid);
-		%end
+		if (nargin>2)
+			Xi = Xi(eid);
+		end
 	end
 
 %	function out = out(obj)
-%		out = obj.odesolver.out;
+%		out = obj.hydrosolver.out;
 %	end
 
 	function y = h0(obj, cid, x)
-		if (nargin() <3)
-			x = obj.x;
+		if (nargin() < 3)
+			x = obj.x(cid);
 		end
 		y = obj.z(0,cid,x) - obj.zb(cid, x);
 		%if (nargin()>1)
@@ -236,10 +171,9 @@ classdef River_Tide_BVP < River_Tide
 
 	function y = z(obj,fid,cid,x)
 		y = obj.out(cid).z(:,fid+1);
-% TODO
-%		if (nargin()>3)
-%			y = interp1(obj.x,y,x,'linear');
-%		end
+		if (nargin()>3)
+			y = interp1(obj.x(cid),y,x,'linear');
+		end
 	end
 	
 	function y = Q(obj,fid,cid,x)
@@ -250,7 +184,7 @@ classdef River_Tide_BVP < River_Tide
 	end
 
 	function y = q(obj,cid,fid,x)
-		if (nargin()<3)
+		if (nargin()<4)
 			x = obj.x;
 		end
 		w = obj.fun.width(cid,x);
@@ -402,7 +336,7 @@ classdef River_Tide_BVP < River_Tide
 	% cd may depend on the depth and thus cannot be precomputed
 	function cd = cd(obj,cid,x,h0)
 		if (nargin()<3)
-			x = obj.x;
+			x = obj.x(cid);
 		end
 		if (nargin()<4)
 			h0 = obj.h0(cid,x);
@@ -412,12 +346,12 @@ classdef River_Tide_BVP < River_Tide
 
 	function zb = zb(obj,cid,x)
 		switch (length(x))
-			case {obj.opt.nx(cid)}
+			case {obj.hydrosolver.nx(cid)}
 				if (isempty(obj.tmp(cid).zb))
 					obj.tmp(cid).zb = obj.fun.zb(cid,x);
 				end
 				zb = obj.tmp(cid).zb;
-			case {obj.opt.nx-1}
+			case {obj.hydrosolver.nx(cid)-1}
 				if (isempty(obj.tmp(cid).c.zb))
 					obj.tmp(cid).c.zb = obj.fun.zb(cid,x);
 				end
@@ -428,8 +362,8 @@ classdef River_Tide_BVP < River_Tide
 	end
 
 	function width = width(obj,cid,x)
-		if (nargin()<2)
-			x = obj.x;
+		if (nargin()<3)
+			x = obj.x(cid);
 		end
 		switch (length(x))
 			case {obj.opt.nx}
@@ -474,10 +408,18 @@ classdef River_Tide_BVP < River_Tide
 		end
 	end
 	function clear(obj)
-		obj.tmp = struct( 'D1_dx',[],'zb',[],'width',[], ...
-			      'c', struct('D1_dx',[],'zb',[],'width',[]));
+		obj.tmp = struct();
+		obj.out = struct();
+		%obj.tmp.zb = [];
+		%obj.tmp.width = [];
+		% obj.tmp.D1_dx = [];
+		%obj.tmp.c.width = [];
+		%obj.tmp.c.zb = [];
+		% obj.tmp.c.D1_dx = [];
+		%obj.tmp = struct( 'D1_dx',[],'zb',[],'width',[], ...
+		%	          'c', struct('D1_dx',[],'zb',[],'width',[]));
 	end
 
 	end % methods
-end % class River_Tide
+end % class River_Tide_BVP
 

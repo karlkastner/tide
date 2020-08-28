@@ -1,19 +1,18 @@
 % Wed 11 Oct 10:18:54 CEST 2017
+% Karl Kastner, Berlin
+%
+%% postprocess hydrodynamic solver
+%
 function postprocess(obj,cdx,x,y,yc)	
 	% extract unknowns
 	nx         = length(x);
 	nxc	   = nx-1;
-%	obj.x      = x(cdx);
 	xc         = mid(x);
 	w          = obj.width(cdx,x);
 	wc         = mid(w);
-%	obj.opt.nx = length(x);
 
 	[z0,   Q0,  Qt] = obj.extract(x,y);
 	[z0c, Q0c, Qtc] = obj.extract(xc,yc);
-
-
-%	obj.Q0_ = Q0;
 
 	% stack
 	obj.out(cdx).Q  = [Q0*ones(size(x)), Qt];
@@ -28,7 +27,7 @@ function postprocess(obj,cdx,x,y,yc)
 		cflag = -2;
 		warning('negative water depth');
 	end
-% TODO
+
 	if (any(~isfinite(obj.out(cdx).z)))
 		cflag = -1;
 		warning('solution is not finite');

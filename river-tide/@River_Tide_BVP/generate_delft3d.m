@@ -1,4 +1,8 @@
 %Tue  5 Nov 20:05:15 +08 2019
+% Karl Kastner, Berlin
+%
+%% generate a Delft3D 4 model for the channel network
+%
 function s = generate_delft3d(obj,cdx,name)
 %	nn = 2;
 	w = obj.width(cdx);

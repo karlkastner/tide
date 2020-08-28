@@ -1,20 +1,20 @@
 % Mon 10 Aug 12:39:35 +08 2020
+% Karl Kastner, Berlin
+%
+%% determine hydrodynamics
+%
 function [y] = solve(obj)
 
-%	obj.rt(1).odesolver.solve();
-	obj.odesolver.solve();
+	obj.hydrosolver.solve();
 
 	% unstack solution for channels
 	y = [];
-	for cdx=1:length(obj.rt)
-		%obj.rt(cdx).out =  obj.rt(1).odesolver.out(cdx);
-		%out = obj.rt(cdx).out;
-		%obj.rt(cdx).postprocess(1, ...
+	for cdx=1:obj.nc
 		obj.postprocess(cdx, ...
-				obj.odesolver(cdx).out.x, ...
-				obj.odesolver(cdx).out.y, ...
-				obj.odesolver(cdx).out.yc);
-		y = [y; obj.odesolver(cdx).out.y];
+				obj.hydrosolver(cdx).out.x, ...
+				obj.hydrosolver(cdx).out.y, ...
+				obj.hydrosolver(cdx).out.yc);
+		y = [y; obj.hydrosolver(cdx).out.y];
 	end % for cdx
 end % solve
 

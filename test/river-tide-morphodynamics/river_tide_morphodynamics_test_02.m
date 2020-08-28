@@ -5,7 +5,7 @@ function [t,ozb,rt,z_] = river_tide_morphodyanmics_test_02(x0,zb0,pflag) %rt_map
 		pflag = false;
 	end
 	dischargeisvariable = false;
-%	dischargeisvariable = true;
+	dischargeisvariable = true;
 
 	tid  = 1;
 	name = 'infinitessimal wave along river with uniform flow';
@@ -72,45 +72,48 @@ function [t,ozb,rt,z_] = river_tide_morphodyanmics_test_02(x0,zb0,pflag) %rt_map
 	opt.sopt.maxiter = 800;
 	opt.dischargeisvariable = dischargeisvariable;
 
-	rt = River_Tide( ...
-				   'fun.zb',      zbfun ...
-				 , 'fun.cd',      cdfun ...
-				 , 'fun.width',   wfun ...
-				 , 'omega',       omega ...
-				 , 'opt',         opt ...
-				 , 'Xi',          Xi ...
-				);
+	odesolver = BVPS_Chararcteristic();
+	odesolver.nx = nx;
+	odesolver.xi = Xi;
 
-	rt.bc       = bc;
 	bc_Qs        = struct();
 	bc_Qs(1).p   = 0;
 	bc_Qs(1).val = 0;
 	bc_Qs(2).p   = 1;
 	Qs           = total_transport_engelund_hansen(drag2chezy(Cd),rt.sediment.d_mm,Q0./(h0*w0),h0,w0)
 	bc_Qs(2).val = Qs; 
-	rt.bc_Qs    = bc_Qs;
 
 	morsolver        = Time_Stepper();
-	morsolver.Ti     = [0,2000*Physics.SECONDS_PER_YEAR];
+	morsolver.Ti     = [0,20*Physics.SECONDS_PER_YEAR];
 	% leapfrog-trapezoidal stable for 0.5, but oscillations persist until 0.25
 	morsolver.cfl    = 0.99;
 	morsolver.scheme = 'upwind';
 %	morsolver.scheme = 'leapfrog-trapezoidal';
-	
-	rt.morsolver    = morsolver;
-%	rt.scheme = 'leapfrog-trapezoidal';
+
+	rt = River_Tide_BVP( ...
+				   'fun.zb',      zbfun ...
+				 , 'fun.cd',      cdfun ...
+				 , 'fun.width',   wfun ...
+				 , 'omega',       omega ...
+				 , 'opt',         opt ...
+				 , 'odesolver',   odesolver ...
+				 , 'morsolver',   morsolver ...
+				);
+
+	rt.bc       = bc;
+	rt.bc_Qs    = bc_Qs;
+	rt.season.Qlim = [Q0;Q0];
+
 tic
 	
-	rtn = River_Tide_Network_2();
-	rtn.rt = rt;
-	rtn.season.Qlim = [Q0;Q0];
-	[t,zb,z_] = rtn.evolve_bed_level();
+	%rtn = River_Tide_BVP();
+	[t,zb,z_] = rt.evolve_bed_level();
 toc
 	%xc = mid(rt.x);
 	%zbfun = @(x) interp1(xc,zb(:,end),x,'linear');
 
-	z1     = rt.z(1);
-	z0     = rt.z(0);
+	z1     = rt.z(1,1);
+	z0     = rt.z(0,1);
 	z0i    = z_(:,1);
 	x      = rt.x;
 	z00    = S0*x;

@@ -1,4 +1,6 @@
 % Thu 23 Mar 10:51:00 CET 2017
+% Karl Kastner, Berlin
+%
 %% friction computed by the method of Dronkers
 %% expressed as coefficients for the frequency components
 %% c.f. dronkers 1964 eq 8.2 and 8.4

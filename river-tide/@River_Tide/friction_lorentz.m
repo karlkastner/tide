@@ -1,4 +1,6 @@
 % 2017-04-04 18:11:50.871153511 +0200
+% Karl Kastner, Berlin
+%
 function [uau, obj] = friction_lorentz(obj,u,Umax)
 	if (nargin()<2 || isempty(Umax))
 		U   = max(abs(u));

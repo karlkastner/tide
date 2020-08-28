@@ -1,4 +1,5 @@
 % Fri  5 Jan 12:21:09 CET 2018
+% Karl Kastner, Berlin
 %
 %% approximate wave number of the left and right traveling wave for variable coefficients
 %%

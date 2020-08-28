@@ -1,4 +1,6 @@
 % Tue  4 Apr 11:18:46 CEST 2017
+% Karl Kastner, Berlin
+%
 %% friction coefficient according to Lorent'z
 %% identical to Dronker's coefficient for zero river flow
 %% and a single frequency component

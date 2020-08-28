@@ -1,4 +1,6 @@
 % Tue  4 Apr 12:12:34 CEST 2017
+% Karl Kastner, Berlin
+%
 %% friction coefficient according to Godin
 %% these coefficients are identical to Dronker's for U_R = phi = 0
 %%

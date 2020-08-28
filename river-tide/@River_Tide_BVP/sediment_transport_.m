@@ -1,24 +1,24 @@
 % Fri  7 Aug 19:07:20 +08 2020
 % Karl Kastner, Berlin
-function [Qs,Qs0] = sediment_transport(obj,t,iscentral)
+function [Qs, Qs0] = sediment_transport(obj,cdx,t,iscentral)
 	d_mm = obj.sediment.d_mm;
 
 	% discharge and channel properties at segment centres
-	w   = obj.width;
-	h   = obj.h0;	
-	cd  = obj.cd;
+	w   = obj.width(cdx);
+	h   = obj.h0(cdx);	
+	cd  = obj.cd(cdx);
 	Cz  = drag2chezy(cd);
 
 	% at end-points
 	if (nargin()>1 && iscentral)
-		Q   = obj.Qc_;
+		Q   = obj.out(cdx).Qc;
 		%Q   = mid(Q);
 		w   = mid(w);
 		% TODO hc from zc, to avoid recursive inner2outer
 		h   = mid(h);
 		Cz  = mid(Cz);
 	else
-		Q   = obj.Q_;
+		Q   = obj.out(cdx).Q;
 	end
 
 	U   = Q./(h.*w);
@@ -31,8 +31,8 @@ function [Qs,Qs0] = sediment_transport(obj,t,iscentral)
 	Qs = [0;Qs;0];
 
 	% left boundary condition
-	p       = obj.bc_Qs(1).p;
-	val     = obj.bc_Qs(1).val;
+	p       = obj.bc_Qs(1,cdx).p;
+	val     = obj.bc_Qs(1,cdx).val;
 	if (iscentral)
 		Qs(1)   = p*val + (1-p)*(1.5*Qs(2)-0.5*Qs(3));
 	else
@@ -40,8 +40,8 @@ function [Qs,Qs0] = sediment_transport(obj,t,iscentral)
 	end
 
 	% right boundary condition
-	p       = obj.bc_Qs(2).p;
-	val     = obj.bc_Qs(2).val;
+	p       = obj.bc_Qs(2,cdx).p;
+	val     = obj.bc_Qs(2,cdx).val;
 	if (iscentral)
 		Qs(end) = p*val + (1-p)*(1.5*Qs(end-1)-0.5*Qs(end-2));
 	else

@@ -61,108 +61,114 @@ function [t,zb] = evolve_bed_level_scenario(obj...
 	             0,L_*pL];
 
 %	meta = river_tide_test_metadata();
-% meta.opt;
 	
 	opt.maxiter      =  100;
 	opt.sopt.maxiter = 100;
 
-	rt = River_Tide();
-	obj.rt = rt;
+%	rt = River_Tide_BVP();
+%	obj.rt = rt;
 
 	% perturbation of the bed level
 	dz = [0,+0.1,-0.1]*h0;
-	for idx=1:length(w0)
-		nx = round(diff(Xi(idx,:))/dx);
+
+	% width of channel
+	wfun      = @(cdx,x) w0(cdx)*ones(size(x));
 	
-		opt.nx = nx; % round(nx*px(idx));
+	% drag/friction coefficient
+	cdfun     = @(cdx,x,h0)  Cd*ones(size(x));
+
+	% bed level of channel
+	zbfun     = @(cdx,x) -h0 + S0*x + dz(cdx);
+
+	bc        = struct();
+	bc_Qs        = struct();
+	obj.sediment.d_mm = d_mm;
+
+	for cdx=1:length(w0)
+		obj.nx(cdx) = round(diff(Xi(cdx,:))/dx);
+%		opt.nx = nx;
 	
-		% width of channel
-		wfun      = @(x) w0(idx)*ones(size(x));
-	
-		% drag/friction coefficient
-		cdfun     = @(x)  Cd*ones(size(x));
-	
-		% bed level of channel
-		zbfun     = @(x) -h0 + S0*x + dz(idx);
 	
 		% base frequency
 		%T         = Constant.SECONDS_PER_DAY;
 		%omega     = 2*pi/T;
 	
-		bc        = struct();
 	
 		% mean sea level
-		if (1~=idx)
-			bc(1,1).var = 'z';
-			bc(1,1).rhs = 0;
+		if (1~=cdx)
+			bc(1,1,cdx).var = 'z';
+			bc(1,1,cdx).rhs = 0;
 	
 			% Dirichlet condition
-			bc(1,1).p   = 1;
+			bc(1,1,cdx).p   = 1;
 		else
-			bc(1,1).var = '';
-			bc(1,1).rhs = [];
+			bc(1,1,cdx).var = '';
+			bc(1,1,cdx).rhs = [];
 		end
 	
 		% river discharge
-		if (1==idx)
-			bc(2,1).var = 'Q';
-			bc(2,1).rhs = Q0;
+		if (1==cdx)
+			bc(2,1,cdx).var = 'Q';
+			bc(2,1,cdx).rhs = Q0;
 		else
-			bc(2,1).var = '';
-			bc(2,1).rhs = [];
+			bc(2,1,cdx).var = '';
+			bc(2,1,cdx).rhs = [];
 		end
 	
 		% wave entering from left
-		if (1~=idx)
-			bc(1,2).var = 'z';
-			bc(1,2).rhs = z10;
-			bc(1,2).p   = [1,0];
-			bc(1,2).q   = [1,pz1r];
+		if (1~=cdx)
+			bc(1,2,cdx).var = 'z';
+			bc(1,2,cdx).rhs = z10;
+			bc(1,2,cdx).p   = [1,0];
+			bc(1,2,cdx).q   = [1,pz1r];
 		else
-			bc(1,2).var = '';
-			bc(1,2).rhs = [];
+			bc(1,2,cdx).var = '';
+			bc(1,2,cdx).rhs = [];
 		end
 	
 		% wave entering from right
-		if (1 == idx)
-			bc(2,2).var = 'z';
-			bc(2,2).rhs =   0;
-			bc(2,2).p   = [1,0];
-			bc(2,2).q   = [0,1];
+		if (1 == cdx)
+			bc(2,2,cdx).var = 'z';
+			bc(2,2,cdx).rhs =   0;
+			bc(2,2,cdx).p   = [1,0];
+			bc(2,2,cdx).q   = [0,1];
 		else
-			bc(2,2).var = '';
-			bc(2,2).rhs = [];
+			bc(2,2,cdx).var = '';
+			bc(2,2,cdx).rhs = [];
 		end
+
+%		opt.Xi = Xi(idx,:);	
+%		obj.rt(idx) = River_Tide_BVP( ...
+%					   'fun.zb',      zbfun ...
+%					 , 'fun.cd',      cdfun ...
+%					 , 'fun.width',   wfun ...
+%					 , 'omega',       omega ...
+%					 , 'opt',         opt ...
+%					 ... %, 'Xi',          Xi(idx,:) ...
+%					);
+%		obj.rt(idx).bc = bc;
 	
-		obj.rt(idx) = River_Tide( ...
-					   'fun.zb',      zbfun ...
-					 , 'fun.cd',      cdfun ...
-					 , 'fun.width',   wfun ...
-					 , 'omega',       omega ...
-					 , 'opt',         opt ...
-					 , 'Xi',          Xi(idx,:) ...
-					);
-		obj.rt(idx).bc = bc;
-	
-		bc_Qs        = struct();
-		obj.rt(idx).sediment.d_mm = d_mm;
-		if (1==idx)
-			bc_Qs(1).p   = 0;
-			bc_Qs(1).val = NaN;
-			bc_Qs(2).p   = 1;
+%		obj.rt(idx).sediment.d_mm = d_mm;
+		if (1==cdx)
+			bc_Qs(1,cdx).p   = 0;
+			bc_Qs(1,cdx).val = NaN;
+			bc_Qs(2,cdx).p   = 1;
 			Qs = total_transport_engelund_hansen(drag2chezy(Cd), ...
 							     d_mm, ...
-							     Q0./(h0*w0(idx)), ...
-							     h0,w0(idx));
-			bc_Qs(2).val = Qs; 
+							     Q0./(h0*w0(cdx)), ...
+							     h0,w0(cdx));
+			bc_Qs(2,cdx).val = Qs; 
 		else
-			bc_Qs(1).p   = 0;
-			bc_Qs(1).val = 0;
-			bc_Qs(2).p   = 1;
-			bc_Qs(2).val = NaN;
+			bc_Qs(1,cdx).p   = 0;
+			bc_Qs(1,cdx).val = 0;
+			bc_Qs(2,cdx).p   = 1;
+			bc_Qs(2,cdx).val = [];
 		end
-		obj.rt(idx).bc_Qs    = bc_Qs;
+%		obj.rt(idx).bc_Qs    = bc_Qs;
 	end % for idx (each branch)
+
+	obj.bc    = bc;
+	obj.bc_Qs = bc_Qs;
 
 	function [cid,eid,p] = jfun()
 		cid = [1,2,3];
@@ -186,7 +192,7 @@ function [t,zb] = evolve_bed_level_scenario(obj...
 		error('here');
 	end
 	
-	obj.rt(1).morsolver    = morsolver;
+	obj.morsolver    = morsolver;
 
 	%rtn = River_Tide_Network_2(rt);
 	obj.junction_condition = {@jfun}

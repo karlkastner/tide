@@ -33,12 +33,12 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 	scheme = 'upwind';
 	d_mm   = 0.2;
 
-	rtn = River_Tide_Network_2();
+	rtn = River_Tide_Network();
 
 	opt.xs     = 1; 
 
 	map = River_Tide_Network_Map('mat/rt-mor-map.mat');
-%	map.recompute = true;
+	map.recompute = true;
 	rtn = map.fun(   {z1} ...
 		 , {pz1} ...	% [1]     reflected wave factor
 		 , {omega} ...	% [rad/s] anguluar frequency of tide

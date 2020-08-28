@@ -1,8 +1,8 @@
 %Tue  5 Nov 20:05:15 +08 2019
-function generate_delft3d(obj,name)
+function s = generate_delft3d(obj,cdx,name)
 %	nn = 2;
-	w = obj.width();
-	x = obj.x;
+	w = obj.width(cdx);
+	x = obj.x(cdx);
 %	nn = [200,8];
 %	x  = linspace(0,1e6,200).';
 %	dS = x(2)-x(1);
@@ -15,14 +15,14 @@ function generate_delft3d(obj,name)
 	%s.Y = -s.Y;
 	s.Z = obj.zb*[1,1]; 
 	%s.generate_from_centreline(x,y,w,dS,nn(2));
-	s.plot();
+%	s.plot();
 	%X = s.X;
 	%s.Z = Z;
 	%w  =
 	%zb =
 %	s.generate_1D()
 	if (nargin()>1)
-		s.export_delft3d_grd('mat/yangtze-200-008.grd');
-		s.export_delft3d_dep('mat/yangtze-200-008.dep');
+		s.export_delft3d_grd([name,'.grd']);
+		s.export_delft3d_dep([name,'.dep']);
 	end
 end

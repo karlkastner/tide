@@ -1,4 +1,5 @@
 % Wed 18 Apr 13:24:05 CEST 2018
+% TODO, this should go to the IVP class
 %% offset of the tidally averaged surface elevation caused by tidal friction
 %% Linear estimate of the mean water level offset (ignoring feed-back of tide)
 function z0t = mwl_offset(obj)
@@ -9,15 +10,18 @@ function z0t = mwl_offset(obj)
 	z0t = interp1(x_,z0t_,obj.x);
 
 	function dz0t_dx = fun_(x_,z0t)
-		dz0_dx   = obj.dz0_dx(x_);
-		w        = obj.width(x_);
+		dz0_dx   = obj.dz0_dx(cdx,x_);
+		w        = obj.width(cdx,x_);
 		%h0       = interp1(obj.x, obj.h0, x_);
-		h0       = obj.h0(x_);
+		h0       = obj.h0(cdx,x_);
 		%Q0       = obj.Q(0,x_);
-		Q0       = obj.Q0(x_);
-		aQ1      = interp1(obj.x, abs(obj.Q(1)), x_);
+		Q0       = obj.Q(0,cdx,x_);
+		Q1       = obj.Q(1,cdx,x_);
+		aQ1      = abs(Q1);
+%interp1(obj.x, abs(obj.Q(1)), x_);
+%		aQ1      = interp1(obj.x, abs(obj.Q(1)), x_);
 		Qhr      = aQ1;
-		cd       = obj.cd(x_);
+		cd       = obj.cd(cdx,x_);
 		p        = obj.friction_coefficient_dronkers(abs(Q0)/Qhr);
 		A0	 = w.*h0;
 		g        = obj.g;

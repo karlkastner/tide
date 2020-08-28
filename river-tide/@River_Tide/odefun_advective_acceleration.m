@@ -3,8 +3,8 @@
 %
 % aa = d/dx (Q^2/A)
 %
-function f = odefun_advective_acceleration(obj,f,k,Q,QQ,h0,dh0_dx,w0,dw0_dx,D1_dx)
-	g = obj.g;
+function f     = odefun_advective_acceleration(obj,f,k,Q,QQ,h0,dh0_dx,w0,dw0_dx,D1_dx)
+	g      = obj.g;
 	omega  = obj.omega;
 	flag   = obj.flag;
 

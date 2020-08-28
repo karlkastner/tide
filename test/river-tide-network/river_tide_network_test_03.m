@@ -91,13 +91,14 @@ for idx=1:2
 	bc(2,k).p   = [1,0];
 	bc(2,k).q   = [0,1];
 
-	out(idx) = River_Tide( ...
+	opt.Xi =  Xi(idx,:);
+	out(idx) = River_Tide_BVP( ...
 				   'fun.zb',      zbfun ...
 				 , 'fun.cd',      cdfun ...
 				 , 'fun.width',   wfun ...
 				 , 'omega',       omega ...
 				 , 'opt',         opt ...
-				 , 'Xi',          Xi(idx,:) ...
+				 ... , 'Xi',          Xi(idx,:) ...
 				);
 if (~z1flag)
 	out(idx).opt.oflag = false(1,4);
@@ -112,7 +113,7 @@ function [cid,eid,p] = jfun()
 %,1./w0];
 end
 
-	rtn = River_Tide_Network_2(out);
+	rtn = River_Tide_Network(out);
 	rtn.junction_condition = {@jfun}
 
 	rtn.init();
@@ -126,13 +127,13 @@ end
 
 		%subplot(length(rtn.rt),4,4*(idx-1)+1);
 		subplot(1,4,1)
-		z0 = rtn.rt(idx).z(0);
+		z0 = rtn.rt(idx).z(0,1);
 		plot(x,z0);
 		hold on
 		
 		%subplot(length(rtn.rt),4,4*(idx-1)+2);
 		subplot(1,4,2)
-		Q0 = rtn.rt(idx).Q(0);
+		Q0 = rtn.rt(idx).Q(0,1);
 		plot(x,Q0);
 		hold on
 if (z1flag)
@@ -141,7 +142,7 @@ if (z1flag)
 		k = 1;
 		subplot(1,4,3)
 		%subplot(length(rtn.rt),4,4*(idx-1)+3);
-		z = rtn.rt(idx).z(k);
+		z = rtn.rt(idx).z(k,1);
 		set(gca,'colororderindex',1);
 		plot(x,abs(z));
 		hold on
@@ -149,7 +150,7 @@ if (z1flag)
 		
 		subplot(1,4,4)
 		%subplot(length(rtn.rt),4,4*(idx-1)+4);
-		Q = rtn.rt(idx).Q(k);
+		Q = rtn.rt(idx).Q(k,1);
 		set(gca,'colororderindex',1);
 		plot(x,[real(Q),imag(Q)]);
 		%plot(x,abs(Q));

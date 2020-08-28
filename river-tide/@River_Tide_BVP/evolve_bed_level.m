@@ -1,6 +1,6 @@
 % Fri  7 Aug 19:02:20 +08 2020
 % TODO use the non-linear multigrid method to evolve over larger time spans
-function [t,zb,zi] = evolve_bed_level(obj)
+function [t, zb, zi] = evolve_bed_level(obj)
 	% TODO this is a workaround
 	% evaluation of zb requires a mesh
 	% but meshing requires a call to "solve"
@@ -12,27 +12,27 @@ function [t,zb,zi] = evolve_bed_level(obj)
 	zi = [];
 
 	% store solution for reuse as initial condition
-	for idx=1:length(obj.rt)
-		%obj.rt(idx).opt.ifun = @(x) obj.rt(idx).out.ypm;
-		obj.tmp(idx).ypm = repmat(obj.rt(idx).out.ypm,1,obj.season.iorder);
+	for cdx=1:obj.nc
+		obj.tmp(cdx).ypm = repmat(obj.odesolver.out(cdx).ypm,1,obj.season.iorder);
 		if (nargout()>2)
-			zi_ = obj.rt(idx).z_;
+			zi_ = obj.out(cdx).z;
 			zi(1:size(zi_,1),end+1:end+size(zi_,2)) = zi_;
 		end
 	end
 
-	zb0 = [];%zeros(nci(end)-1,1);
+	zb0 = [];
 	ni = 0;
-	for idx=1:length(obj.rt)
+	for cdx=1:obj.nc
 		% TODO fetch xc
-		x      = obj.rt(idx).x;
+		x      = obj.odesolver.out(cdx).x;
 		nxc    = length(x)-1;
-		zb0(ni+(1:nxc),1) = obj.rt(idx).zb(mid(x));
+		zb0(ni+(1:nxc),1) = obj.zb(cdx,mid(x));
 		ni = ni+nxc;
 	end
-	[t,zb] = obj.rt(1).morsolver.solve(@obj.dzb_dt, zb0);
+
+	[t,zb] = obj.morsolver.solve(@obj.dzb_dt, zb0);
 
 	obj.evolution.t  = t;
 	obj.evolution.zb = zb;
-end
+end % evolve bed level
 

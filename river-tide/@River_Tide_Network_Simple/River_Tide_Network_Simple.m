@@ -17,7 +17,7 @@
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
 %
-classdef River_Tide_Network < handle
+classdef River_Tide_Network_Simple < handle
 	properties
 		% channel length
 		L 

@@ -1,10 +1,16 @@
 % Sun  8 Oct 13:08:39 CEST 2017
 % transform arbitrary to cs-integrated discharge boundary condition
+% TODO, make bc 3-dimensional
 function obj = bc_transformation(obj)
 	n_z0 = 0;
 	n_Q0 = 0;			
 
-	bc = obj.bc;
+	% TODO, quick fix for missing field
+
+	obj.bc(1,1,1).set = false;
+	for cdx=1:size(obj.bc,3)
+
+	bc = obj.bc(:,:,cdx);
 
 	% for left and right end
 	for id=1:2
@@ -12,7 +18,7 @@ function obj = bc_transformation(obj)
 		switch (bc(id,1).var)
 		case {'z','z0'}
 			% TODO, store in tmp and rename 'bc','z0', compute max
-			obj.z0_downstream = bc(id,1).rhs;
+			%obj.z0_downstream = bc(id,1).rhs;
 			n_z0              = n_z0+1;
 			%bc(id,1).rhs = bc(id,1).rhs;
 			bc(id,1).set     = true;
@@ -20,7 +26,7 @@ function obj = bc_transformation(obj)
 		case {'Q','Q0'}
 			%if (~obj.opt.dischargeisvariable)
 			% TODO, store in tmp and rename 'bc','Q0'
-				obj.Q0_      = bc(id,1).rhs;
+				%obj.Q0_      = bc(id,1).rhs;
 				n_Q0         = n_Q0+1;
 				% bc(id,1).rhs = [];
 				bc(id,1).set = false;
@@ -53,7 +59,7 @@ function obj = bc_transformation(obj)
 			switch (bc(id,jd).var)
 			case {'z'}
 				% dQ/dx = -1i*o*z
-				w0 = obj.width(obj.Xi(id));
+				w0 = obj.width(cdx,obj.Xi(cdx,id));
 				omega_j              =  (jd-df)*obj.omega;
 				bc(id,jd).rhs        = -1i*omega_j*w0*bc(id,jd).rhs;
 				if ( bc(id,jd).p(2) ~= 0)
@@ -83,14 +89,15 @@ function obj = bc_transformation(obj)
 		end % for jd, frequency components
 	end % for id, left and right end of doamin
 
-	if (~isreal(obj.z0_downstream) || ~isreal(obj.Q0_))
-		error('mean water level and mean discharge must be real');
-	end
+%	if (~isreal(obj.z0_downstream) || ~isreal(obj.Q0_))
+%		error('mean water level and mean discharge must be real');
+%	end
 
 	if (n_z0 ~= 1 && n_Q0 ~= 1)
 		error('Mean water level and mean discharge must be specified on opposit ends of the domain');
 	end
-
-	obj.bc = bc;
+	
+	obj.bc(:,:,cdx) = bc;
+	end % for cdx
 end % bc_transform
 

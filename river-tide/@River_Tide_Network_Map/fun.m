@@ -70,7 +70,7 @@ function [rtn, key, obj] = fun( ...
 	else
 		disp(['recomputing ', key]);
 
-		rtn = River_Tide_Network_2();
+		rtn = River_Tide_Network();
 
 		[t, zb] = rtn.evolve_bed_level_scenario(...
 		   z1{1}  ...	% [1]     amplitude of incoming wave

@@ -3,6 +3,7 @@
 %%  this is experimental and not yet fully working
 function obj = solve_swe(obj)
 	g      = Constant.gravity;
+	% TODO zb_downstream undefined
 	h0     = -zb_downstream;
 	c      = sqrt(g*h0);
 	% lambda = 2*pi*c/omega;

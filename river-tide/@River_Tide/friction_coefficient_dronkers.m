@@ -13,15 +13,12 @@
 %% function p = friction_coefficient_dronkers(alpha,order)
 %%
 function p = friction_coefficient_dronkers(obj,alpha)
-%	if (nargin()>2 &&symflag)
 	if (obj.issym)
 		syms p0 p1 p2 p3 real
 		p = [p0, p1, p2, p3];
 		return;
 	end
-%	if (nargin()<2)
-%		order = 3;
-%	end
+
 	% note: in cai 2016: alpha = -phi
 	if (~issym(alpha))
 		alpha = min(1,max(-1,alpha));

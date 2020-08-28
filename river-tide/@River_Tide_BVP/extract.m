@@ -3,8 +3,8 @@
 function [z0, Q0, Qt] = extract(obj,x,y)
 	nx  = length(x);
 	nxc = nx-1;
-	switch (obj.opt.hmode)
-	case {'matrix'}
+%	switch (obj.opt.hmode)
+%	case {'matrix'}
 		if (obj.opt.dischargeisvariable)
 			z0  = y(1:nx);
 			Q0  = y(nx+1);
@@ -20,7 +20,7 @@ function [z0, Q0, Qt] = extract(obj,x,y)
 			%z0c = yc_(:,1);
 			%Qtc = yc_(:,2);
 		end
-	otherwise
-		error('here');
-	end % switch
+%	otherwise
+%		error('here');
+%	end % switch
 end

@@ -23,8 +23,8 @@
 %%
 %% function [rhs, p, q, obj] = bcfun(obj,x,y,ccdx)
 %
-%function [rhs, p, q, set, obj] = bcfun(obj,x,y,ccdx,varargin)
-function [rhs, p, q, set, obj] = bcfun(obj,bid,cid,varargin)
+%function [rhs, p, q, set, obj] = bcfun(obj,cid,bid,varargin)
+function [rhs, p, q, set, obj] = bcfun(obj,cid,bid,varargin)
 	if (isa(obj.bc(bid,cid).rhs,'function_handle'))
 		rhs = feval(obj.bc(bid,cid).rhs,varargin{:});
 		% TODO, retransform here, if necessary

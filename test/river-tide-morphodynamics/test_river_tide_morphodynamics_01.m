@@ -1,46 +1,49 @@
 % Wed  9 Oct 15:23:10 PST 2019
 %function [t,zb,z1,fail,rmse,name,rt] = river_tide_test_06(rt_map,pflag)
-function [t,ozb,rt,z_] = river_tide_morphodyanmics_test_02(x0,zb0,pflag) %rt_map,pflag)
+function [out,t,ozb,rt] = test_river_tide_morphodyanmics_01(x0,zb0,pflag)
 	if (nargin()<3)
 		pflag = false;
 	end
 	dischargeisvariable = false;
 	dischargeisvariable = true;
 
-	tid  = 1;
-	name = 'infinitessimal wave along river with uniform flow';
+	out.id  = 1;
+	out.name = 'infinitessimal wave along river with uniform flow';
 
-	% tidal range
-	z10           = 1;
+	% tidal amplitude
+	z10       = 1;
 
 	% river discharge
 	Q0        = -10;
-	S0        = 3e-5;
 
 	% width of channel
 	w0        = 1;
-	wfun      = @(x)   w0*ones(size(x));
+
 	% drag/friction coefficient
 	Cd        = 2.5e-3;
-	cdfun     = @(x)  Cd*ones(size(x));
 
 	% initial bed level of channel
-%	h0        = 10;
-	h0        = normal_flow_depth(Q0,w0,Cd,S0,'cd')
-	h00       = h0;
-%	S0         = -normal_flow_slope(Q0,h0,w0,Cd,'cd');
-	zbfun     = @(x) -h0 + S0*x + 0*1e-1*randn(size(x));
+	h0        = 10;
+	h00 = h0;
 
-%	if (nargin()>0)
-%		zbfun = @(xi) interp1(x0,zb0,xi,'linear');
-%	end
+	% inital slope of channel bed (asymmetotic slope at upstream boundary)
+	S0         = -normal_flow_slope(Q0,h0,w0,drag2chezy(Cd));
+
+	% inital bed level of channel 
+	zb     = @(x) -h0 + S0*x;
+
+	d_mm = 0.2;
+
+	% base frequency
+	T         = Constant.SECONDS_PER_DAY;
+	omega     = 2*pi/T;
 
 	bc        = struct();
 	% mean sea level
 	bc(1,1).var = 'z';
-	bc(1,1).rhs =  0;
+	bc(1,1).rhs = 0;
 	% Dirichlet condition
-	bc(1,1).p   =  1;
+	bc(1,1).p   = 1;
 	% river discharge
 	bc(2,1).rhs   = Q0;
 	bc(2,1).var   = 'Q';
@@ -57,72 +60,70 @@ function [t,ozb,rt,z_] = river_tide_morphodyanmics_test_02(x0,zb0,pflag) %rt_map
 	bc(2,2).p   = [1,0];
 	bc(2,2).q   = [0,1];
 
-	% base frequency
-	T         = Constant.SECONDS_PER_DAY;
-	omega     = 2*pi/T;
+	bc_Qs        = struct();
+	bc_Qs(1,1).p   = 0;
+	bc_Qs(1,1).rhs = 0;
+	bc_Qs(2,1).rhs = total_transport_engelund_hansen(drag2chezy(Cd),d_mm,Q0./(h0*w0),h0,w0)
+	bc_Qs(2,1).p   = 1;
 
 	% domain size
-	L         = h0/S0;
-	Xi        = [0,1.2*L];
+	L0 = h0/S0;
+	Xi        = [0,2*h0/S0];
 
+	nx               = 100;
 	meta             = river_tide_test_metadata();
 	opt              = meta.opt;
 	opt.maxiter      = 100;
-	opt.nx           = 50;
 	opt.sopt.maxiter = 800;
 	opt.dischargeisvariable = dischargeisvariable;
 
-	odesolver = BVPS_Chararcteristic();
-	odesolver.nx = nx;
-	odesolver.xi = Xi;
-
-	bc_Qs        = struct();
-	bc_Qs(1).p   = 0;
-	bc_Qs(1).val = 0;
-	bc_Qs(2).p   = 1;
-	Qs           = total_transport_engelund_hansen(drag2chezy(Cd),rt.sediment.d_mm,Q0./(h0*w0),h0,w0)
-	bc_Qs(2).val = Qs; 
+	hydrosolver    = BVPS_Characteristic();
+	hydrosolver.xi = Xi;
+	hydrosolver.nx = nx;
 
 	morsolver        = Time_Stepper();
-	morsolver.Ti     = [0,20*Physics.SECONDS_PER_YEAR];
-	% leapfrog-trapezoidal stable for 0.5, but oscillations persist until 0.25
+	morsolver.Ti     = [0,2000*Physics.SECONDS_PER_YEAR];
+	% leapfrog-trapezoidal stable only for cfl <= 0.6
+%	morsolver.cfl    = 0.6;
 	morsolver.cfl    = 0.99;
 	morsolver.scheme = 'upwind';
+	morsolver.scheme = 'maccormack';
 %	morsolver.scheme = 'leapfrog-trapezoidal';
 
-	rt = River_Tide_BVP( ...
-				   'fun.zb',      zbfun ...
-				 , 'fun.cd',      cdfun ...
-				 , 'fun.width',   wfun ...
+	opt.stokes_order = 2;
+
+	rt  = River_Tide_BVP( ...
+				   'zb',          zb ...
+				 , 'cd',          Cd ...
+				 , 'width',       w0 ...
 				 , 'omega',       omega ...
 				 , 'opt',         opt ...
-				 , 'odesolver',   odesolver ...
+				 , 'hydrosolver', hydrosolver ...
 				 , 'morsolver',   morsolver ...
 				);
+	rt.sediment.d_mm = d_mm;
 
-	rt.bc       = bc;
-	rt.bc_Qs    = bc_Qs;
-	rt.season.Qlim = [Q0;Q0];
+	rt.bc    = bc;
+	rt.bc_Qs      = bc_Qs;
 
-tic
-	
-	%rtn = River_Tide_BVP();
-	[t,zb,z_] = rt.evolve_bed_level();
-toc
-	%xc = mid(rt.x);
+tic();
+	[t,zb] = rt.evolve_bed_level();
+toc()
+	%xc = mid(out.x);
 	%zbfun = @(x) interp1(xc,zb(:,end),x,'linear');
 
 	z1     = rt.z(1,1);
 	z0     = rt.z(0,1);
-	z0i    = z_(:,1);
-	x      = rt.x;
+%	z0i    = z_(:,1);
+	z0i    = NaN;
+	x      = rt.x(1);
+	xc     = mid(x);
 	z00    = S0*x;
 
 	figure(1);
 	clf();
 	subplot(2,2,1)
-	plot(mid(x),[zb(:,1),zb(:,end)]);
-%,zbfun(mid(x))])
+	plot(mid(x),[zb(:,1),zb(:,end),rt.zb(1,mid(x)),rt.z(0,1,mid(x))])
 %	ylabel('zb')
 	legend('zb(0)','zb(T)');
 	
@@ -142,34 +143,39 @@ toc
 	title(['N = ' num2str(length(t))]);
 
 	subplot(2,2,4)
-	plot(mid(x),[diff(z0)./diff(rt.x)]-S0)
+	plot(mid(x),[diff(z0)./diff(x)]-S0)
 	hold on;
-	plot(mid(x),[abs(diff(z1))./diff(rt.x)])
-	plot(mid(x),[diff(inner2outer(zb(:,end)))./diff(rt.x)]-S0)
+	plot(mid(x),[abs(diff(z1))./diff(x)])
+	plot(mid(x),[diff(inner2outer(zb(:,end)))./diff(x)]-S0)
 %	hline(S0);
 %	ylabel();		
 	legend('dz0/dx-S0','dz1/dx','dzb/dx-S0');
 
 	figure(2);
 	subplot(2,1,1);
-	[Qs,Qs0] = rt.sediment_transport(0,0);
+	t = NaN;
+	iscentral = false;
+	[Qs,trt,tas,tst] = rt.sediment_transport_(1,t,iscentral);
 	Qs = Qs(2:end-1,:);
-	plot(x/L,[Qs,Qs0,Qs-Qs0]);
+	Qs_rt     = Qs.*trt;
+	Qs_stokes = Qs.*tst;
+	Qs0 = Qs.*(1-trt-tst);
+	plot(xc/L0,[Qs,Qs0,Qs_rt,Qs_stokes]);
 %	abs(Qs([1:2 end-1:end])./Qs(end))
-	Q = rt.Q_;
 	ylabel('kg/s');
-	legend('Qs total','Qs r','Qs rt');
+	legend('Total','River','RT','Stokes');
 
+	Q = rt.out(1).Q;
 	subplot(2,1,2)
-	plot(x,[Q(:,1),abs(Q(:,2))])
+	plot(x,abs(Q))
 	ylabel('m^3/s');
 	legend('Q0','|Qt|');
 
-	h0=rt.h0./h00;
+	h0=rt.h0(1)./h00;
 	zs=rt.z(0);
 	x=rt.x;
 	S = cdiff(zs)./cdiff(x);
-	cd=rt.cd;
+	cd=rt.cd(1);
 	u0 = sqrt(9.81./cd.*h0.*S);
 	Q0=rt.Q(0);
 	u0(:,2) = Q0./h0;
@@ -177,10 +183,10 @@ toc
 
 	figure(3);
 	subplot(2,2,1);
-	clf
+	clf();
 	plot([u0,u1+1]);
 
-	dzb_dt = rtn.dzb_dt(0,zb(:,end),1);
+	dzb_dt = rt.dzb_dt(0,zb(:,end),1);
 	subplot(2,2,2);
 	plot(dzb_dt);
 	
@@ -189,20 +195,21 @@ toc
      
 	%figure(4);
 	subplot(2,2,4);
-	plot(Qs); 
+	plot(xc,Qs);
 
- ozb = zb;
- x=rt.x;
- h=rt.h0;
+ozb = zb;
+	x=rt.x;
+ h=rt.h0(1);
  Q1=(rt.Q(1));
  Qs1=Qs-Qs0;
  figure(6);
  clf;
-  p=-5; y = (h.^p-h(end).^p)./(h(1).^p-h(end).^p);
+ p=-5;
+ y = (h.^p-h(end).^p)./(h(1).^p-h(end).^p);
  x_ = rt.x*S0/h00;
  plot(x_,y,'linewidth',1,'color',[0,0,0]);
  hold on;
- plot(x_,[Qs1./Qs1(1)],'--','linewidth',2.5);
+ plot(xc./L0,[Qs1./Qs1(1)],'--','linewidth',2.5);
  %legend('(h(x)-h_u)/(h(0)-h_u)',
  legend('(h(x)^{-5}-h_u^{-5})/(h(0)^{-5}-h_u^{-5})','(Qs_{rt}(x)/Qs_{rt}(0)');
 %'(|Q_1(x)|/|Q_1(0)|)^2');
@@ -216,9 +223,7 @@ toc
 	Q1=abs(rt.Q(1));
 	xi=interp1(2*log(Q1./Q1(1)),rt.x,([-1:-1:-5]),'linear')*S0/h00;
 	ax=addx();
-if (all(isfinite(xi)))
 	set(ax,'xlim',xl,'xtick',xi,'xticklabel',num2str((-1:-1:-5)'));
-end
 	xlabel({' ','ln(Qs_{rt}(x)/Qs_{rt}(0))'});
 	set(gca,'ytick',[]);
 	%pdfprint(11, 'img/tidal-river-schematic.pdf',2.5,[],'pdf',0.1);
@@ -230,10 +235,8 @@ end
 	rtm_plot();
 
 figure(12);
-plot(   mid(t(1:end-1))/Physics.SECONDS_PER_YEAR, ...
-	diff(t(1:end-1)/Physics.SECONDS_PER_YEAR) );
-ylabel('dt/y');
-
+plot(diff(t(1:end-1)/86400/365.25))
+ylabel('dt')
 % plot(x,[abs((Q1./Q1(1)).^2),Qs1./Qs1(1)],'--','linewidth',1.5);
 % legend('(h(x)-h_u)/(h(0)-h_u)','(|Q_1(x)|/|Q_1(0)|)^2');
 %xlim([0,2e5])

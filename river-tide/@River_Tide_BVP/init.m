@@ -5,9 +5,8 @@
 %
 %% function obj = init(obj)
 function init(obj)
-	obj.clear();
 
-	obj.neq = sum(obj.opt.oflag)+1;
+%	obj.neq = sum(obj.opt.oflag)+1;
 
 	obj.bc_transformation();
 
@@ -23,6 +22,7 @@ function init(obj)
 	end
 
 	obj.hydrosolver.init();
-
+	obj.clear();
+size(obj.tmp)
 end % River_Tide_BVP/init
 

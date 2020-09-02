@@ -1,21 +1,30 @@
 % Tue 18 Aug 09:27:08 +08 2020
-function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
-	tid  = 2;
-	name = 'two upstream channels, one downstream channel';
+function [out,t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
+	if (nargin()<3)
+		pflag = false;
+	end
+	out.id  = 2;
+	out.name = 'two upstream channels, one downstream channel';
+
+	% tidal amplitude
+	z10           = 1;
 
 	% river discharge
-	Q0   = -10;
 	Qlim = [-2,-20];
+	Q0   = formative_discharge(Qlim(1),Qlim(2),'chezy'); 
 	iorder = 1;
 
-	z10  =  1;
-
-	% slope
-	S0   = 2.5e-5;
-	Cd   = 2.5e-3;
-
+	% width of channel
 	w0   = [1,1/3,2/3];
-	h0   = normal_flow_depth(Q0,w0(1),Cd,S0,'cd');
+
+	% drag/friction coefficient
+	Cd   = 2.5e-3;
+	
+	% asymptotic depth in upstream reach
+	h0   = 10;
+
+	% asymptotic bed slope in upstream reach
+	S0         = -normal_flow_slope(Q0,h0,w0(1),drag2chezy(Cd));
 
 	L      = h0/S0
 	z1     = 1;
@@ -23,21 +32,20 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 	omega  = 2*pi/Physics.SECONDS_PER_DAY;
 	pL     = 0.25;
 	ruleQ  = NaN; % not yet used
-	ruleQs = 'geometric';
-	nx0    = 50;
+	nx0    = 25;
 	Xi     = 1.2*L;
 	dx     = L*1/(nx0-1);
 %	dx     = L/49;
-	Ti     = Physics.SECONDS_PER_YEAR*2000;
+	Ti     = Physics.SECONDS_PER_YEAR*1000;
 	cfl    = 0.99;
 	scheme = 'upwind';
 	d_mm   = 0.2;
 
-	rtn = River_Tide_Network();
+	opt.xs     = 1;
+	bif_stokes_order = 2;
+	bif_ignore_rt = 0;
 
-	opt.xs     = 1; 
-
-	map = River_Tide_Network_Map('mat/rt-mor-map.mat');
+	map = River_Tide_Morphodynamics_Map('mat/rt-mor-map.mat');
 	map.recompute = true;
 	rtn = map.fun(   {z1} ...
 		 , {pz1} ...	% [1]     reflected wave factor
@@ -55,7 +63,8 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 		 , {w0(3)} ...	% [m]     width of upstream channel
 		 , {Cd} ...
 		 , {ruleQ} ...	%  -      rule for discharge division
-		 , {ruleQs} ...	%  -      rule for sediment division
+		 , {bif_ignore_rt} ...	%  -      rule for sediment division
+		 , {bif_stokes_order}  ... %
 		 , {dx} ...	% [m]     spatial discretization step
 		 , {Ti} ...	% [s]     simulated time span
 		 , {cfl} ...	% [1]     cfl condition
@@ -69,9 +78,9 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 
 	figure(20);
 	x = [];
-	for idx=1:length(rtn.rt)
-		x = [x;mid(rtn.rt(idx).x)];
-		plot(rtn.rt(idx).x/L, rtn.rt(idx).zb(rtn.rt(idx).x));
+	for idx=1:rtn.nc
+		x = [x;mid(rtn.x)];
+		plot(rtn.x(idx)/L, rtn.zb(idx,rtn.x(idx)));
 		hold on;
 	end
 %	set(gca,'colororderindex',1);
@@ -79,10 +88,10 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 %	plot(x,zb(:,1),'.-');
 
 	figure(21);
-	for idx=1:length(rtn.rt)
-		%x = [x;mid(rtn.rt(idx).x)];
-		plot(rtn.rt(idx).x/L, rtn.rt(idx).h0);
-%(rtn.rt(idx).x));
+	for idx=1:rtn.nc
+		%x = [x;mid(rtn.x)];
+		plot(rtn.x(idx)/L, rtn.h0(idx));
+%(rtn.x));
 		hold on
 	end
 
@@ -93,38 +102,38 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 	d(:,2) = max(abs(diff(zb,[],2)));
 	plot(t(1:end-1),d);
 	subplot(2,2,2);
-	for idx=1:length(rtn.rt)
-		Qs = rtn.rt(idx).sediment_transport(0,1);
-		plot(mid(rtn.rt(idx).x),Qs(2:end-1));
+	for idx=1:rtn.nc
+	%	Qs = rtn.sediment_transport(idx,0,0);
+	%	plot(mid(rtn.x(idx)),Qs(2:end-1));
 		hold on;
 	end
 
-	figure(1)
+	figure(1);
 	clf();
 	e = 1e-2;
-	for idx=1:length(rtn.rt)
+	for idx=1:rtn.nc
 		figure(1);
-		x = rtn.rt(idx).x;
+		x = rtn.x(idx);
 
 		%subplot(length(rtn.rt),4,4*(idx-1)+1);
 		subplot(1,4,1);
-		z0 = rtn.rt(idx).z(0);
+		z0 = rtn.z(0,idx);
 		plot(x,z0);
 		hold on;
 		
 		%subplot(length(rtn.rt),4,4*(idx-1)+2);
 		subplot(1,4,2)
-		Q0 = rtn.rt(idx).Q(0);
+		Q0 = rtn.Q(0,idx);
 		%plot(x,Q0);
 		plot(x,Q0*(1+e*idx));
 		hold on
 	
-		[Qlr,zlr] = rtn.rt(idx).decompose();
+		[Qlr,zlr] = rtn.decompose(idx);
 
 		k = 1;
 		subplot(1,4,3)
 		%subplot(length(rtn.rt),4,4*(idx-1)+3);
-		z = rtn.rt(idx).z(k);
+		z = rtn.z(k,idx);
 		%set(gca,'colororderindex',1);
 		plot(x,abs(z)*(1 + e*idx));
 		hold on
@@ -132,7 +141,7 @@ function [t,zb,rtn] = river_tide_morphodynamics_test_03(rt_map,pflag)
 		
 		subplot(1,4,4)
 		%subplot(length(rtn.rt),4,4*(idx-1)+4);
-		Q = rtn.rt(idx).Q(k);
+		Q = rtn.Q(k,idx);
 		%set(gca,'colororderindex',1);
 
 		plot(x,abs(Q));
@@ -176,11 +185,11 @@ abs(sum(w.*Q_))./mean(abs(Q))
 %	rmse = rt.check_continuity();
 %	% compare to analytical solution
 %	g = Constant.gravity;
-%	c0 = sqrt(g*h0);
+%	c0 = sqrtn(g*h0);
 %	k0 = omega/c0;
 %	x = rt.x;
 %
-%	r = (1+1i)*sqrt(-Cd.*omega.*Q0/w0./(g*h0.^3));
+%	r = (1+1i)*sqrtn(-Cd.*omega.*Q0/w0./(g*h0.^3));
 %	z = z10*exp(-r*x);
 %
 %	rmse(2)  = rms(rt.z_(:,2)-z)

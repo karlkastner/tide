@@ -82,8 +82,8 @@
 			, {bc(1,2).var}, {bc(1,2).rhs}, {bc(1,2).p}, {bc(1,2).q} ...
 			, {bc(2,2).var}, {bc(2,2).rhs}, {bc(2,2).p}, {bc(2,2).q} ...
 			, opt);
-	z0(:,idx) = rt.z_(:,1); 
-	z1(:,idx) = rt.z_(:,2); 
+	z0(:,idx) = rt.z(0); 
+	z1(:,idx) = rt.z(1)); 
 	end % for idx
 
 	namedfigure(1,name);

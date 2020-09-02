@@ -11,14 +11,13 @@ function [dzb_dt,dt_max] = dzb_dt(obj,t,zb,ddir)
 	p          = obj.sediment.p;
 	rho        = obj.sediment.rho;
 
-
 	% TODO BVPSC should have global xc
 	nci = 1;
 	xc = [];
 	for cdx=1:obj.nc
-		x   = obj.x(cdx);
-		xc  = [xc;mid(x)];
-		nxc = length(x)-1;
+		x         = obj.x(cdx);
+		xc        = [xc;mid(x)];
+		nxc       = length(x)-1;
 		ncii(cdx) = nci;
 		nci       = nci+nxc;
 		obj.tmp(cdx).zb   = [];
@@ -31,64 +30,79 @@ function [dzb_dt,dt_max] = dzb_dt(obj,t,zb,ddir)
 	dzb_dt = zeros(nci-1,1);
 
 	% determin discharge values and weights for integration over the seasons
-	% TODO Qlim should be part of the boundary conditions
-	if (isfield(obj.season,'Qlim') && ~isempty(obj.season.Qlim))
-		if (isa(obj.season.Qlim,'function_handle'))
-			Qlim = obj.season.Qlim(t);
-		else
-			Qlim = obj.season.Qlim;
-		end
-		if (obj.season.iorder > 1)
-			% integrate over the seasons,
-			% without updating the bed-level during the year
-			[weight, b] = int_1d_gauss(obj.season.iorder);
-			Q0          = inv_hydrograph(  b*[0;1] ...
-				 		     , Qlim(1) ...
-						     , Qlim(2) ...
-						    );
-		else
-			% single formative discharge, for which Qs ~ <Qs> ~ <Q^2>
+	% TODO evaluate in time, if given by function
+	sbc = struct();
+
+	% for each channel
+	for cdx=1:obj.nc
+	    % implicit assumption here, that mean-component has frequency index 1
+	    % for each end point
+	    for bdx=1:2
+	        if (~isfield(obj.bc(bdx,1,cdx),'Qseason') || isempty(obj.bc(bdx,1,cdx).Qseason))
 			weight = 1;
-			Q0     = formative_discharge(  Qlim(1) ...
-						     , Qlim(2) ...
-						    );
-		end
-		h0 = normal_flow_depth(Q0,obj.season.w0,obj.season.Cd,obj.season.S0,'Cd');
-		Qs = total_transport_engelund_hansen(drag2chezy(obj.season.Cd), ...
-			obj.rt(1).sediment.d_mm,Q0./(h0*obj.season.w0),h0,obj.season.w0);
-	else
-		weight = 1;
-		Q0 = obj.bc(2,1,1).rhs;
-		Qs = obj.bc_Qs(2,1).val;
-	end
+			sbc(bdx,cdx).rhs    = obj.bc(bdx,1,cdx).rhs*ones(1,obj.opt.iorder);
+			sbc_Qs(bdx,cdx).rhs = obj.bc_Qs(bdx,cdx).rhs*ones(1,obj.opt.iorder);
+		else
+			Qlim = obj.bc(bdx,1,cdx).Qseason;
+
+			if (obj.opt.iorder > 1)
+				% discharges and weights for integrating over the seasons
+				[weight, b] = int_1d_gauss(obj.opt.iorder);
+				Q0          = inv_hydrograph(  b*[0;1] ...
+					 		     , Qlim(1) ...
+							     , Qlim(2) ...
+							    );
+			else
+				% single formative discharge, for which Qs ~ <Qs> ~ <Q^2>
+				% TODO pass manning/chezy flag
+				weight = 1;
+				Q0     = formative_discharge(  Qlim(1) ...
+							     , Qlim(2) ...
+							    );
+			end
+			%h0 = normal_flow_depth(Q0,obj.width(cdx,),obj.cd(cdx,),obj.season.S0,'Cd');
+			%Qs = total_transport_engelund_hansen(drag2chezy(obj.season.Cd), ...
+			%	obj.sediment.d_mm,Q0./(h0*obj.season.w0),h0,obj.season.w0);
+			Qs = obj.bc_Qs(bdx,1,cdx).rhsfun(t,Q0);
+			sbc(bdx,cdx).rhs    = Q0;
+			sbc_Qs(bdx,cdx).rhs = Qs;
+		end % else of if
+	    end % for bdx
+	end % for cdx
 
 	% compute seasonally averaged rate of bed level change
-	c = 0;
+	c      = 0;
 	dt_max = inf;
-
-	for sdx=1:length(Q0)
-
-		% TODO, this is a quick fix
-		% use channel specific values
-		obj.bc(2,1,1).rhs  = Q0(sdx);
-		obj.bc_Qs(2,1).val = Qs(sdx);
+	% for each integration point (aka season) over the annual hydrograph
+	for sdx=1:obj.opt.iorder
+		% for each channel
+		for cdx=1:obj.nc
+		 % for each boundary
+		 for bdx=1:2
+			% set to seasonal value
+			if (~isempty(sbc(bdx,cdx).rhs))
+			obj.bc(bdx,1,cdx).rhs    = sbc(bdx,cdx).rhs(sdx);
+			obj.bc_Qs(bdx,cdx).rhs   = sbc_Qs(bdx,cdx).rhs(sdx);
+			end
+		 end % bdx
+		end % cdx
 	
 		% reuse solution of last time step as initial condition
-		if (isfield(obj.tmp(1),'ypm')) % && ~isempty(obj.tmp(cdx).ypm))
+		if (isfield(obj.tmp(1),'ypm') && size(obj.tmp(1).ypm,2)>=sdx)
 			obj.hydrosolver.inifun = @(cdx,x) obj.tmp(cdx).ypm(:,sdx);
-		end
+		end % if
 
 		obj.solve();
 		
 		% TODO, the cflag belong to the network, not branches
 		if (obj.hydrosolver.out(1).cflag ~= 1)
 			error('no-convergence');
-		end
+		end % if
 	
 		% save initial condition for reuse during next time step
 		for cdx=1:obj.nc
 			obj.tmp(cdx).ypm(:,sdx) = obj.hydrosolver.out(cdx).ypm;
-		end
+		end % for cdx
 	
 		% get transport at segment interfaces
 		s = obj.sediment_transport(t,ddir);
@@ -105,7 +119,7 @@ function [dzb_dt,dt_max] = dzb_dt(obj,t,zb,ddir)
 				dQsi = downwind_difference(x,s(cdx).Qs);
 			otherwise % central
 				dQsi = central_difference(x,s(cdx).Qs);
-			end
+			end % switch ddir
 	
 			% note that even if differences are upwinded, dx stays the same
 			x    = obj.x(cdx);

@@ -14,11 +14,11 @@
 % You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
 %
-classdef River_Tide_Map < Compute_Map
+classdef River_Tide_Hydrodynamics_Map < Compute_Map
 	properties
 	end % properties
 	methods
-		function obj = River_Tide_Map(varargin)
+		function obj = River_Tide_Hydrodynamics_Map(varargin)
 		         obj = obj@Compute_Map(varargin{:});
 		end % constructor
 	end % methods

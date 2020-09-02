@@ -7,37 +7,35 @@
 %
 % function [Q1lr, z1lr, obj] = decompose(obj)
 %
-function decompose(x,w0,z1,Q0,Qt)
+function [Q1lr,z1lr] = decompose(obj,x,w0,z0,z1,Q0,Q1)
+	% TODO, quick fix
+	cdx = 1;
 
+	omega = obj.omega;
 	dx    = diff(x);
 
 	% element edges to centres
-	xc = mid(x); %0.5*(x(1:end-1)+x(2:end));
+	% TODO, w and x should be passed
+	xc = mid(x);
 	wc = mid(w0);
-	if (0)
-		Q1c = 0.5*(Q1(1:end-1)+Q1(2:end));
-		c  = obj.odefun(cdx,xc,Q1c);
+	
+	% TODO quick fix, pass Q2 as well
+	if (obj.opt.oflag(2))
+		Qt = [Q1;zeros(size(Q1))];
 	else
-		switch (obj.opt.hmode)
-		case {'matrix'}
-			if (obj.opt.dischargeisvariable)
-				y = [obj.z(cdx,0); Q0(1); Q1];
-				k=2;
-			else
-				y = [obj.z(cdx,0); Q1];
-				k = 2;
-			end
-		otherwise
-			y = obj.Q(cdx,1);
-			k = 1;
-		end
-		%if (obj.opt.oflag(2))
-		%	y = [y;obj.Q_];
-		%end
-
-		c = obj.odefun(cdx,x,y);
-		c_ = 0.5*(c(1:end-1,:,k)+c(2:end,:,k));	
+		Qt = Q1;
 	end
+
+	if (obj.opt.dischargeisvariable)
+		y = [z0; Q0(1); Qt];
+		k=2;
+	else
+		y = [z0; Qt];
+		k = 2;
+	end
+
+	c = obj.odefun(cdx,x,y);
+	c_ = 0.5*(c(1:end-1,:,k)+c(2:end,:,k));	
 	r  = roots2(c_);
 	
 	% match values at segment end points (continuity)
@@ -65,8 +63,5 @@ function decompose(x,w0,z1,Q0,Qt)
 		z1lr(:,idx) = A*z1lrc(:,idx);
 	end % for idx
 
-%	qlr = bsxfun(@times,Qlr,1./wc);
-%	zlr = obj.q1_to_z1(xc,qlr,obj.omega);
-	end
 end % decompose
 

@@ -26,12 +26,13 @@ function y0 = ifun(obj,cdx,x)
 	z0 = obj.zb(cdx,x) + h0;
 	z0 = max(z0,z0_min);
 
+	nf = sum(obj.opt.oflag);
 	if (~obj.opt.dischargeisvariable)
-		y0 = [z0; zeros(length(x),1)];
+		y0 = [z0; zeros(nf*length(x),1)];
 	else
 		%y0 = [z0; Q0_dummy; sqrt(eps)*randn(length(x)*(obj.neq-1),1)];
 		%y0 = [z0+h0_dummy*randn(size(z0)); Q0_dummy*(1 + randn()); 1e-3*randn(length(x)*(obj.neq-1),1)];
-		y0 = [z0; Q0_dummy; zeros(length(x),1)];
+		y0 = [z0; Q0_dummy; zeros(nf*length(x),1)];
 	end
 end % bcfun
 

@@ -2,8 +2,9 @@
 classdef Bifurcation < handle
 	properties
 		division_rule
-	end
+		opt = struct('ignorertfordivision','false');
+	end % properties
 	methods
-	end
-end
+	end % methods
+end % class Bifurcation
 

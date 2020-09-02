@@ -19,7 +19,8 @@ function [rtn, key, obj] = fun( ...
 		, wc ...	% [m]     width of right branch
 		, Cd ...	% [1]     drag coefficient
 		, ruleQ ...	%  -      rule for discharge division
-		, ruleQs ...    %	  rule for sediment division
+		, bif_ignore_rt    ...    %	  rule for sediment division
+		, bif_stokes_order ... %
 		, dx ...	% [m]     spatial discretization step
 		, Ti ...	% [s]     simulated time span
 		, cfl ...	% [1]     cfl condition
@@ -54,7 +55,8 @@ function [rtn, key, obj] = fun( ...
 		, wc{1} ...	% [m]     width of right branch
 		, Cd{1} ...	% [1]     drag coefficient
 		, ruleQ{1} ...	%  -      rule for discharge division
-		, ruleQs{1} ...    %	  rule for sediment division
+		, bif_ignore_rt{1} ...    %	  rule for sediment division
+		, bif_stokes_order{1} ...
 		, dx{1} ...	% [m]     spatial discretization step
 		, Ti{1} ...		% [s]     simulated time span
 		, cfl{1} ...	% [1]     cfl condition
@@ -87,7 +89,8 @@ function [rtn, key, obj] = fun( ...
 		 , [wa{1},wb{1},wc{1}] ...	% [m]     width of upstream channel
 		 , Cd{1} ...
 		 , ruleQ{1} ...	%  -      rule for discharge division
-		 , ruleQs{1} ...	%  -      rule for sediment division
+		 , bif_ignore_rt{1} ...	%  -      rule for sediment division
+		 , bif_stokes_order{1} ... %
 		 , dx{1} ...	% [m]     spatial discretization step
 		 , Ti{1} ...	% [s]     simulated time span
 		 , cfl{1} ...	% [1]     cfl condition

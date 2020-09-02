@@ -1,37 +1,42 @@
 % Wed  9 Oct 15:23:10 PST 2019
-function [fail,rmse,name,rt] = river_tide_test_11(rt_map,pflag)
+function [out,rt] = river_tide_test_11(rt_map,pflag)
+	if (nargin()<2)
+		pflag = 1;
+	end
 	reltol = 1e-2;
-	tid  = 12;
-	name = 'swap left and right end';
+	out.id  = 12;
+	out.name = 'swap left and right end';
 
 	T   = Constant.SECONDS_PER_DAY;
 
 	% river discharge
 	Q0  = -10;
-	z10 = [1,sqrt(eps)];
+	z10 = [1,0];
 	z1L = [0,1];
 
 	L = 5e5;
-	for idx=1:2
-	Qu = -Q0;
+
 	% width of channel
 	w0        = 1;
-	wfun      = @(x)   w0*ones(size(x));
 	% drag/friction coefficient
-	cD        = 2.5e-3;
-	cdfun     = @(x)  cD*ones(size(x));
-	% bed level of channel
+	Cd        = 2.5e-3;
+	% depth of channel
 	h0        = 10;
-	S0         = normal_flow_slope(-Qu,h0,w0,drag2chezy(cD))
-%	figure(1)
+
+	for idx=1:2
+	if (2 == idx)
+		Q0 = -Q0;
+	end
+
+	% slope of channel
+	S0         = -normal_flow_slope(Q0,h0,w0,drag2chezy(Cd))
+
+	% bed level of channel
 	if (1==idx)
-	clf
-	zbfun     = @(x) -h0 + S0*x;
-%	plot(zbfun(linspace(0,L)))
-%	hold on
+		zb  = @(x) -h0 + S0*x;
 	else
-		zbfun     = @(x) -h0 + S0*(L-x);
-%	plot(zbfun(linspace(0,L)))
+		
+		zb  = @(x) -h0 + S0*(x-L);
 	end
 	bc        = struct();
 
@@ -41,7 +46,7 @@ function [fail,rmse,name,rt] = river_tide_test_11(rt_map,pflag)
 	bc(1,1).rhs = 0;
 	% river discharge
 	bc(2,1).var = 'Q';
-	bc(2,1).rhs = -Q0;
+	bc(2,1).rhs = Q0;
 	else
 	bc(1,1).var = 'Q';
 	bc(1,1).rhs = Q0;
@@ -53,7 +58,8 @@ function [fail,rmse,name,rt] = river_tide_test_11(rt_map,pflag)
 	bc(1,1).p   = 1;
 	% Dirichlet condition
 	bc(2,1).p   = 1;
-q = 0;
+	q = 0;
+
 	% wave entering from left
 	bc(1,2).var = 'z';
 	bc(1,2).rhs = z10(idx);
@@ -70,6 +76,7 @@ q = 0;
 	bc(2,2).rhs = z1L(idx);
 	bc(2,2).p   = [1,0];
 	bc(2,2).q   = [q,1];
+
 	bc(2,3).var = 'z';
 	bc(2,3).rhs = 0;
 	bc(2,3).p   = [1,0];
@@ -82,11 +89,11 @@ q = 0;
 
 	meta = river_tide_test_metadata();
 	opt = meta.opt;
-	opt.oflag   = [true(1,3)];
+	opt.oflag   = [true(1,1)];
 
 	% solve with model
 	[rt(idx)]  = rt_map.fun({Xi} ... % Q0,
-			, {wfun}, {cdfun}, {zbfun}, omega ...
+			, {w0}, {Cd}, {zb}, omega ...
 			, {bc(1,1).var}, {bc(1,1).rhs}, {bc(1,1).p} ...
 			, {bc(2,1).var}, {bc(2,1).rhs}, {bc(2,1).p} ...
 			, {bc(1,2).var}, {bc(1,2).rhs}, {bc(1,2).p}, {bc(1,2).q} ...
@@ -97,27 +104,43 @@ q = 0;
 
 	end
 
-	z = ([rt(1).z(1),flipud(rt(2).z(1))]);
-	res = z(:,1)-z(:,2);
+
+	zb = ([rt(1).zb,flipud(rt(2).zb)]);
+
+	z0 = ([rt(1).z(0),flipud(rt(2).z(0))]);
+
+	z1 = ([rt(1).z(1),flipud(rt(2).z(1))]);
+	res = z1(:,1)-z1(:,2);
 	rmse = rms(res);
-	fail = (rmse > reltol*rms(z(:,1)));
+	result = (rmse(1) > reltol*rms(z1(:,1)));
+
+	% dummy value
+	rmse(2) = NaN;
+	out.rmse   = rmse;
+	out.result = result;
 
 	if (pflag)
 		figure(1);
 		clf();
 		subplot(2,2,1)
-		plot(rt(1).x,abs(z(:,1)));
+		plot(rt(1).x,[z0(:,1) zb(:,1)]);
 		hold on
-		plot(rt(1).x,abs(z(:,2)),'--');
-		ylabel('|z|');
-	
-		subplot(2,2,2)
-		plot(rt(1).x,angle(z(:,1)));
-		hold on
-		plot(rt(1).x,angle(z(:,2)),'--');
-		ylabel('angle(z)');
+		plot(rt(1).x,[z0(:,2) zb(:,2)],'--');
+		ylabel('z_0');
 	
 		subplot(2,2,3)
+		plot(rt(1).x,abs(z1(:,1)));
+		hold on
+		plot(rt(1).x,abs(z1(:,2)),'--');
+		ylabel('|z_1|');
+	
+		subplot(2,2,4)
+		plot(rt(1).x,angle(z1(:,1)));
+		hold on
+		plot(rt(1).x,angle(z1(:,2)),'--');
+		ylabel('arg(z_1)');
+	
+		subplot(2,2,2)
 		plot(rt(1).x,[rt(1).zb,rt(2).zb],'k');
 		hold on
 		plot(rt(1).x,[rt(1).z(0),rt(2).z(0)],'r--');
@@ -131,16 +154,16 @@ q = 0;
 
 %	bw = Backwater1D();
 %	nn = opt.nx;
-%	[x_, h_, z0_] = bw.solve(-Q0,0,drag2chezy(cD),wfun,zbfun,0,Xi);
-%	[x_, h_, z0_] = bw.solve_analytic(-Q0,drag2chezy(cD),w0,S0,h0,nn);
+%	[x_, h_, z0_] = bw.solve(-Q0,0,drag2chezy(Cd),wfun,zbfun,0,Xi);
+%	[x_, h_, z0_] = bw.solve_analytic(-Q0,drag2chezy(Cd),w0,S0,h0,nn);
 %	z0  = interp1(x_,z0_,rt.x,'linear','extrap');
 %	z0 = S0*x;
-%	z0t = rt.z_(:,1) - z0;
+%	z0t = rt.z(0) - z0;
 %	z2 = rt.z_(:,3);
 %
 %	z2_ = rt.even_overtide_analytic(z10);
 %	%z0_ = interp1(x_,h_,rt.x,'spline')+0*zbfun(rt.x);
-%	% r = (1+1i)*sqrt(-cD.*omega.*Q0/w0./(g*h0.^3));
+%	% r = (1+1i)*sqrt(-Cd.*omega.*Q0/w0./(g*h0.^3));
 %	% z = z10*exp(-r*x);
 %
 %	rmse(2)  = norm(z2_-z2);
@@ -149,9 +172,9 @@ q = 0;
 %	nres_ = rms(cdiff(z2_,2))
 %	fail = (rmse(1) > 0.05/z10) || (rmse(2) > 10*nres_);
 %
-%	zz = NaN(size(rt.z_));
+%	zz = NaN(size(rt.out.z));
 %	zz(:,3) = z2_;
-%	river_tide_test_plot(tid,rt,zz,name,pflag);
+%	river_tide_test_plot(out.id,rt,zz,out.name,pflag);
 %	
 end % river_tide_test_09
 

@@ -33,6 +33,6 @@ function postprocess(obj,cdx,x,y,yc)
 		warning('solution is not finite');
 	end
 
-	obj.out.cflag_ = cflag;
+	obj.cflag(cdx) = cflag;
 end
 

@@ -12,7 +12,7 @@ function [rmse,res] = check_continuity(obj)
 		Q1    = obj.Q(cdx,1);
 		z1    = obj.z(cdx,1);
 
-		[rmse(cdx),res{cdx}] = check_continuity@River_Tide(obj,x,w,zt,Qt,omega);
+		[rmse(cdx),res{cdx}] = check_continuity@River_Tide(obj,x,w,z1,Q1,omega);
 	end
 end % River_Tide_BVP / check_continuity
 

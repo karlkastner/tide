@@ -3,9 +3,9 @@
 %% or retrive the scenario, if it was already computed
 function [out, key, obj] = fun(obj ...
 		, Xi ... 	% domain extend (river start and end coordiante)
-		, wfun ... 	% width as function of x
-		, cdfun ...	% drag coefficient as function x
-		, zbfun ...	% bed level as function of x
+		, width ... 	% channel width as scalar or function of x
+		, cd ...	% drag coefficient as scalar or function x
+		, zb ...	% bed level as scalar or function of x
 		, omega ...	% angalar frequency of tide
 		, bc0l_var, bc0l_val, bc0l_p ...	% mean flow bc at mouth
 		, bc0r_var, bc0r_val, bc0r_p ...	% mean flow bc upstream
@@ -27,9 +27,9 @@ function [out, key, obj] = fun(obj ...
 	g     = Constant.g;
 	Xi    = Xi{1};
 	L     = Xi(2)-Xi(1);
-	wfun  = wfun{1};
-	cdfun = cdfun{1};
-	zbfun = zbfun{1};
+	width     = width{1};
+	cd    = cd{1};
+	zb    = zb{1};
 	
 	if (~isempty(bc2l_var))
 		bc2l = {bc2l_var{1}, ...
@@ -39,7 +39,7 @@ function [out, key, obj] = fun(obj ...
 			bc2l_q{1}(1), ...
 			bc2l_q{1}(2)};
 	else
-		bc2l = repmat({{}},6,1);
+		bc2l = repmat({},6,1);
 	end
 	if (~isempty(bc2r_var))
 		bc2r = {bc2r_var{1}, ...
@@ -49,19 +49,35 @@ function [out, key, obj] = fun(obj ...
 			bc2r_q{1}(1), ...
 			bc2r_q{1}(2)};
 	else
-		bc2r = repmat({{}},6,1);
+		bc2r = repmat({},6,1);
 	end
- 
-	key = obj.key(...	
-			opt.model_str, ...
-			func2str(opt.solver), ...
-			func2str(zbfun), ...
-			func2str(wfun), ...
-			func2str(cdfun), ...
-			omega, ...		% left end
-			bc0l_var{1}, ...
+
+	if (isa(zb,'function_handle'))
+		zb_str = func2str(zb);
+	else
+		zb_str = num2str(zb);
+	end
+	if (isa(width,'function_handle'))
+		w_str = func2str(width);
+	else
+		w_str = num2str(width);
+	end
+	if (isa(cd,'function_handle'))
+		cd_str = func2str(cd);
+	else
+		cd_str = num2str(cd);
+	end
+
+	key = obj.key(  ...	
+			...  % opt.model_str, ...
+			...  % func2str(opt.solver), ...
+			zb_str, ...
+			w_str, ...
+			cd_str, ...
+			omega, ...		
+			bc0l_var{1}, ...		% left end
 			bc0l_val{1}, ...
-			bc0l_p{1}, ...
+			bc0l_p{1}(1), ...
 			bc1l_var{1}, ...
 			bc1l_val{1}, ...
 			bc1l_p{1}(1), ...
@@ -71,7 +87,7 @@ function [out, key, obj] = fun(obj ...
 			bc2l{:}, ...
 			bc0r_var{1}, ...		% right end
 			bc0r_val{1}, ...
-			bc0r_p{1}, ...
+			bc0r_p{1}(1), ...
 			bc1r_var{1}, ...
 			bc1r_val{1}, ...
 			bc1r_p{1}(1), ...
@@ -109,54 +125,60 @@ function [out, key, obj] = fun(obj ...
 			end
 			out = rt_quasi_stationary_trigonometric(Xi,W0,Q0_,cd,omega,zbfun,bc,opt);
 		case {'wave','swe'}
-			x         = linspace(Xi(1),Xi(2))';
+			% x         = linspace(Xi(1),Xi(2))';
 
-			% TODO make RT intelligent to accept scalars instead of functions
-			out = River_Tide( ...
-				   'fun.zb',      zbfun ...
-				 , 'fun.cd',      cdfun ...
-				 , 'fun.width',   wfun ...
-				 , 'omega',       omega ...
-				 , 'opt',         opt ...
-				 , 'Xi',          Xi ...
+			hydrosolver    = BVPS_Characteristic();
+			hydrosolver.xi = Xi;
+			hydrosolver.nx = opt.nx;
+			hydrosolver.opt.xs = opt.xs;
+
+			opt.dischargeisvariable = true;
+
+			out = River_Tide_BVP( ...
+				   'zb',        zb ...
+				 , 'cd',        cd ...
+				 , 'width',     width ...
+				 , 'omega',         omega ...
+				 , 'opt',           opt ...
+				 , 'hydrosolver',   hydrosolver ...
 				);
 
-		%	out.set_bc_from_cell(bc0l_var,bc0l_val,bc0l_p,bc0r_var,bc0r_val,bc0r_p);
+			bc            = out.bc;
+		
+			% boundary condition mean component (left end)
+			bc(1,1).var   = bc0l_var{1};
+			bc(1,1).rhs   = bc0l_val{1};
+			bc(1,1).p     = bc0l_p{1};
+			% right end
+			bc(2,1).var   = bc0r_var{1};
+			bc(2,1).rhs   = bc0r_val{1};
+			bc(2,1).p     = bc0r_p{1};
 
-	bc            = out.bc;
+			% boundary condition main tidal component
+			bc(1,2).var   = bc1l_var{1};
+			bc(1,2).rhs   = bc1l_val{1};
+			bc(1,2).p     = bc1l_p{1}; 
+			bc(1,2).q     = bc1l_q{1};
+			bc(2,2).var   = bc1r_var{1};
+			bc(2,2).rhs   = bc1r_val{1};
+			bc(2,2).p     = bc1r_p{1}; 
+			bc(2,2).q     = bc1r_q{1};
 
-	% boundary condition mean component (left end)
-	bc(1,1).var   = bc0l_var{1};
-	bc(1,1).rhs   = bc0l_val{1};
-	bc(1,1).p     = bc0l_p{1};
-	% right end
-	bc(2,1).var   = bc0r_var{1};
-	bc(2,1).rhs   = bc0r_val{1};
-	bc(2,1).p     = bc0r_p{1};
-	% boundary condition main tidal component
-	bc(1,2).var   = bc1l_var{1};
-	bc(1,2).rhs   = bc1l_val{1};
-	bc(1,2).p     = bc1l_p{1}; 
-	bc(1,2).q     = bc1l_q{1};
-	bc(2,2).var   = bc1r_var{1};
-	bc(2,2).rhs   = bc1r_val{1};
-	bc(2,2).p     = bc1r_p{1}; 
-	bc(2,2).q     = bc1r_q{1};
-	if (~isempty(bc2l_var))
-	% bc of even overtide
-		bc(1,3).var   = bc2l_var{1};
-		bc(1,3).rhs   = bc2l_val{1};
-		bc(1,3).p     = bc2l_p{1}; 
-		bc(1,3).q     = bc2l_q{1}; 
-	end
-	if (~isempty(bc2r_var))
-		bc(2,3).var   = bc2r_var{1};
-		bc(2,3).rhs   = bc2r_val{1};
-		bc(2,3).p     = bc2r_p{1}; 
-		bc(2,3).q     = bc2r_q{1}; 
-	end
-
-	out.bc = bc;
+			if (~isempty(bc2l_var))
+			% bc of even overtide
+				bc(1,3).var   = bc2l_var{1};
+				bc(1,3).rhs   = bc2l_val{1};
+				bc(1,3).p     = bc2l_p{1}; 
+				bc(1,3).q     = bc2l_q{1}; 
+			end
+			if (~isempty(bc2r_var))
+				bc(2,3).var   = bc2r_var{1};
+				bc(2,3).rhs   = bc2r_val{1};
+				bc(2,3).p     = bc2r_p{1}; 
+				bc(2,3).q     = bc2r_q{1}; 
+			end
+		
+			out.bc = bc;
 
 			out.init();
 

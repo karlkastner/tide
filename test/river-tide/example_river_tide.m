@@ -86,7 +86,7 @@
 	r = (1+1i)*sqrt(-cD.*omega.*Q0/w0./(g*h0.^3));
 	z = z10*exp(-r*x);
 
-	rmse(2)  = rms(rt.z_(:,2)-z)
+	rmse(2)  = rms(rt.z(1))-z)
 	% err ~ C*df^2/dx^2*dx^2, where C sufficiently large constant
 	nres_ = rms(cdiff(z,2));
 	fail = (rmse(1)/z10 > 0.05) || (rmse(2) > 10*nres_);
@@ -97,7 +97,7 @@
 		namedfigure(tid,['Test: ',name]);
 		clf();
 		subplot(2,4,1);
-		plot(rt.x,[zbfun(x),rt.z_(:,1)]);
+		plot(rt.x,[zbfun(x),rt.z(0)]);
 		legend('z_b','z_0');
 
 		subplot(2,4,5);
@@ -105,14 +105,14 @@
 		legend('w_0');
 
 		subplot(2,4,2);
-		plot(rt.x,abs(rt.z_(:,2)));
+		plot(rt.x,abs(rt.z(1))));
 		hold on;
 		plot(x,abs(z),'--');
 		legend('|z_1|');
 		ylim([0,max(ylim())]);
 
 		subplot(2,4,6)
-		plot(rt.x,angle(rt.z_(:,2)));
+		plot(rt.x,angle(rt.z(1))));
 		hold on;
 		plot(x,angle(z),'--');
 		legend('arg(z_1)');
@@ -129,12 +129,12 @@
 		ylim(pi*[-1,1]);
 
 		subplot(2,4,4)
-		plot(rt.x,abs(rt.Q_(:,2)));
+		plot(rt.x,abs(rt.Q(1)));
 		legend('|Q_1|');
 		ylim([0,max(ylim())]);
 
 		subplot(2,4,8)
-		plot(rt.x,angle(rt.Q_(:,2)));
+		plot(rt.x,angle(rt.Q(1)));
 		legend('arg(Q_1)');
 		ylim(pi*[-1,1]);
 

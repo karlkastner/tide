@@ -1,44 +1,44 @@
 % Tue 25 Aug 18:21:53 +08 2020
-function [t,ozb,rt,z_] = river_tide_morphodyanmics_test_04_sesons(x0,zb0,pflag)
+function [out,t,ozb,rt] = river_tide_morphodyanmics_test_04_sesons(x0,zb0,pflag)
 	if (nargin()<3)
 		pflag = false;
 	end
-%	dischargeisvariable = false;
-	dischargeisvariable = true;
+	out.id   = 5;
+	out.name = 'integration over the hydrograph (seasons)';
 
+	% number of points for integration over hydrograph
 	iorder = [1,3,1,3];
-e = sqrt(eps);
+
+	% tidal amplitude
+	% TODO, why does it fail for e = 0?
+	e = sqrt(eps);
 	z10   = [e,e,1,1];
 
-%	tid  = 1;
-%	name = ''infinitessimal wave along river with uniform flow';
-
-	% tidal range
-	%z10           = sqrt(eps);
-
 	% river discharge
-%	Q0        = -10;
 	Qlim      = [-2,-20];
-	Q0        = formative_discharge(Qlim(1),Qlim(2)); 
-	S0        = 3e-5;
+	Q0        = formative_discharge(Qlim(1),Qlim(2),'chezy'); 
 
 	% width of channel
 	w0        = 1;
-	wfun      = @(x)   w0*ones(size(x));
+
 	% drag/friction coefficient
 	Cd        = 2.5e-3;
-	cdfun     = @(x)  Cd*ones(size(x));
+
+	% asymptotic depth in upstream reach
+	h0        = 10;
+	h00       = h0;
+
+	% asymptotic bed slope in upstream reach
+	S0         = -normal_flow_slope(Q0,h0,w0,drag2chezy(Cd));
 
 	% initial bed level of channel
-%	h0        = 10;
-	h0        = normal_flow_depth(Q0,w0,Cd,S0,'cd')
-	h00       = h0;
-%	S0         = -normal_flow_slope(Q0,h0,w0,Cd,'cd');
-	zbfun     = @(x) -h0 + S0*x + 0*1e-1*randn(size(x));
+	zb         = @(x) -h0 + S0*x;
 
-%	if (nargin()>0)
-%		zbfun = @(xi) interp1(x0,zb0,xi,'linear');
-%	end
+	d_mm = 0.2;
+
+	% base frequency
+	T         = Constant.SECONDS_PER_DAY;
+	omega     = 2*pi/T;
 
 	bc        = struct();
 	% mean sea level
@@ -47,7 +47,8 @@ e = sqrt(eps);
 	% Dirichlet condition
 	bc(1,1).p   =  1;
 	% river discharge
-	bc(2,1).rhs   = Q0;
+	%bc(2,1).rhs   = Q0;
+	bc(2,1).Qseason  = Qlim;
 	bc(2,1).var   = 'Q';
 	% Dirichlet condition
 	bc(2,1).p     = 1;
@@ -62,69 +63,67 @@ e = sqrt(eps);
 	bc(2,2).p   = [1,0];
 	bc(2,2).q   = [0,1];
 
-	% base frequency
-	T         = Constant.SECONDS_PER_DAY;
-	omega     = 2*pi/T;
+	bc_Qs        = struct();
+	bc_Qs(1,1).p   = 0;
+	bc_Qs(1,1).rhs = 0;
+
+function Qs_ = Qsfun(t,Q0_)
+	h0_ = normal_flow_depth(Q0_,w0,Cd,S0,'Cd');
+	Qs_ = total_transport_engelund_hansen(drag2chezy(Cd),d_mm,Q0_./(h0_*w0),[],w0);
+end
+
+	bc_Qs(2,1).rhsfun = @Qsfun; 
+	bc_Qs(2,1).p   = 1;
 
 	% domain size
-	L         = h0/S0;
-	Xi        = [0,1.2*L];
+	L0        = h0/S0;
+	Xi        = [0,1.2*L0];
+
+	nx           = 25;
 
 	meta             = river_tide_test_metadata();
 	opt              = meta.opt;
 	opt.maxiter      = 100;
-	opt.nx           = 50;
 	opt.sopt.maxiter = 800;
-	opt.dischargeisvariable = dischargeisvariable;
+	opt.dischargeisvariable = true;
 
-	rt = River_Tide( ...
-				   'fun.zb',      zbfun ...
-				 , 'fun.cd',      cdfun ...
-				 , 'fun.width',   wfun ...
-				 , 'omega',       omega ...
-				 , 'opt',         opt ...
-				 , 'Xi',          Xi ...
-				);
-
-	rt.bc       = bc;
-	bc_Qs        = struct();
-	bc_Qs(1).p   = 0;
-	bc_Qs(1).val = 0;
-	bc_Qs(2).p   = 1;
-	Qs           = total_transport_engelund_hansen(drag2chezy(Cd),rt.sediment.d_mm,Q0./(h0*w0),h0,w0)
-	bc_Qs(2).val = Qs; 
-	rt.bc_Qs    = bc_Qs;
+	hydrosolver = BVPS_Characteristic();
+	hydrosolver.xi = Xi;
+	hydrosolver.nx = nx;
+	hydrosolver.opt.dischargeisvariable = true;
 
 	morsolver        = Time_Stepper();
 	morsolver.Ti     = [0,2000*Physics.SECONDS_PER_YEAR];
-	% leapfrog-trapezoidal stable for 0.5, but oscillations persist until 0.25
 	morsolver.cfl    = 0.99;
 	morsolver.scheme = 'upwind';
-%	morsolver.scheme = 'leapfrog-trapezoidal';
-	
-	rt.morsolver    = morsolver;
-%	rt.scheme = 'leapfrog-trapezoidal';
-	
-	rtn = River_Tide_Network_2(rt);
-	rtn.season.Qlim = Qlim;
-	rtn.season.S0   = S0;
-	rtn.season.w0   = w0(1);
-	rtn.season.Cd   = Cd(1);
+
+	rt = River_Tide_BVP( ...
+				   'zb',      zb ...
+				 , 'cd',      Cd ...
+				 , 'width',   w0 ...
+				 , 'omega',       omega ...
+				 , 'opt',         opt ...
+				 , 'hydrosolver',   hydrosolver ...
+				 , 'morsolver',   morsolver ...
+				);
+	rt.sediment.d_mm = d_mm;
+
+	rt.bc       = bc;
+	rt.bc_Qs    = bc_Qs;
 
 	figure(1);
-	clf;
+	clf();
 
 for idx=1:length(iorder)
 
-%	rtn.rt = rt;
-tic
-	rtn.season.iorder = iorder(idx);
-rtn.rt(1).bc(1,2).var = 'z';
-rtn.rt(1).bc(1,2).rhs = z10(idx);
-rtn.rt(1).bc(1,2).p   = [1,0];
-rtn.rt(1).bc(1,2).q   = [1,0];
-	[t,zb,z_] = rtn.evolve_bed_level();
-toc
+tic();
+	rt.opt.iorder = iorder(idx);
+	rt.bc(1,2,1).var = 'z';
+	rt.bc(1,2,1).rhs = z10(idx);
+	rt.bc(1,2,1).p   = [1,0];
+	rt.bc(1,2,1).q   = [1,0];
+	[t,zb] = rt.evolve_bed_level();
+toc()
 	plot(zb(:,end));
 	drawnow();
 	hold on
@@ -136,7 +135,7 @@ if (0)
 
 	z1     = rt.z(1);
 	z0     = rt.z(0);
-	z0i    = z_(:,1);
+	%z0i    = z_(:,1);
 	x      = rt.x;
 	z00    = S0*x;
 
@@ -202,7 +201,7 @@ if (0)
 	clf
 	plot([u0,u1+1]);
 
-	dzb_dt = rtn.dzb_dt(0,zb(:,end),1);
+	dzb_dt = rt.dzb_dt(0,zb(:,end),1);
 	subplot(2,2,2);
 	plot(dzb_dt);
 	

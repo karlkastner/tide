@@ -73,10 +73,6 @@ classdef River_Tide_BVP < River_Tide
 		% history over time
 		evolution = struct('t', [], 'zb', []);
 		
-		% seasonal hydrograph
-		% TODO Qmin, Qmax have go to bc
-		season = struct('iorder',1,'Qmin',[],'Qmax',[]);
-
 		% temporary storage
 		tmp = struct( 'D1_dx',[] ...
 			      ,'zb',[] ...
@@ -85,12 +81,16 @@ classdef River_Tide_BVP < River_Tide
 					   ,'zb',[] ...
 					   ,'width',[]) ...
 			    );
+		cflag;
 	end % properties
 	methods
 	function obj = River_Tide_BVP(varargin)
-		obj.opt.imethod = 'spline';
-		obj.bifurcation = Bifurcation();
+		obj.opt.imethod      = 'spline';
+		obj.opt.iorder       = 1;
+		obj.opt.stokes_order = 2;
+		obj.bifurcation      = Bifurcation();
 		obj.bifurcation.division_rule = @obj.bifurcation.sediment_division_geometric;
+		obj.hydrosolver      = BVPS_Characteristic();
 
                 for idx=1:2:length(varargin)
 			switch(varargin{idx})
@@ -110,40 +110,92 @@ classdef River_Tide_BVP < River_Tide
 					syms g positive
 					obj.g = g;
 				end
-			case {'fun.cd','cdfun','cd'}
-				cdfun = varargin{idx+1};
-				if(isa(cdfun,'function_handle'))
-					switch (nargin(cdfun))
-			    			case {2}
-							obj.fun.cd = @(cid,x,h) feval(cdfun,x);
-			    			case {3}
-							obj.fun.cd = @(cid,x,h) feval(cdfun,x,h);
-			    		otherwise
-						error('Chezy coefficient function must take 3 (cid,x) or 3 (cid, x and h) arguments.');
-					end
-				else
-					% constant value
-					obj.fun.cd = @(x,h) cdfun;
-				end % else of isa function
+			case {'fun.zb','zb','bed-level'}
+				obj.set_zb(varargin{idx+1});
+			case {'fun.width','width','w0'}
+				obj.set_width(varargin{idx+1});
+			case {'fun.cd','cd'}
+				obj.set_cd(varargin{idx+1});
 			otherwise
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
 			end % switch
                 end %for idx
-		
 		obj.hydrosolver.inifun = @obj.initial_value;
-
-		if (isempty(obj.hydrosolver))
-			obj.hydrosolver = BVPS_Characteristic();
-		end
 	end % River_Tide (constructor)
 
+	function set_cd(obj,fun)
+	if(isa(fun,'function_handle'))
+		switch (nargin(fun))
+			case {1}
+				obj.fun.cd = @(~,x,h) feval(fun,x);
+    			case {2}
+				obj.fun.cd = @(cid,x,h) feval(fun,x);
+    			case {3}
+				obj.fun.cd = @(cid,x,h) feval(fun,x,h);
+    		otherwise
+			error('Chezy coefficient function must take 3 (cid,x) or 3 (cid, x and h) arguments.');
+		end
+	else
+		% constant value
+		%obj.fun.cd = @(cdx,x,~) fun(cdx)*ones(size(x));
+		if (isscalar(fun))
+			obj.fun.cd = @(~,x,~) fun*ones(size(x));
+		else
+			obj.fun.cd = @(cdx,x,~) fun(cdx)*ones(size(x));
+		end
+	end % else of isa function
+	end
+	function set_zb(obj,fun)
+	if(isa(fun,'function_handle'))
+		switch (nargin(fun))
+		case {1}
+			obj.fun.zb = @(~,x) fun(x);
+		case {2}
+			obj.fun.zb = @(cdx,x) fun(cdx,x);
+		otherwise
+			error('bed-level must be a vector with one entry per channel or a function accepting 1 (x) or 2 (cid,x) argumets');
+		end
+	else
+		obj.fun.zb = @(cdx,x) fun(cdx)*ones(size(x));
+	end
+	end
+
+
+	function set_width(obj,fun)
+	if(isa(fun,'function_handle'))
+		switch (nargin(fun))
+		case {1}
+			obj.fun.width = @(~,x) fun(x);
+		case {2}
+			obj.fun.width = @(cdx,x) fun(cdx,x);
+		otherwise
+			error('width must be a vector with one entry per channel or a function accepting 1 (x) or 2 (cid,x) argumets');
+		end
+	else
+		if (isscalar(fun))
+			obj.fun.width = @(~,x) fun*ones(size(x));
+		else
+			obj.fun.width = @(cdx,x) fun(cdx)*ones(size(x));
+		end
+	end
+	end
 	% quasi/pseudo members
 	function nc = nc(obj)
 		nc = obj.hydrosolver.nc;
 	end
 
+	function nx = nx(obj)
+		nx = obj.hydrosolver.nx;
+	end
+
+	function neq = neq(obj)
+		neq = obj.hydrosolver.neq;
+	end
 
 	function x = x(obj,cid)
+		if (nargin()<2)
+			cid = 1;
+		end
 		x = obj.hydrosolver.out(cid).x;
 	end
 	
@@ -170,6 +222,9 @@ classdef River_Tide_BVP < River_Tide
 	end
 
 	function y = z(obj,fid,cid,x)
+		if (nargin() < 3)
+			cid = 1;
+		end
 		y = obj.out(cid).z(:,fid+1);
 		if (nargin()>3)
 			y = interp1(obj.x(cid),y,x,'linear');
@@ -177,8 +232,11 @@ classdef River_Tide_BVP < River_Tide
 	end
 	
 	function y = Q(obj,fid,cid,x)
-		y = obj.out(cid).Q(:,id+1);
-		if (nargin()>2)
+		if (nargin()<3)
+			cid = 1;
+		end
+		y = obj.out(cid).Q(:,fid+1);
+		if (nargin()>3)
 			y = interp1(obj.x,y,x,'linear');
 		end
 	end
@@ -221,15 +279,18 @@ classdef River_Tide_BVP < River_Tide
 		end
 	end
 
-	function y = u(obj,cid,fid,x)
-		y  = obj.q(cid,fid)./obj.h0(cid);
-		if (nargin()>2)
-			y = interp1(obj.x,y,x,'linear');
+	function y = u(obj,fid,cid,varargin)
+		if (nargin() < 3)
+			cid = 1;
 		end
+		y  = obj.q(cid,fid,varargin{:})./obj.h0(cid,varargin{:});
+		%if (nargin()>2)
+		%	y = interp1(obj.x,y,x,'linear');
+		%end
 	end
 
-	function y = velocity(obj,cid,x)
-		y = obj.u(cid,fid,x);
+	function y = velocity(obj,varargin)
+		y = obj.u(varargin{:});
 %		Q = obj.Q_;
 %		if (nargin()>1)
 %			Q = interp1(obj.x,Q,x,'linear');
@@ -345,7 +406,15 @@ classdef River_Tide_BVP < River_Tide
 	end
 
 	function zb = zb(obj,cid,x)
-		switch (length(x))
+		if (nargin()<2)
+			cid=1;
+		end
+		if (nargin()<3)
+			nx = obj.nx;
+		else
+			nx = length(x);
+		end
+		switch (nx)
 			case {obj.hydrosolver.nx(cid)}
 				if (isempty(obj.tmp(cid).zb))
 					obj.tmp(cid).zb = obj.fun.zb(cid,x);
@@ -362,16 +431,19 @@ classdef River_Tide_BVP < River_Tide
 	end
 
 	function width = width(obj,cid,x)
+		if (nargin()<2)
+			cid = 1;
+		end
 		if (nargin()<3)
 			x = obj.x(cid);
 		end
 		switch (length(x))
-			case {obj.opt.nx}
+			case {obj.hydrosolver.nx(cid)}
 				if (isempty(obj.tmp(cid).width))
 					obj.tmp(cid).width = obj.fun.width(cid,x);
 				end
 				width = obj.tmp(cid).width;
-			case {obj.opt.nx-1}
+			case {obj.hydrosolver.nx(cid)-1}
 				if (isempty(obj.tmp(cid).c.width))
 					obj.tmp(cid).c.width = obj.fun.width(cid,x);
 				end
@@ -386,12 +458,12 @@ classdef River_Tide_BVP < River_Tide
 			x = obj.x;
 		end
 		switch (length(x))
-		case {obj.opt.nx}
+		case {obj.hydrosolver.nx(cid)}
 			if (isempty(obj.tmp(cid).D1_dx))
 				obj.tmp(cid).D1_dx = derivative_matrix_1_1d(x,[],2);
 			end
 			D1_dx = obj.tmp(cid).D1_dx;
-		case {obj.opt.nx-1}
+		case {obj.hydrosolver.nx(cid)-1}
 			if (isempty(obj.tmp(cid).c.D1_dx))
 				obj.tmp(cid).c.D1_dx = derivative_matrix_1_1d(x,[],2);
 			end
@@ -408,17 +480,25 @@ classdef River_Tide_BVP < River_Tide
 		end
 	end
 	function clear(obj)
-		obj.tmp = struct();
+		% to avoid assinging by dissim-structure
+		obj.tmp = struct( 'D1_dx',[] ...
+			      ,'zb',[] ...
+			      ,'width',[] ...
+			      ,'c', struct( 'D1_dx',[] ...
+					   ,'zb',[] ...
+					   ,'width',[]) ...
+			    );
+		for idx=2:obj.nc
+		obj.tmp(idx) = struct( 'D1_dx',[] ...
+			      ,'zb',[] ...
+			      ,'width',[] ...
+			      ,'c', struct( 'D1_dx',[] ...
+					   ,'zb',[] ...
+					   ,'width',[]) ...
+			    );
+		end % for idx
 		obj.out = struct();
-		%obj.tmp.zb = [];
-		%obj.tmp.width = [];
-		% obj.tmp.D1_dx = [];
-		%obj.tmp.c.width = [];
-		%obj.tmp.c.zb = [];
-		% obj.tmp.c.D1_dx = [];
-		%obj.tmp = struct( 'D1_dx',[],'zb',[],'width',[], ...
-		%	          'c', struct('D1_dx',[],'zb',[],'width',[]));
-	end
+	end % clear
 
 	end % methods
 end % class River_Tide_BVP

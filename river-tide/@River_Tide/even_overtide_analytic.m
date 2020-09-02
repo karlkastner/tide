@@ -1,6 +1,9 @@
 % Wed 25 Apr 15:09:11 CEST 2018
 % Karl Kastner, Berlin
 %
+% even overtide in a channel
+% friction is dominated by river flow (Q0 > |Q1|)
+% mean flow is uniform (dh0/dx = 0) 
 function z2 = even_overtide_analytic(obj,x,z10,h0,w0,Q0,Cd,omega)
 	g     = Constant.gravity;	
 

@@ -18,11 +18,7 @@
 % function [k10, kq, kz, c] = wave_number_analytic(obj,Q0,w,h,cd,omega,az1,Qt,dh_dx,dw_dx)
 function [k10, kq, kz, c] = wave_number_analytic(obj,Q0,Qt,h,dh_dx,w,dw_dx,cd)
 	g = obj.g;
-	if (~obj.issym)
-		Pi = pi;	
-	else
-		Pi = sym('pi');
-	end
+	pi_ = obj.pi;
 
 	% specific discharge
 	q0 = Q0./w;

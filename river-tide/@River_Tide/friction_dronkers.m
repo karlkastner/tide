@@ -31,12 +31,11 @@ function [uau_sum, uau, p, obj] = friction_dronkers(obj,u,Umid,Uhr)
 	if (issym(u)) %obj.issymbolic) %nargin()>4 && psym)
 		syms p0 p1 p2 p3
 		p = [p0, p1, p2, p3];
-		syms pi_
 	else
 		alpha = Umid/Uhr;
 		p     = -obj.friction_coefficient_dronkers(alpha);
-		pi_ = pi;
 	end
+	pi_ = obj.pi;
 
 	order = obj.opt.friction_order;
 	for idx=1:order+1

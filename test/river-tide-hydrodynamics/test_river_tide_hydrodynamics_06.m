@@ -1,44 +1,67 @@
 % Wed  9 Oct 15:23:10 PST 2019
-function [out, rt] = river_tide_test_06(rt_map,pflag)
+function [out, rt, d3d] = test_river_tide_hydrodynamics_06(rt_map,pflag)
+	meta = test_river_tide_metadata();
+	if (nargin()<1)
+		rt_map      = River_Tide_Hydrodynamics_Map(meta.mapname_str);
+	end
 	if (nargin()<2)
 		pflag = 1;
 	end
-	out.id  = 6;
-	out.name = 'infinitessimal wave along river with uniform flow';
+	tab = readtable('test-river-tide.csv');
+	out.id   = 6;
+	fdx = find(tab.id == out.id)
+	out.name = tab(fdx,:).name{1};
 
 	% surface elevation at channel mouth
-	z10 = 0.1;
+	z10 = tab.z10(fdx);
+
 	zs =[0,z10];
+
 	% river discharge
-	Q0        = -10;
+	Q0 = tab.Q0(fdx);
+
+	% width at channel mouth
+	w00 = tab.w00(fdx);
+
 	% width of channel
-	w0        = 1;
+	w0  = eval(tab(fdx,:).w0{1});
+
 	% drag/friction coefficient
-	Cd        = 2.5e-3;
-	% depth of channel
-	h0        = 10;
-	% slope of channel
-	S0         = -normal_flow_slope(Q0,h0,w0,drag2chezy(Cd));
+	Cd = tab.Cd(fdx);
+
+	% depth at channel mouth
+	h0 = tab.h0(fdx);
+
+	% slope of channel bed
+	S0         = -normal_flow_slope(Q0,h0,w00,drag2chezy(Cd));
+
 	% bed level of channel
-	zb         = @(x) -h0 + S0*x;
+	zb        = eval(tab(fdx,:).zb{1});
+
 	% base frequency
-	T         = Constant.SECONDS_PER_DAY;
+	T_d       = tab.T(fdx);
+	T         = T_d*Constant.SECONDS_PER_DAY;
 	omega     = 2*pi/T;
 
 	% length of computational domain
-	Lx         = 1e6;
-
-	meta = river_tide_test_metadata();
-	opt = meta.opt;
+	Lx = tab.Lx(fdx);
 
 	% reflection coefficient at right end of boundary
-	qr = 0;
+	qr = tab.qr(fdx);
+
+	opt = meta.opt;
+
 	rt = hydrodynamic_scenario(rt_map,zs,qr,zb,Q0,w0,Cd,omega,Lx,opt);
+
+	% generate d3d equivalent model for comparison
+	rt.generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt,out.id,pflag);
 
 	Xi = rt.hydrosolver.xi;
 
 	% check ode
 	rmse = rt.check_continuity();
+
 	% compare to analytical solution
 	g = Constant.gravity;
 	c0 = sqrt(g*h0);

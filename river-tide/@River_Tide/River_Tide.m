@@ -21,6 +21,7 @@ classdef River_Tide < handle
 	properties
 		% acceleration by gravity
 		g = Constant.gravity;
+		pi = pi;
 
 		% angular frequency of the main tidal species
 		omega
@@ -43,7 +44,7 @@ classdef River_Tide < handle
 
 	end % properties
 	methods
-	function obj = River_Tide(varargin)
+	    function obj = River_Tide(varargin)
                 for idx=1:2:length(varargin)
 			switch(varargin{idx})
 			case {'opt'}
@@ -59,8 +60,7 @@ classdef River_Tide < handle
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
 			end
                 end %for idx
-	end % River_Tide (constructor)
-
+	    end % River_Tide (constructor)
 
 	end % methods
 end % class River_Tide

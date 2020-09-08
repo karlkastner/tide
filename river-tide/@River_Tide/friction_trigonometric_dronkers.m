@@ -11,11 +11,7 @@ function [c, uau, uau_, p] = friction_trigonometric_dronkers(obj,u,dp,Umid,Uhr)
 		[Urange, Umid] = fourier_range(cvec(u),[0;dp]);
 		Uhr = 1/2*Urange;
 	end
-	if (~obj.issym)
-		pi_ = pi;
-	else
-		syms pi_;
-	end
+	pi_ = obj.pi;
 
 	% Note that here midrange and half-range are required,
 	% not amplitude and mean

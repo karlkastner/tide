@@ -1,45 +1,62 @@
 % Wed  9 Oct 15:23:10 PST 2019
-function [out,rt] = river_tide_test_13(rt_map,pflag)
+function [out, rt, d3d] = test_river_tide_hydrodynamics_13(rt_map,pflag)
+	meta = test_river_tide_metadata();
+	if (nargin()<1)
+		rt_map      = River_Tide_Hydrodynamics_Map(meta.mapname_str);
+	end
 	if (nargin()<2)
 		pflag = 1;
 	end
+	tab      = readtable('test-river-tide.csv');
 	out.id   = 13;
-	out.name = 'quarter-diurnal tide, uniform flow';
+	fdx      = find(tab.id == out.id)
+	out.name = tab(fdx,:).name{1};
 
 	% frequency components surface elevation at channel mouth
 	% (z0,z1,z2,z3,z4)
-	z10 = 0.1;
+	z10 = tab.z10(fdx);
 	zs = [0,z10,0,0];
  
 	% river discharge
-	Q0        =  -10;
-	% width of channel
-	w0        = 1;
-	% drag/friction coefficient
-	Cd        = 2.5e-3;
-	% depth of channel
-	h0        = 5;
-	% slope of channel bed
-	S0         = -normal_flow_slope(Q0,h0,w0,drag2chezy(Cd));
-	% bed level of channel
-	zb     = @(x) -h0 + S0*x;
+	Q0 = tab.Q0(fdx);
 
+	% width of channel at river mouth
+	w00 = tab.w00(fdx);
+	% width of channel
+	w0  = eval(tab(fdx,:).w0{1});
+
+	% drag/friction coefficient
+	Cd = tab.Cd(fdx);
+
+	% depth of channel
+	h0 = tab.h0(fdx);
+
+	% slope of channel bed
+	S0         = -normal_flow_slope(Q0,h0,w00,drag2chezy(Cd));
+
+	% bed level of channel
+	zb        = eval(tab(fdx,:).zb{1});
 
 	% base frequency
-	T         = Constant.SECONDS_PER_DAY;
+	T_d       = tab.T(fdx);
+	T         = T_d*Constant.SECONDS_PER_DAY;
 	omega     = 2*pi/T;
 
-	% domain length
-	Lx	  = 2e5;
+	% length of computational domain
+	Lx = tab.Lx(fdx);
+	
+	% reflection coefficient at right end of boundary
+	qr = tab.qr(fdx);
 
-	meta = river_tide_test_metadata();
 	opt = meta.opt;
 
 	opt.oflag   = [true(1,4)];
 
-	% reflection coefficient at right boundary
-	qr = 0;
 	rt = hydrodynamic_scenario(rt_map,zs,qr,zb,Q0,w0,Cd,omega,Lx,opt);
+
+	% generate d3d equivalent model for comparison
+	rt(1).generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt,out.id,pflag);
 
 	% compare to analytical solution
 	g = Constant.gravity;

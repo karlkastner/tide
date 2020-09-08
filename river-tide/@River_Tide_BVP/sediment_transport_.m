@@ -39,6 +39,8 @@ function [Qs, rt, asym, stokes] = sediment_transport_(obj,cdx,t,ddir)
 	Qs = [0;Qs;0];
 
 	% left boundary condition
+	% TODO check during init
+	if (size(obj.bc_Qs,2)>=cdx)
 	p       = obj.bc_Qs(1,cdx).p;
 	val     = obj.bc_Qs(1,cdx).rhs;
 	if (~isempty(val))
@@ -57,6 +59,7 @@ function [Qs, rt, asym, stokes] = sediment_transport_(obj,cdx,t,ddir)
 		Qs(end) = p*val + (1-p)*(1.5*Qs(end-1)-0.5*Qs(end-2));
 	else
 		Qs(end) = p*val + (1-p)*(2*Qs(end-1)-Qs(end-2));
+	end
 	end
 	end
 

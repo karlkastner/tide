@@ -16,7 +16,7 @@ breaklines=true
 \setlength{\cftsubsecnumwidth}{3.5em}
 
 \title{Manual for Package:
-tide\protect\\Revision 20M
+tide\protect\\Revision 22M
 }
 \author{Karl K\"astner}
 %\date{}
@@ -397,6 +397,11 @@ ${}$
  TODO subtract forcing term
 
 \end{lstlisting}
+\subsection{derive\_lorentz}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{dkq\_dx}
 ${}$
 \begin{lstlisting}
@@ -453,11 +458,21 @@ ${}$
 \subsection{friction\_coefficient\_lorentz}
 ${}$
 \begin{lstlisting}
- friction coefficient according to Lorent'z
+ coefficients of the Fourier expansion of the signed square of the |Q|Q
+ of the friction term
+
+ Lorent'z used this first for the case of no river flow
+
  identical to Dronker's coefficient for zero river flow
  and a single frequency component
  c.f. Cai
- c.f. Dronkers 
+ c.f. Dronkers (gamma = alpha) 
+
+ note difference in coefficients due to different definitions:
+ definition used here:
+	Q = Q0 + 1/2*(sum_k Q_k e(k iwt) + conj(Q_k e(k iwt)))
+ but Dronkers defines
+	Q = Q + sum_k Q_k e(k iwt)
 
  function L = friction_coefficient_lorentz(obj,phi)
 
@@ -519,7 +534,13 @@ ${}$
  friction computed by the method of Godin
  expressed as coefficients of the frequency components (trigonometric form)
 
-  function [c, uau] = friction_trigonometric_godin(obj,u,dp,Umax)
+ Chebycheff coeffcients for zero river flow
+ (albeit applied by Godin to cases with river flow)
+ c.f. godin 1990, table 1, column Ch
+ Note: the coefficients do indeed not (exactly) sum up to 1
+ Note: Godin tries several slightly different sets of coefficients,
+       of which the Chebysheff set is best
+
 
 \end{lstlisting}
 \subsection{friction\_trigonometric\_lorentz}
@@ -1203,6 +1224,8 @@ ${}$
 ${}$
 \begin{lstlisting}
  determine tidal discharge from water level for tidal wave
+ in contrast to the inverse, discharge to level,
+ this is not unique, due to the integration constant
 
 \end{lstlisting}
 \subsection{tidal\_ellipse}
@@ -1255,11 +1278,6 @@ ${}$
 
 \end{lstlisting}
 \subsection{hydrodynamic\_scenario}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{river\_tide\_test\_metadata}
 ${}$
 \begin{lstlisting}
 
@@ -1418,12 +1436,33 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{test\_river\_tide\_hydrodynamics\_14}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{test\_river\_tide\_hydrodynamics\_15}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
 \subsection{test\_river\_tide\_hydrodynamics\_batch}
+${}$
+\begin{lstlisting}
+ river tide test case batch run
+
+\end{lstlisting}
+\subsection{test\_river\_tide\_metadata}
 ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
 \subsection{test\_river\_tide\_models}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{test\_rt\_d3d\_evaluate}
 ${}$
 \begin{lstlisting}
 
@@ -1505,6 +1544,16 @@ ${}$
 
 \end{lstlisting}
 \subsection{test\_river\_tide\_morphodynamics\_04}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{test\_river\_tide\_morphodynamics\_16}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{test\_river\_tide\_morphodynamics\_17}
 ${}$
 \begin{lstlisting}
 

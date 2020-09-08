@@ -4,7 +4,7 @@
 %% compute friction with the method of Godin
 function [uau, obj] = friction_godin(obj,u,Umax)
 	if (nargin()<2 || isempty(Umax))
-		U   = max(abs(u));
+		Umax   = max(abs(u));
 	end
 
 	% chebycheff coeffcients for zero river flow (albeit applied by godin to cases with river flow)
@@ -37,7 +37,7 @@ function [uau, obj] = friction_godin(obj,u,Umax)
 	% even coefficients are zero
 	for idx=2:2:length(c)
 		%uau = U^2*(c(1)*u_ + c(2)*u_.^3);
-		uau = uau + c(idx)*U^2*u_.^(idx-1);
+		uau = uau + c(idx)*Umax.^2*u_.^(idx-1);
 	end
 end % River_Tide/friction_godin
 

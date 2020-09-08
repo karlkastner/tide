@@ -1,24 +1,42 @@
 % Wed  9 Oct 15:55:23 PST 2019
-function [out,rt] = river_tide_test_10(rt_map,pflag)
+function [out, rt, d3d] = test_river_tide_hydrodynamics_10(rt_map,pflag)
+	meta = test_river_tide_metadata();
+	if (nargin()<1)
+		rt_map      = River_Tide_Hydrodynamics_Map(meta.mapname_str);
+	end
 	if (nargin()<2)
 		pflag = 1;
 	end
-	out.id = 10;
-	out.name = 'ideal estuary, width convergence cancel frictional damping';
+	tab = readtable('test-river-tide.csv');
+	out.id   = 10;
+	fdx = find(tab.id == out.id)
+	out.name = tab(fdx,:).name{1};
+
 	% tidal surface elevation
-	z10 = 0.1;
+	z10 = tab.z10(fdx);
 	zs = [0,z10];
+
 	% river discharge
-	Q0        = 0;
+	Q0 = tab.Q0(fdx);
+
+	% width of channel at river mouth
+	w00 = tab.w00(fdx);
+
 	% width of channel
-	w00        = 1e5;
-	% depth of channel
-	h0        = 10;
+%	w0  = eval(tab(fdx,:).w0{1});
+
 	% drag/friction coefficient
-	Cd        = 2.5e-3;
+	Cd = tab.Cd(fdx);
+
+	% depth of channel
+	h0 = tab.h0(fdx);
+
+	% bed level of channel
+	zb        = eval(tab(fdx,:).zb{1});
 
 	% base frequency
-	T         = Constant.SECONDS_PER_DAY;
+	T_d       = tab.T(fdx);
+	T         = T_d*Constant.SECONDS_PER_DAY;
 	omega     = 2*pi/T;
 
 	g = Constant.gravity;
@@ -29,21 +47,25 @@ function [out,rt] = river_tide_test_10(rt_map,pflag)
 	k = wave_number_tide(omega,Cd,h0,abs(z10));
 
 	% damping modulus
-	r =  -imag(k);
+	r1 =  -imag(k);
 
 	% convergence length of width
-	Lw = 0.5/r;
-	w0      = @(x) w00*exp(-x/Lw);
-	% bed level of channel
-	zb        = -h0;
+	Lw = 0.5/r1;
+	w0  = eval(tab(fdx,:).w0{1});
 
-	Lx = 1e6;
+	% length of computational domain
+	Lx = tab.Lx(fdx);
 
-	meta = river_tide_test_metadata();
-	opt = meta.opt;
 	% reflection coefficient at right end of boundary
-	qr = 0;
+	qr = tab.qr(fdx);
+
+	opt = meta.opt;
+
 	rt = hydrodynamic_scenario(rt_map,zs,qr,zb,Q0,w0,Cd,omega,Lx,opt);
+
+	% generate d3d equivalent model for comparison
+	rt.generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt,out.id,pflag);
 
 	Xi = rt.hydrosolver.xi;
 

@@ -6,16 +6,13 @@
 function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,cD,c,D1_dx)
 	g     = obj.g;
 	omega = obj.omega;
-	if (issym(Q))
-		Pi = sym('pi');
-	else
-		Pi = pi;
-	end
+	pi_   = obj.pi;
 	fl = obj.flag.oh || obj.flag.gh;
 
 	% - d/dt cD/(g h^3 w^2) 1/pi(f0 Q_hr^2 + f1 Q + f2 Q^2)
 	% d/dt Q_hr^2 = 0, drops
-	s  = - (1i*k*omega).*cD./(Pi.*g.*h0.^3.*w0.^2);
+	%s  = - (1i*k*omega).*cD./(pi_.*g.*h0.^3.*w0.^2);
+	s  = - (1i*k*omega).*cD./(g.*h0.^3.*w0.^2);
 
 	% f1 : Q''
 	% f2 : Q'
@@ -36,11 +33,14 @@ function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,cD,c,D1_dx)
 	DQ3k1 = fourier_multiplicative_interaction_coefficients(DQ2k1,Q,size(Q,2),1);
 
 	% f3 : Q : self damping
-	f(:,3) = f(:,3) + s.*(-c(:,2).*Qhr - 2.*c(:,3).*abs(Q(:,1)) );
+	f(:,3) = f(:,3) + s.*(-c(:,2).*Qhr - c(:,3).*abs(Q(:,1)) );
 
 	% f4 : constant term, damping by interaction
 	% sign changed according to test case 8
-	f(:,4) = f(:,4) + s.*( - c(:,3).*QQ(:,k+1) ...
+	% TODO the factor in front of c(3) seems wrong,
+	% for z1=0.01/h0, it is too small, for z1=0.1/h0 it is just right,
+	% maybe the 1/h non-linearity cannot be ignored
+	f(:,4) = f(:,4) + s.*( - -c(:,3).*QQ(:,k+1) ...
 			       + fl.*(  -3./(1i.*omega.*w0).*c(:,2).*DQ2k1(:,k+1) ...
                                       + -3./(1i.*omega.*w0).*c(:,3).*DQ3k1(:,k+1)));
 end % odefun_friction

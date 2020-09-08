@@ -23,10 +23,8 @@ function p = friction_coefficient_dronkers(obj,alpha)
 	% note: in cai 2016: alpha = -phi
 	if (~issym(alpha))
 		alpha = min(1,max(-1,alpha));
-		pi_ = pi;
-	else
-		syms pi_
 	end
+	pi_ = obj.pi;
 	
 	a = acos(alpha);
 	alpha = a;

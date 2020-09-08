@@ -19,11 +19,12 @@ function [Q1lr,z1lr] = decompose(obj,x,w0,z0,z1,Q0,Q1)
 	xc = mid(x);
 	wc = mid(w0);
 	
-	% TODO quick fix, pass Q2 as well
-	if (obj.opt.oflag(2))
-		Qt = [Q1;zeros(size(Q1))];
-	else
-		Qt = Q1;
+	% TODO quick fix, pass Q2 and Q3 as well
+	Qt = Q1;
+	for idx=2:length(obj.opt.oflag)
+	if (obj.opt.oflag(idx))
+		Qt = [Qt;zeros(size(Q1,1),1)];
+	end
 	end
 
 	if (obj.opt.dischargeisvariable)
@@ -45,7 +46,7 @@ function [Q1lr,z1lr] = decompose(obj,x,w0,z0,z1,Q0,Q1)
 	A   = [diag(sparse(exp(-0.5*dx.*r(:,1)))), diag(sparse(exp(-0.5*dx.*(r(:,2)))));
 	       diag(sparse(exp(+0.5*dx.*r(:,1)))), diag(sparse(exp(+0.5*dx.*(r(:,2)))))];
 	% subtract constant part
-	Q1_   = [Q1(1:end-1)-c(1:end-1,4); Q1(2:end)-c(2:end,4)];
+	Q1_   = [Q1(1:end-1,1)-c(1:end-1,4); Q1(2:end,1)-c(2:end,4)];
 	Q1lrc = A \ Q1_;
 	Q1lrc = reshape(Q1lrc,[],2);
 

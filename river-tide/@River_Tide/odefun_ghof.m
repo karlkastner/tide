@@ -6,7 +6,7 @@ function f = odefun_ghof(obj,k,q0,qhr,h0,dz0_dx,cD,c0,c1,c2,Pi)
 	g      = obj.g;
 	flag   = obj.flag;
 	f      = zeros(size(q0,1),4);
-	if (issym(q0))
+	if (obj.issym)
 		f = sym(f);
 	end
 	switch (k)

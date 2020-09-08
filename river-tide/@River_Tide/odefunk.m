@@ -16,7 +16,7 @@ function [f, F3]  = odefunk(obj, k, Q, QQ, Qhr, h0, dh0_dx, dz0_dx, w0, dw0_dx, 
 
 	n = size(Q,1);
 	f = zeros(n,4);
-	if (issym(Q))
+	if (obj.issym)
 		f = sym(f);
 	end
 

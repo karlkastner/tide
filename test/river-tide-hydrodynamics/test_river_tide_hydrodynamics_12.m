@@ -1,27 +1,38 @@
 % Wed  9 Oct 15:23:10 PST 2019
-function [out,rt] = river_tide_test_11(rt_map,pflag)
+function [out, rt, d3d] = test_river_tide_hydrodynamics_12(rt_map,pflag)
+	meta = test_river_tide_metadata();
+	if (nargin()<1)
+		rt_map      = River_Tide_Hydrodynamics_Map(meta.mapname_str);
+	end
 	if (nargin()<2)
 		pflag = 1;
 	end
 	reltol = 1e-2;
-	out.id  = 12;
-	out.name = 'swap left and right end';
 
-	T   = Constant.SECONDS_PER_DAY;
+	tab = readtable('test-river-tide.csv');
+	out.id  = 12;
+	fdx = find(tab.id == out.id)
+	out.name = tab(fdx,:).name{1};
+
+	% surface elevation at mouth
+	z10_ = tab.z10(fdx);
+	z10 = [z10_,0];
+	z1L = [0,z10_];
 
 	% river discharge
-	Q0  = -10;
-	z10 = [1,0];
-	z1L = [0,1];
+	Q0 = tab.Q0(fdx);
 
-	L = 5e5;
+	% width of channel at river mouth
+	w00 = tab.w00(fdx);
 
 	% width of channel
-	w0        = 1;
+	w0  = eval(tab(fdx,:).w0{1});
+
 	% drag/friction coefficient
-	Cd        = 2.5e-3;
+	Cd = tab.Cd(fdx);
+
 	% depth of channel
-	h0        = 10;
+	h0 = tab.h0(fdx);
 
 	for idx=1:2
 	if (2 == idx)
@@ -29,14 +40,17 @@ function [out,rt] = river_tide_test_11(rt_map,pflag)
 	end
 
 	% slope of channel
-	S0         = -normal_flow_slope(Q0,h0,w0,drag2chezy(Cd))
+	S0         = -normal_flow_slope(Q0,h0,w00,drag2chezy(Cd))
+
+	% length of computational domain
+	Lx = tab.Lx(fdx);
 
 	% bed level of channel
 	if (1==idx)
 		zb  = @(x) -h0 + S0*x;
 	else
 		
-		zb  = @(x) -h0 + S0*(x-L);
+		zb  = @(x) -h0 + S0*(x-Lx);
 	end
 	bc        = struct();
 
@@ -83,11 +97,16 @@ function [out,rt] = river_tide_test_11(rt_map,pflag)
 	bc(2,3).q   = [0,1];
 
 	% base frequency
+	% period (in days)
+	T_d       = tab.T(fdx);
+	T   = T_d*Constant.SECONDS_PER_DAY;
 	omega     = 2*pi/T;
-	% domain size
-	Xi        = [0,L];
 
-	meta = river_tide_test_metadata();
+	Xi        = [0,Lx];
+
+	% reflection coefficient at right end of boundary
+	qr = tab.qr(fdx);
+
 	opt = meta.opt;
 	opt.oflag   = [true(1,1)];
 
@@ -103,6 +122,10 @@ function [out,rt] = river_tide_test_11(rt_map,pflag)
 			, opt);
 
 	end
+
+	% generate d3d equivalent model for comparison
+	rt(1).generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt(1),out.id,pflag);
 
 
 	zb = ([rt(1).zb,flipud(rt(2).zb)]);
@@ -146,35 +169,6 @@ function [out,rt] = river_tide_test_11(rt_map,pflag)
 		plot(rt(1).x,[rt(1).z(0),rt(2).z(0)],'r--');
 	end
 
-	% compare to analytical solution
-%	g = Constant.gravity;
-%	c = sqrt(g*h0);
-%	k = omega/c;
-%	x = rt.x;
 
-%	bw = Backwater1D();
-%	nn = opt.nx;
-%	[x_, h_, z0_] = bw.solve(-Q0,0,drag2chezy(Cd),wfun,zbfun,0,Xi);
-%	[x_, h_, z0_] = bw.solve_analytic(-Q0,drag2chezy(Cd),w0,S0,h0,nn);
-%	z0  = interp1(x_,z0_,rt.x,'linear','extrap');
-%	z0 = S0*x;
-%	z0t = rt.z(0) - z0;
-%	z2 = rt.z_(:,3);
-%
-%	z2_ = rt.even_overtide_analytic(z10);
-%	%z0_ = interp1(x_,h_,rt.x,'spline')+0*zbfun(rt.x);
-%	% r = (1+1i)*sqrt(-Cd.*omega.*Q0/w0./(g*h0.^3));
-%	% z = z10*exp(-r*x);
-%
-%	rmse(2)  = norm(z2_-z2);
-%
-%	% err ~ C*df^2/dx^2*dx^2, where C sufficiently large constant
-%	nres_ = rms(cdiff(z2_,2))
-%	fail = (rmse(1) > 0.05/z10) || (rmse(2) > 10*nres_);
-%
-%	zz = NaN(size(rt.out.z));
-%	zz(:,3) = z2_;
-%	river_tide_test_plot(out.id,rt,zz,out.name,pflag);
-%	
-end % river_tide_test_09
+end % river_tide_test_12
 

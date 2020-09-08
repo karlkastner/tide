@@ -4,6 +4,7 @@ function rt = hydrodynamic_scenario(rt_map,zl,qr,zb,Q0,w0,Cd,omega,Lx,opt)
 	opt.oflag = [true(1,length(zl)-1),false(1,4-length(zl))];
 
 	bc          = struct();
+
 	% for each frequency component
 	for idx=1:length(zl)
 		% boundary at left end
@@ -30,6 +31,7 @@ function rt = hydrodynamic_scenario(rt_map,zl,qr,zb,Q0,w0,Cd,omega,Lx,opt)
 		end
 		bc(2,idx).q   = [qr,1];
 	end
+
 	for idx=length(zl)+1:4
 		for jdx=1:2
 		    bc(jdx,idx).var = {};
@@ -38,6 +40,7 @@ function rt = hydrodynamic_scenario(rt_map,zl,qr,zb,Q0,w0,Cd,omega,Lx,opt)
 		    bc(jdx,idx).q   = [];
 		end
 	end
+
 	% mean discharge
 	% (overwrite right end bc for zero-frequency component)
 	% river discharge

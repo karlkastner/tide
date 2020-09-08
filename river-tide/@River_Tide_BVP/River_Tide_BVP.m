@@ -283,7 +283,7 @@ classdef River_Tide_BVP < River_Tide
 		if (nargin() < 3)
 			cid = 1;
 		end
-		y  = obj.q(cid,fid,varargin{:})./obj.h0(cid,varargin{:});
+		y  = obj.q(fid,cid,varargin{:})./obj.h0(cid,varargin{:});
 		%if (nargin()>2)
 		%	y = interp1(obj.x,y,x,'linear');
 		%end

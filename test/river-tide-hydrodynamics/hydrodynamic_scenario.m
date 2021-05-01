@@ -1,5 +1,5 @@
 % Wed  9 Oct 15:23:10 PST 2019
-function rt = hydrodynamic_scenario(rt_map,zl,qr,zb,Q0,w0,Cd,omega,Lx,opt)
+function rt = hydrodynamic_scenario(rt_map,zl,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt)
 
 	opt.oflag = [true(1,length(zl)-1),false(1,4-length(zl))];
 
@@ -13,12 +13,12 @@ function rt = hydrodynamic_scenario(rt_map,zl,qr,zb,Q0,w0,Cd,omega,Lx,opt)
 		bc(1,idx).rhs = zl(idx);
 		% Dirichlet condition
 		if (idx==1)
-		bc(1,idx).p   = 1;
+			bc(1,idx).p   = 1;
 		else
-		bc(1,idx).p   = [1,0];		
+			bc(1,idx).p   = [1,0];		
 		end
 		% wave entering from left
-		bc(1,idx).q   = [1,0];
+		bc(1,idx).q   = [1,ql];
 	
 		% boundary condition at right end
 		bc(2,idx).var = {'z'};

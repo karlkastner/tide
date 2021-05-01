@@ -8,11 +8,14 @@
 function f     = odefun_advective_acceleration(obj,f,k,Q,QQ,h0,dh0_dx,w0,dw0_dx,D1_dx)
 	g      = obj.g;
 	omega  = obj.omega;
-	flag   = obj.flag;
+%	flag   = obj.opt.ode;
 
 	s      = -1./(g.*h0.*w0);
 	dA0_dx = h0.*dw0_dx + w0.*dh0_dx;
 	A0     = h0.*w0;
+
+	% sel-interaction, second-derivative
+	% f(1) = 0
 
 	% self-interaction, first-derivative, (d/dx(Q0*Qk) = (dQ0/dx*Qk + Q0*dQk/dx)
 	f(:,2) = f(:,2) + s.*(2./A0.*Q(:,1));

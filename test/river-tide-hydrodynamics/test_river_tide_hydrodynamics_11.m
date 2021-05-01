@@ -48,20 +48,25 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_11(rt_map,pflag)
 	Lx = tab.Lx(fdx);
 
 	% reflection coefficient at right end of boundary
+	ql = tab.ql(fdx);
 	qr = tab.qr(fdx);
 
 	opt = meta.opt;
 	opt.oflag   = [true(1,3)];
 
 	for idx=1:2
-		rt(idx) = hydrodynamic_scenario(rt_map,[0,z10(idx),z20(idx)],qr,zb,Q0,w0,Cd,omega(idx),Lx,opt);
+		rt(idx) = hydrodynamic_scenario(rt_map,[0,z10(idx),z20(idx)],ql,qr,zb,Q0,w0,Cd,omega(idx),Lx,opt);
 	end % for idx
 
 	% generate d3d equivalent model for comparison
-	rt(1).generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	d3dopt                = struct();
+	d3dopt.Lc            = tab.Lc(fdx);
+	d3dopt.bndisharmonic = true;
+	folder = [meta.folder.d3d,num2str(out.id)];
+	rt(1).generate_delft3d(folder,meta.param,meta.param_silent,d3dopt);
 	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt(1),out.id,pflag);
 
-	z = ([rt(1).z(2),rt(2).z(1)]);
+	z = ([rt(1).channel(1).waterlevel(2),rt(2).channel(1).waterlevel(1)]);
 	res = z(:,1)-z(:,2);
 	rmse = max(abs(res));
 	result = (rmse > 0.01*z20_);
@@ -76,21 +81,21 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_11(rt_map,pflag)
 		figure(100+out.id);
 		clf();
 		subplot(2,2,1)
-		plot(rt(1).x,abs(z(:,1)));
+		plot(rt(1).channel(1),abs(z(:,1)));
 		hold on
-		plot(rt(1).x,abs(z(:,2)),'--');
+		plot(rt(1).channel(1),abs(z(:,2)),'--');
 		legend('T_{base} = 1','T_{base} = 1/2');
 		ylabel('|z_2|');
 	
 		subplot(2,2,2)
-		z = ([rt(1).z(2),rt(2).z(1)]);
-		plot(rt(1).x,angle(z(:,1)));
+		z = ([rt(1).waterlevel(2),rt(2).waterlevel(1)]);
+		plot(rt(1).channel(1),angle(z(:,1)));
 		hold on
-		plot(rt(1).x,angle(z(:,2)),'--');
+		plot(rt(1).channel(1),angle(z(:,2)),'--');
 		ylabel('arg(z_2)');
 	
 		subplot(2,2,3)
-		plot(rt(1).x,abs([rt(1).out.z(:,2:3)]));
+		plot(rt(1).channel(1),abs([rt(1).channel(1).z(:,2:3)]));
 	end % if pflag
 
 

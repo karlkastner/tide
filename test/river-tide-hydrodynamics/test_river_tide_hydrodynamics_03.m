@@ -49,15 +49,19 @@ function [out,rt, d3d] = test_river_tide_hydrodynamics_03(rt_map,pflag)
 	Lx = tab.Lx(fdx);
 
 	% reflection coefficient at right end of boundary
+	ql = tab.ql(fdx);
 	qr = tab.qr(fdx);
 
-	meta = river_tide_test_metadata();
 	opt  = meta.opt;
 
-	rt = hydrodynamic_scenario(rt_map,zs,qr,zb,Q0,w0,Cd,omega,Lx,opt);
+	rt = hydrodynamic_scenario(rt_map,zs,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt);
 
 	% generate d3d equivalent model for comparison
-	rt.generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	d3dopt                = struct();
+	d3dopt.Lc            = tab.Lc(fdx);
+	d3dopt.bndisharmonic = true;
+	folder = [meta.folder.d3d,num2str(out.id)];
+	rt.generate_delft3d(folder,meta.param,meta.param_silent,d3dopt);
 	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt,out.id,pflag);
 
 	Xi = rt.hydrosolver.xi;
@@ -69,17 +73,17 @@ function [out,rt, d3d] = test_river_tide_hydrodynamics_03(rt_map,pflag)
 	g = Constant.gravity;
 	c0 = sqrt(g*h0);
 	k0 = omega/c0;
-	x = rt.x;
+	x = rt.channel(1).x;
 	% k = int dk dx
 	phi = -k0*2*Lh*(1-exp(1/2*x/Lh));
 	z = z10*exp(-1i*phi + 0.25./Lh*x);
 
-	rmse(2)  = rms(rt.z(1)-z);
+	rmse(2)  = rms(rt.channel(1).waterlevel(1)-z);
 	% err ~ C*df^2/dx^2*dx^2, where C sufficiently large constant
 	nres_  = rms(cdiff(z,2));
 	result = (rmse(1)/z10 > 0.05) || (rmse(2) > 10*nres_);
 	
-	zz      = NaN(size(rt.out.z));
+	zz      = NaN(size(rt.channel(1).z));
 	zz(:,2) = z;
 	river_tide_test_plot(out.id,rt,zz,out.name,pflag);
 

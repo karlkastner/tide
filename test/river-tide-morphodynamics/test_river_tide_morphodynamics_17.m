@@ -1,42 +1,53 @@
 % Wed  9 Oct 15:23:10 PST 2019
-%function [t,zb,z1,fail,rmse,name,rt] = river_tide_test_06(rt_map,pflag)
 function [out,rt,d3d,t,ozb] = test_river_tide_morphodyanmics_17(x0,zb0,pflag)
+	meta = test_river_tide_metadata();
 	if (nargin()<3)
 		pflag = false;
 	end
+	tab = readtable(meta.testspec);
 	out.id   = 17;
-	out.name = 'morphodynamics, small wave';
+	fdx = find(tab.id == out.id)
+	out.name = tab(fdx,:).name{1};
 
-	% 10 years simulations
+	% duration of simulations
 	Ti_y   = 1000;
 	morfac = 50;
 
 	% tidal amplitude
-	z10       = 0.1i;
+	z10 = tab.z10(fdx);
 
 	% river discharge
-	Q0        = -10;
+	Q0 = tab.Q0(fdx);
+
+	% width at channel mouth
+	w00 = tab.w00(fdx);
 
 	% width of channel
-	w0        = 1;
+	w0  = eval(tab(fdx,:).w0{1});
 
 	% drag/friction coefficient
-	Cd        = 2.5e-3;
+	Cd = tab.Cd(fdx);
 
 	% initial bed level of channel
-	h0        = 10;
+	h0 = tab.h0(fdx);
 	h00       = h0;
 
 	% inital slope of channel bed (asymmetotic slope at upstream boundary)
-	S0         = -normal_flow_slope(Q0,h0,w0,drag2chezy(Cd));
+	S0         = -normal_flow_slope(Q0,h0,w00,drag2chezy(Cd));
 
 	% inital bed level of channel 
-	zb     = @(x) -h0 + S0*x;
+	zb        = eval(tab(fdx,:).zb{1});
+
+	% length of computational domain
+	%L0 = h0/S0;
+	Lx = tab.Lx(fdx);
+	Xi = [0,2*Lx];
 
 	d_mm = 0.2;
 
 	% base frequency
-	T         = Constant.SECONDS_PER_DAY;
+	T_d       = tab.T(fdx);
+	T         = T_d*Constant.SECONDS_PER_DAY;
 	omega     = 2*pi/T;
 
 	bc        = struct();
@@ -67,9 +78,6 @@ function [out,rt,d3d,t,ozb] = test_river_tide_morphodyanmics_17(x0,zb0,pflag)
 	bc_Qs(2,1).rhs = total_transport_engelund_hansen(drag2chezy(Cd),d_mm,Q0./(h0*w0),h0,w0)
 	bc_Qs(2,1).p   = 1;
 
-	% domain size
-	L0 = h0/S0;
-	Xi        = [0,2*h0/S0];
 
 	nx               = 100;
 	meta             = test_river_tide_metadata();
@@ -87,7 +95,6 @@ function [out,rt,d3d,t,ozb] = test_river_tide_morphodyanmics_17(x0,zb0,pflag)
 	% leapfrog-trapezoidal stable only for cfl <= 0.6
 %	morsolver.cfl    = 0.6;
 	morsolver.cfl    = 0.99;
-	morsolver.cfl    = 0.5;
 	morsolver.scheme = 'upwind';
 %	morsolver.scheme = 'mccormack';
 %	morsolver.scheme = 'leapfrog-trapezoidal';
@@ -116,13 +123,15 @@ function [out,rt,d3d,t,ozb] = test_river_tide_morphodyanmics_17(x0,zb0,pflag)
 	% generate d3d equivalent model for comparison
 	meta.param_silent.mdf.Sub2   = ' C ';   % activate transport
 	% trick : every k*24+1 h to allow fourier transform
-	meta.param_silent.mdf.dt_map = (2*24+1)*60;                                             
+	meta.param_silent.mdf.dt_map = (8*24+1)*60;                                             
 	meta.param_silent.mdf.Tstop  = 1440*365.25*Ti_y/morfac;                                     
 	meta.param_silent.MorFac     = morfac;                                 
 	meta.param_silent.mor.MorUpd = true;
-	fdx    = 1;
-	tab.Lc = 1;
-	rt.generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	d3dopt               = struct();
+	d3dopt.Lc            = tab.Lc(fdx);
+	d3dopt.bndisharmonic = true;
+	folder = [meta.folder.d3d,num2str(out.id)];
+	rt.generate_delft3d(folder,meta.param_silent,d3dopt);
 	rt.opt.stokes_order = 2;
 	% must precede the rt-solution, otherwise end result of rt is used as intial value
 

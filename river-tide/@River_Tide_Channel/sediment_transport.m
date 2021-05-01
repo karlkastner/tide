@@ -3,26 +3,27 @@
 %
 %% compute sediment transport for a single channel
 %
-function [Qs, rt, asym, stokes] = sediment_transport_(obj,cdx,t,ddir)
+function [Qs, rt, asym, stokes] = sediment_transport_(obj,t,ddir)
+	% TODO from parent
 	d_mm = obj.sediment.d_mm;
 
 	% discharge and channel properties at segment centres
-	w   = obj.width(cdx);
-	cd  = obj.cd(cdx);
+	w   = obj.width; %(cdx);
+	cd  = obj.cd; %(cdx);
 	Cz  = drag2chezy(cd);
-	z1  = obj.z(1,cdx);
-	h0  = obj.h0(cdx);
+	z1  = obj.z(1); %,cdx);
+	h0  = obj.h0; %(cdx);
 
 	% at end-points
 	if (1) %nargin()>3 && ddir)
-		Q   = obj.out(cdx).Qc;
+		Q   = obj.Qc; % obj.out(cdx).Qc;
 		w   = mid(w);
 		% TODO hc from zc, to avoid recursive inner2outer
 		h0  = mid(h0);
 		Cz  = mid(Cz);
 		z1  = mid(z1);
 	else
-		Q   = obj.out(cdx).Q;
+		Q   = obj.Q; %obj.out(cdx).Q;
 	end
 
 	U   = Q./(h0.*w);
@@ -63,5 +64,6 @@ function [Qs, rt, asym, stokes] = sediment_transport_(obj,cdx,t,ddir)
 	end
 	end
 
+	obj.Qs = Qs;
 end % River_Tide_BVP_/sediment_transport
 

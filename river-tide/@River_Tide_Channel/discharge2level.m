@@ -12,14 +12,12 @@
 %% =>     z = 1i/o dq/dx
 %%
 function z = discharge2level(obj,x,Qt,w)
-	omega = obj.omega;
+	omega = obj.rt_bvp.omega;
 	z = zeros(size(Qt));
+	% TODO construct from basis functions, rather than derivative1
 	dQt_dx = derivative1(x,Qt);
 	for idx=1:size(Qt,2)
 		z(:,idx) = 1i./(idx*omega*w) .* dQt_dx(:,idx);
-		%derivative1(x,Q(:,idx));
-	    	  %*(         derivative1(x,q) ...
-	          % + q./w.*derivative1(x,w) );
 	end
 end % River_Tide_BVP/q1_to_z1
 

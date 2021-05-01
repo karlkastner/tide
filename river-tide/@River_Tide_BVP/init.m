@@ -23,6 +23,5 @@ function init(obj)
 
 	obj.hydrosolver.init();
 	obj.clear();
-size(obj.tmp)
 end % River_Tide_BVP/init
 

@@ -1,4 +1,4 @@
-% Wed  9 Oct 15:23:10 PST 2019
+% Wed  9 Sep 11:53:49 +08 2020
 function [out, rt, d3d] = test_river_tide_hydrodynamics_05(rt_map,pflag)
 	meta = test_river_tide_metadata();
 	if (nargin()<1)
@@ -8,14 +8,14 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_05(rt_map,pflag)
 		pflag = 1;
 	end
 	tab = readtable('test-river-tide.csv');
-	out.id   = 5;
+	out.id   = 05;
 	fdx = find(tab.id == out.id)
 	out.name = tab(fdx,:).name{1};
 
 	% surface elevation at channel mouth
 	z10 = tab.z10(fdx);
 
-	zs =[0,z10];
+	zs =[0,z10,0,0];
 
 	% river discharge
 	Q0 = tab.Q0(fdx);
@@ -44,14 +44,20 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_05(rt_map,pflag)
 	Lx = tab.Lx(fdx);
 
 	% reflection coefficient at right end of boundary
+	ql = tab.ql(fdx);
 	qr = tab.qr(fdx);
 
 	opt = meta.opt;
 
-	rt = hydrodynamic_scenario(rt_map,zs,qr,zb,Q0,w0,Cd,omega,Lx,opt);
+	rt = hydrodynamic_scenario(rt_map,zs,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt);
 
 	% generate d3d equivalent model for comparison
-	rt.generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	d3dopt               = struct();
+	d3dopt.Lc            = tab.Lc(fdx);
+	d3dopt.Cz_end        = tab.Cz_end(fdx);
+	d3dopt.bndisharmonic = true;
+	folder = [meta.folder.d3d,num2str(out.id)];
+	rt.generate_delft3d(folder,meta.param,meta.param_silent,d3dopt);
 	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt,out.id,pflag);
 
 	Xi = rt.hydrosolver.xi;
@@ -63,16 +69,16 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_05(rt_map,pflag)
 	g = Constant.gravity;
 	c0 = sqrt(g*h0);
 	k0 = omega/c0;
-	x = rt.x;
+	x = rt.channel(1).x;
 	r = 1/2*Cd/h0.^2.*8/(3*pi).*abs(z10);
 	z = z10*exp(-1i*k0*x - r*x);
 
-	rmse(2)  = rms(rt.z(1)-z);
+	rmse(2)  = rms(rt.channel(1).waterlevel(1)-z);
 	% err ~ C*df^2/dx^2*dx^2, where C sufficiently large constant
 	nres_ = rms(cdiff(z,2));
 	result = (rmse(1)/z10 > 0.05) || (rmse(2) > 10*nres_);
 
-	zz      = NaN(size(rt.out.z));
+	zz      = NaN(size(rt.channel(1).z));
 	zz(:,2) = z;
 	river_tide_test_plot(out.id,rt,zz,out.name,pflag);
 

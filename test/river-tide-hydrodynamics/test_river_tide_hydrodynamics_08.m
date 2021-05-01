@@ -45,16 +45,21 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_08(rt_map,pflag)
 	Lx = tab.Lx(fdx);
 
 	% reflection coefficient at right end of boundary
+	ql = tab.ql(fdx);
 	qr = tab.qr(fdx);
 
 	opt = meta.opt;
 	opt.sopt.maxiter = 100;
 	opt.sopt.reltol = 1e-8;
 
-	rt = hydrodynamic_scenario(rt_map,zs,qr,zb,Q0,w0,Cd,omega,Lx,opt);
+	rt = hydrodynamic_scenario(rt_map,zs,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt);
 
 	% generate d3d equivalent model for comparison
-	rt.generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	d3dopt                = struct();
+	d3dopt.Lc            = tab.Lc(fdx);
+	d3dopt.bndisharmonic = true;
+	folder = [meta.folder.d3d,num2str(out.id)];
+	rt.generate_delft3d(folder,meta.param,meta.param_silent,d3dopt);
 	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt,out.id,pflag);
 
 	Xi = rt.hydrosolver.xi;
@@ -63,18 +68,18 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_08(rt_map,pflag)
 	g = Constant.gravity;
 	c = sqrt(g*h0);
 	k = omega/c;
-	x = rt.x;
+	x = rt.channel(1).x;
 
 %	bw = Backwater1D();
 %	nn = opt.nx;
 %	[x_, h_, z0_] = bw.solve(-Q0,0,drag2chezy(Cd),wfun,zbfun,0,Xi);
 %	[x_, h_, z0_] = bw.solve_analytic(-Q0,drag2chezy(Cd),w0,S0,h0,nn);
-%	z0  = interp1(x_,z0_,rt.x,'linear','extrap');
+%	z0  = interp1(x_,z0_,rt.channel(1).x,'linear','extrap');
 	z0 = S0*x;
-	z0t = rt.z(0) - z0;
+	z0t = rt.channel(1).waterlevel(0) - z0;
 %mwl_offset_analytic(obj,x,z10,h0,w0,Cd,Q0) 
 	z0t_ = rt.mwl_offset_analytic(x,z10,h0,w0,Cd,abs(Q0));
-	%z0_ = interp1(x_,h_,rt.x,'spline')+0*zbfun(rt.x);
+	%z0_ = interp1(x_,h_,rt.channel(1).x,'spline')+0*zbfun(rt.channel(1).x);
 	% r = (1+1i)*sqrt(-Cd.*omega.*Q0/w0./(g*h0.^3));
 	% z = z10*exp(-r*x);
 
@@ -92,51 +97,51 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_08(rt_map,pflag)
 		clf();
 
 		subplot(2,2,1);
-		%[zbfun(x),rt.z(0)]);
-		plot(rt.x,z0t);
+		%[zbfun(x),rt.channel(1).waterlevel(0)]);
+		plot(rt.channel(1).x,z0t);
 		hold on;
-		plot(rt.x,z0t_,'--');
-		%plot(rt.x,z0t_./z0t,'-.');
+		plot(rt.channel(1).x,z0t_,'--');
+		%plot(rt.channel(1).x,z0t_./z0t,'-.');
 		legend('z_0');
 
 %		namedfigure(out.id,['Test: ',out.name]);
 %		clf();
 %		subplot(2,3,1);
-%		plot(rt.x,[zbfun(x),rt.z(0)]);
+%		plot(rt.channel(1).x,[zbfun(x),rt.channel(1).waterlevel(0)]);
 %		hold on;
 %		plot(x_,z0_,'--');
 %		legend('z_b','z_0');
 %
 %		subplot(2,3,4);
-%		plot(rt.x,[wfun(x)]);
+%		plot(rt.channel(1).x,[wfun(x)]);
 %		legend('z_b','z_0');
 %
 %		subplot(2,3,2);
-%		plot(rt.x,abs(rt.z(1))));
+%		plot(rt.channel(1).x,abs(rt.channel(1).waterlevel(1))));
 %%		hold on;
 %%		plot(x,abs(z),'--');
 %		legend('|z_1|');
 %
 %		subplot(2,3,5)
-%		plot(rt.x,angle(rt.z(1))));
+%		plot(rt.channel(1).x,angle(rt.channel(1).waterlevel(1))));
 %%		hold on;
 %%		plot(x,angle(z),'--');
 %		legend('arg(z_1)');
 %		ylim(pi*[-1,1]);
 %
 %		subplot(2,3,3)
-%		plot(rt.x,abs(rt.Q(1)));
+%		plot(rt.channel(1).x,abs(rt.channel(1).discharge(1)));
 %		legend('|Q_1|');
 %
 %		subplot(2,3,6)
-%		plot(rt.x,angle(rt.Q(1)));
+%		plot(rt.channel(1).x,angle(rt.channel(1).discharge(1)));
 %		legend('arg(Q_1)');
 %
-%		%dQ_dx = derivative1(rt.x,rt.Q(1));
-%		%plot(rt.x,[real(dQ_dx),imag(dQ_dx)]);
-%		%rt.Q(1)),imag(rt.Q(1))]);
+%		%dQ_dx = derivative1(rt.channel(1).x,rt.channel(1).discharge(1));
+%		%plot(rt.channel(1).x,[real(dQ_dx),imag(dQ_dx)]);
+%		%rt.channel(1).discharge(1)),imag(rt.channel(1).discharge(1))]);
 %		%subplot(2,2,3)
-%		%plot(diff(rt.x));
+%		%plot(diff(rt.channel(1).x));
 	end % if pflag
 end % river_tide_test_1
 

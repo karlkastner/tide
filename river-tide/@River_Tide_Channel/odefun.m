@@ -7,7 +7,7 @@
 %      this requires the bvp solve to accept a predefined mesh as an argument
 % TODO heed identity abs(Qi)^2 = abs(Qi^2) = conj(Qi)*Qi
 %      to move coupling terms from rhs (b) to lhs (A)
-function [f, obj] = odefun(obj,cdx,x,y)
+function [f, obj] = odefun(obj,x,y)
 	% without any input, order of coupled odes is returned
 	if ( nargin()<3 || isempty(x) )
 		f(1) = 1;
@@ -17,7 +17,7 @@ function [f, obj] = odefun(obj,cdx,x,y)
 		%else
 			k = 1;
 		%end
-		for idx=1:length(obj.opt.oflag)
+		for idx=1:length(obj.rt_bvp.opt.oflag)
 			if (obj.opt.oflag(idx))
 				k    = k+1;
 				f(k) = 2;
@@ -29,29 +29,30 @@ function [f, obj] = odefun(obj,cdx,x,y)
 	k = obj.neq;
 
 	g      = obj.g;
-	omega1 = obj.omega;
-	flag   = obj.flag;
+	omega1 = obj.rt_bvp.omega;
+	%flag   = obj.flag;
 
-	w0      = obj.width(cdx,x);
-	D1_dx  = obj.D1_dx(cdx,x);
+	w0     = obj.width(x);
+	D1_dx  = obj.D1_dx(x);
+	D2_dx  = obj.D2_dx2(x);
 	dw_dx  = D1_dx*w0;
 
-	zb     = obj.zb(cdx,x);
+	zb     = obj.zb(x);
 	nx     = length(x);
 
 	[z0,Q0,Qt] = obj.extract(x,y);
 	Q0         = repmat(Q0,nx,1);
+	zs         = [z0, obj.discharge2level(x,Qt,w0)];
 
 	% TODO properly determine range and midrange
 	%Qhr    = sum(abs(Qt),2);
 	%Qmid   = Q0;
 	%[Qhr,Qmid] = tidal_range_exp([Q0,Qt]);
 
-
 	h0     = z0 - zb;
-	Cd     = obj.cd(cdx,x,h0);
-	h0     = max(h0,obj.hmin);
+	Cd     = obj.cd(x,h0);
+	h0     = max(h0,obj.rt_bvp.hmin);
 
-        f = odefun@River_Tide(obj, x, [Q0,Qt], h0, z0, zb, w0, Cd, dw_dx, D1_dx);
+        f = odefun@River_Tide(obj, x, [Q0, Qt], h0, zs, z0, zb, w0, Cd, dw_dx, D1_dx, D2_dx);
 end % River_Tide_BVP/odefun
 

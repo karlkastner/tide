@@ -3,10 +3,11 @@
 %
 %% compute sediment transport for the channel network, including routing at
 %% junctions
-function [out] = sediment_transport(obj,t,ddir)
-	out = struct();
+function sediment_transport(obj,t,ddir)
+	%out = struct();
 	for cdx=1:obj.nc
-		[out(cdx).Qs,out(cdx).Qs0] = obj.sediment_transport_(cdx,t,ddir);
+		obj.channel(idx).sediment_transport(t,ddir);
+		%[out(cdx).Qs,out(cdx).Qs0] = obj.sediment_transport_(cdx,t,ddir);
 	end
 
 	% apply junction conditions
@@ -17,14 +18,16 @@ function [out] = sediment_transport(obj,t,ddir)
 		for cdx=1:length(cid)
 			if (1 == eid(cdx))
 				id = 1;
-				Qs_j(cdx) = out(cid(cdx)).Qs(1);
+				Qs_j(cdx) = obj.channel(cid(cdx)).Qs(1);
+				%Qs_j(cdx) = out(cid(cdx)).Qs(1);
 			else
 				%nxc = length(obj.rt(cid(cdx)).x)-1;
 				nx = obj.hydrosolver.nx(cid(cdx));
 				%length(obj.rt(cid(cdx)).x)-1;
 				idc  = nx-1;
 				id   = nx;
-				Qs_j(cdx) = out(cid(cdx)).Qs(end);
+				%Qs_j(cdx) = out(cid(cdx)).Qs(end);
+				Qs_j(cdx) = obj.channel(cid(cdx)).Qs(end);
 			end
 
 if (0)
@@ -37,11 +40,11 @@ if (0)
 else
 			x_j       = obj.hydrosolver.xi(cid(cdx),eid(cdx));
 			% TODO, why c, should be at end points
-			Q0_j(cdx) = obj.out(cid(cdx)).Q(id,1); 
+			Q0_j(cdx) = obj.channel(cid(cdx)).Q(id,1); 
 			%Q0_j(cdx) = obj.rt(cid(cdx)).Qc(id,1); 
 			% TODO higher frequencies
-			Qt_j(cdx) = obj.out(cid(cdx)).Q(id,2);
-			zt_j(cdx) = obj.out(cid(cdx)).z(id,2);
+			Qt_j(cdx) = obj.channel(cid(cdx)).Q(id,2);
+			zt_j(cdx) = obj.channel(cid(cdx)).z(id,2);
 			w_j(cdx)  = obj.width(cid(cdx),x_j);
 			h_j(cdx)  = obj.h0(cid(cdx),x_j);
 			Cd_j(cdx) = obj.cd(cid(cdx),x_j,h_j(cdx));
@@ -65,9 +68,11 @@ end
 		% write transport at junctions
 		for cdx=1:length(cid)
 			if (1 == eid(cdx))
-				out(cdx).Qs(1) = Qs_j(cdx);
+				obj.channel(cdx).Qs(1) = Qs_j(cdx);
+				%out(cdx).Qs(1) = Qs_j(cdx);
 			else
-				out(cdx).Qs(end) = Qs_j(cdx);
+				obj.channel(cdx).Qs(end) = Qs_j(cdx);
+				%out(cdx).Qs(end) = Qs_j(cdx);
 			end
 		end % for cdx
 	end % for idx

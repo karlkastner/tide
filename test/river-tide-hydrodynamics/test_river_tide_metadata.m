@@ -3,6 +3,8 @@ function meta = river_tide_test_metadata()
 	[retval,rev_str] = system('svn info --show-item revision');
 	rev_str      = chomp(rev_str);
 	meta.mapname_str = ['mat/test-rt-hydrodynamics-',rev_str,'.mat'];
+	meta.folder.d3d  = 'mat/test-river-tide-';
+	meta.testspec    = [ROOTFOLDER,'/src/lib/tide/test/river-tide-hydrodynamics/test-river-tide.csv'];
 
 	% model for river tide
 	opt.model_str = 'wave';
@@ -15,12 +17,17 @@ function meta = river_tide_test_metadata()
 	% change of distance between points along channel 
 	opt.xs     = 1; 
 	opt.sopt.maxiter = 20;
+	opt.sopt.maxiter = 200;
+	opt.friction_order = 5;
+	opt.ode.advective_acceleration = true;
+	opt.ode.advective_acceleration = false;
+	opt.odefunk = 'odefunk_1';
 	
 	meta.opt = opt;
 
 	% d3d model parameters
 	param = struct();
-	param.mdf.Tstop = 1440*28;
+	param.mdf.Tstop = 2*1440*28;
 	% TODO based on cfl and dx
 	param.mdf.Dt     = 10;      % minutes
 	param.mdf.Roumet = 'C';
@@ -36,7 +43,9 @@ function meta = river_tide_test_metadata()
 	param.mdf.TraFrm = 'eh.tra'
 	param.mdf.Trtrou = 'N'
 	param.mdf.dt_map = 60;
+	param.bndisharmonic = true;
 
 	meta.param_silent = param;
+	meta.param = struct();
 end
 

@@ -1,6 +1,8 @@
 % Sun  8 Oct 13:08:39 CEST 2017
 % Karl Kastner, Berlin
 %
+%% function cf = friction_coefficient(obj,Qmid,Qhr)
+%
 function cf = friction_coefficient(obj,Qmid,Qhr)
 	switch (obj.opt.friction_method)
 	case {'neglect-river'} % lorentz
@@ -17,7 +19,7 @@ function cf = friction_coefficient(obj,Qmid,Qhr)
 		% identical to Dronkers for Q0>Qt
 		c = [0,0,-pi];
 	otherwise 
-		error('objfun');
+		error('friction_coefficient');
 	end
-end
+end % friction_coefficient
 

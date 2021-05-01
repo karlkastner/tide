@@ -105,6 +105,7 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_12(rt_map,pflag)
 	Xi        = [0,Lx];
 
 	% reflection coefficient at right end of boundary
+	ql = tab.ql(fdx);
 	qr = tab.qr(fdx);
 
 	opt = meta.opt;
@@ -124,15 +125,19 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_12(rt_map,pflag)
 	end
 
 	% generate d3d equivalent model for comparison
-	rt(1).generate_delft3d(out.id,meta.param_silent,tab.Lc(fdx));
+	d3dopt                = struct();
+	d3dopt.Lc            = tab.Lc(fdx);
+	d3dopt.bndisharmonic = true;
+	folder = [meta.folder.d3d,num2str(out.id)];
+	rt(1).generate_delft3d(folder,meta.param,meta.param_silent,d3dopt);
 	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt(1),out.id,pflag);
 
 
-	zb = ([rt(1).zb,flipud(rt(2).zb)]);
+	zb = ([rt(1).channel(1).zb,flipud(rt(2).channel(1).zb)]);
 
-	z0 = ([rt(1).z(0),flipud(rt(2).z(0))]);
+	z0 = ([rt(1).channel(1).waterlevel(0),flipud(rt(2).channel(1).waterlevel(0))]);
 
-	z1 = ([rt(1).z(1),flipud(rt(2).z(1))]);
+	z1 = ([rt(1).channel(1).waterlevel(1),flipud(rt(2).channel(1).waterlevel(1))]);
 	res = z1(:,1)-z1(:,2);
 	rmse = rms(res);
 	result = (rmse(1) > reltol*rms(z1(:,1)));
@@ -146,27 +151,27 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_12(rt_map,pflag)
 		figure(1);
 		clf();
 		subplot(2,2,1)
-		plot(rt(1).x,[z0(:,1) zb(:,1)]);
+		plot(rt(1).channel(1).x,[z0(:,1) zb(:,1)]);
 		hold on
-		plot(rt(1).x,[z0(:,2) zb(:,2)],'--');
+		plot(rt(1).channel(1).x,[z0(:,2) zb(:,2)],'--');
 		ylabel('z_0');
 	
 		subplot(2,2,3)
-		plot(rt(1).x,abs(z1(:,1)));
+		plot(rt(1).channel(1).x,abs(z1(:,1)));
 		hold on
-		plot(rt(1).x,abs(z1(:,2)),'--');
+		plot(rt(1).channel(1).x,abs(z1(:,2)),'--');
 		ylabel('|z_1|');
 	
 		subplot(2,2,4)
-		plot(rt(1).x,angle(z1(:,1)));
+		plot(rt(1).channel(1).x,angle(z1(:,1)));
 		hold on
-		plot(rt(1).x,angle(z1(:,2)),'--');
+		plot(rt(1).channel(1).x,angle(z1(:,2)),'--');
 		ylabel('arg(z_1)');
 	
 		subplot(2,2,2)
-		plot(rt(1).x,[rt(1).zb,rt(2).zb],'k');
+		plot(rt(1).channel(1).x,[rt(1).channel(1).zb,rt(2).channel(1).zb],'k');
 		hold on
-		plot(rt(1).x,[rt(1).z(0),rt(2).z(0)],'r--');
+		plot(rt(1).channel(1).x,[rt(1).channel(1).waterlevel(0),rt(2).channel(1).waterlevel(0)],'r--');
 	end
 
 

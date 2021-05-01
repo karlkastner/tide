@@ -1,5 +1,5 @@
-% Wed  9 Oct 15:55:23 PST 2019
-function [out, rt, d3d] = test_river_tide_hydrodynamics_02(rt_map,pflag)
+% Wed  9 Sep 11:53:49 +08 2020
+function [out, rt, d3d] = test_river_tide_hydrodynamics_50(rt_map,pflag)
 	meta = test_river_tide_metadata();
 	if (nargin()<1)
 		rt_map      = River_Tide_Hydrodynamics_Map(meta.mapname_str);
@@ -8,14 +8,14 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_02(rt_map,pflag)
 		pflag = 1;
 	end
 	tab = readtable('test-river-tide.csv');
-	out.id   = 2;
+	out.id   = 50;
 	fdx = find(tab.id == out.id)
 	out.name = tab(fdx,:).name{1};
 
 	% surface elevation at channel mouth
 	z10 = tab.z10(fdx);
 
-	zs = [0,z10];
+	zs =[0,z10];
 
 	% river discharge
 	Q0 = tab.Q0(fdx);
@@ -25,9 +25,6 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_02(rt_map,pflag)
 
 	% width of channel
 	w0  = eval(tab(fdx,:).w0{1});
-
-	% convergence length of width
-	Lw        = 1e6;
 
 	% drag/friction coefficient
 	Cd = tab.Cd(fdx);
@@ -50,21 +47,20 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_02(rt_map,pflag)
 	ql = tab.ql(fdx);
 	qr = tab.qr(fdx);
 
-	opt  = meta.opt;
+	opt = meta.opt;
 
 	rt = hydrodynamic_scenario(rt_map,zs,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt);
 
 	% generate d3d equivalent model for comparison
-	d3dopt               = struct();
+	d3dopt                = struct();
 	d3dopt.Lc            = tab.Lc(fdx);
 	d3dopt.bndisharmonic = true;
 	folder = [meta.folder.d3d,num2str(out.id)];
-	rt.sediment = [];
 	rt.generate_delft3d(folder,meta.param,meta.param_silent,d3dopt);
 	[out.rmse_d3d, d3d] = test_rt_d3d_evaluate(rt,out.id,pflag);
 
 	Xi = rt.hydrosolver.xi;
-
+	
 	% check ode
 	rmse = rt.check_continuity();
 
@@ -73,18 +69,19 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_02(rt_map,pflag)
 	c0 = sqrt(g*h0);
 	k0 = omega/c0;
 	x = rt.channel(1).x;
-	z = z10*exp(-1i*k0*x + 0.5./Lw*x);
+	r = 1/2*Cd/h0.^2.*8/(3*pi).*abs(z10);
+	z = z10*exp(-1i*k0*x - r*x);
 
 	rmse(2)  = rms(rt.channel(1).waterlevel(1)-z);
 	% err ~ C*df^2/dx^2*dx^2, where C sufficiently large constant
 	nres_ = rms(cdiff(z,2));
 	result = (rmse(1)/z10 > 0.05) || (rmse(2) > 10*nres_);
 
-	zz = NaN(size(rt.channel(1).z));
+	zz      = NaN(size(rt.channel(1).z));
 	zz(:,2) = z;
 	river_tide_test_plot(out.id,rt,zz,out.name,pflag);
 
-	out.rmse = rmse;
+	out.rmse   = rmse;
 	out.result = result;
-end % river_tide_test_02
+end % river_tide_test_05
 

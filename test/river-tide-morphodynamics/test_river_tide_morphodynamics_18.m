@@ -1,18 +1,18 @@
 % Wed  9 Oct 15:23:10 PST 2019
-%function [t,zb,z1,fail,rmse,name,rt] = river_tide_test_06(rt_map,pflag)
-function [out,rt,d3d,t,ozb] = test_river_tide_morphodyanmics_16(x0,zb0,pflag)
+function [out,rt,d3d,t,ozb] = test_river_tide_morphodyanmics_18(x0,zb0,pflag)
 	meta = test_river_tide_metadata();
 	if (nargin()<3)
 		pflag = false;
 	end
-	tab      = readtable(meta.testspec);
-	out.id   = 16;
-	fdx      = find(tab.id == out.id)
+	tab = readtable(meta.testspec);
+	out.id   = 18;
+	fdx = find(tab.id == out.id)
 	out.name = tab(fdx,:).name{1};
 
 	% duration of simulations
-	Ti_y   = 1000;
+	Ti_y   = 100;
 	morfac = 50;
+	nx     = 200;
 
 	% tidal amplitude
 	z10 = tab.z10(fdx);
@@ -80,7 +80,6 @@ function [out,rt,d3d,t,ozb] = test_river_tide_morphodyanmics_16(x0,zb0,pflag)
 	bc_Qs(2,1).p   = 1;
 
 
-	nx               = 100;
 	meta             = test_river_tide_metadata();
 	opt              = meta.opt;
 	opt.maxiter      = 100;
@@ -143,7 +142,7 @@ toc()
 
 	figure(1e3);
  clf;
- zb_=d3d.zb;
+zb_=d3d.zb;
  zb_=squeeze(zb_(:,2,:));
  plot(mid(zb_([1,end],:)'));
  hold on;

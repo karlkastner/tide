@@ -1,14 +1,15 @@
 % Mon  2 Oct 12:27:30 CEST 2017
 %% compute river tide for a scenario with specific boundary conditions and store it in the hash,
 %% or retrive the scenario, if it was already computed
+% TODO improve passing of the bcs as individual arguments, which is a necessary evil for the iterator at the moment
 function [out, key, obj] = fun(obj ...
 		, Xi ... 	% domain extend (river start and end coordiante)
 		, width ... 	% channel width as scalar or function of x
 		, cd ...	% drag coefficient as scalar or function x
 		, zb ...	% bed level as scalar or function of x
 		, omega ...	% angalar frequency of tide
-		, bc0l_var, bc0l_val, bc0l_p ...	% mean flow bc at mouth
-		, bc0r_var, bc0r_val, bc0r_p ...	% mean flow bc upstream
+		, bc0l_var, bc0l_val, bc0l_p ...	 % mean flow bc at mouth
+		, bc0r_var, bc0r_val, bc0r_p ...	 % mean flow bc upstream
 		, bc1l_var, bc1l_val, bc1l_p, bc1l_q ... % main species bc at mouth
 		, bc1r_var, bc1r_val, bc1r_p, bc1r_q ... % main species bc upstream
 		, bc2l_var, bc2l_val, bc2l_p, bc2l_q ... % overtide bc at mouth
@@ -27,7 +28,7 @@ function [out, key, obj] = fun(obj ...
 	g     = Constant.g;
 	Xi    = Xi{1};
 	L     = Xi(2)-Xi(1);
-	width     = width{1};
+	width = width{1};
 	cd    = cd{1};
 	zb    = zb{1};
 	
@@ -134,16 +135,21 @@ function [out, key, obj] = fun(obj ...
 
 			opt.dischargeisvariable = true;
 
-			out = River_Tide_BVP( ...
-				   'zb',        zb ...
-				 , 'cd',        cd ...
-				 , 'width',     width ...
-				 , 'omega',         omega ...
-				 , 'opt',           opt ...
-				 , 'hydrosolver',   hydrosolver ...
-				);
+			channel = River_Tide_Channel( ...
+				   'zb',            zb ...
+				 , 'cd',            cd ...
+				 , 'width',         width ...
+			);
 
-			bc            = out.bc;
+			out = River_Tide_BVP( ...
+				   'hydrosolver',   hydrosolver ...
+				 , 'channel',       channel ...
+				 , 'opt',           opt ...
+				 , 'omega',         omega ...
+				);
+		
+			% do not copy unused frequencies
+			bc            = struct();
 		
 			% boundary condition mean component (left end)
 			bc(1,1).var   = bc0l_var{1};
@@ -172,13 +178,23 @@ function [out, key, obj] = fun(obj ...
 				bc(1,3).q     = bc2l_q{1}; 
 			end
 			if (~isempty(bc2r_var))
+			% bc of odd overtide
 				bc(2,3).var   = bc2r_var{1};
 				bc(2,3).rhs   = bc2r_val{1};
 				bc(2,3).p     = bc2r_p{1}; 
 				bc(2,3).q     = bc2r_q{1}; 
 			end
+
+			% dummy frequencies
+			for idx = (size(bc,2)+1:length(opt.oflag)+1)
+				if (opt.oflag(idx-1))
+					bc(1,idx) = out.channel(1).bc(1,idx);
+					bc(2,idx) = out.channel(1).bc(2,idx);
+				end
+			end
+			%bc            = out.bc;
 		
-			out.bc = bc;
+			out.channel(1).bc = bc;
 
 			out.init();
 

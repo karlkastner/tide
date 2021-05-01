@@ -8,7 +8,6 @@ function [t, zb] = evolve_bed_level(obj)
 
 	obj.init();
 
-
 	zb0 = [];
 	ni  = 0;
 	for cdx=1:obj.nc
@@ -23,5 +22,5 @@ function [t, zb] = evolve_bed_level(obj)
 
 	obj.evolution.t  = t;
 	obj.evolution.zb = zb;
-end % evolve bed level
+end % function evolve_bed_level
 

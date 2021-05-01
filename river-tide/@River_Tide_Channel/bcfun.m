@@ -27,15 +27,15 @@
 %% function [rhs, p, q, obj] = bcfun(obj,cid,bid,fid)
 %
 %function [rhs, p, q, set, obj] = bcfun(obj,cid,bid,fid,varargin)
-function [rhs, p, q, type, obj] = bcfun(obj,cid,bid,fid,varargin)
-	if (isa(obj.bc(bid,fid,cid).rhs,'function_handle'))
+function [rhs, p, q, type, obj] = bcfun(obj,bid,fid,varargin)
+	if (isa(obj.bc(bid,fid).rhs,'function_handle'))
 		rhs = feval(obj.bc(bid,fid,cid).rhs,varargin{:});
 		% TODO, retransform here, if necessary
 	else
-		rhs = obj.bc(bid,fid,cid).rhs;
+		rhs = obj.bc(bid,fid).rhs;
 	end
-	p    = obj.bc(bid,fid,cid).p;
-	q    = obj.bc(bid,fid,cid).q;
-	type = obj.bc(bid,fid,cid).var;
-end % River_tide/bcfun
+	p    = obj.bc(bid,fid).p;
+	q    = obj.bc(bid,fid).q;
+	type = obj.bc(bid,fid).var;
+end % River_Tide_Channel/bcfun
 

@@ -2,35 +2,36 @@
 % Karl Kastner, Berlin
 %
 %% transform arbitrary to cs-integrated discharge boundary condition
-function obj = bc_transformation(obj)
+function transform_bc(obj)
+
+	omega = obj.channel(1).omega;
 
 	% for each channel
-	for cdx=1:size(obj.bc,3)
 	    n_z0 = 0;
 	    n_Q0 = 0;			
 	
 	    % for left and right end of current channel
 	    for bdx=1:2
 	        % mean water level and discharge
-	        switch (obj.bc(bdx,1,cdx).var)
+	        switch (obj.bc(bdx,1).var)
 	        case {'z','z0'}
 	            n_z0                     = n_z0+1;
-	            obj.bc(bdx,1,cdx).set     = true;
-	            obj.bc(bdx,1,cdx).var     = 'z';
+	            obj.bc(bdx,1).set     = true;
+	            obj.bc(bdx,1).var     = 'z';
 	        case {'Q','Q0'}
 	            %if (~obj.opt.dischargeisvariable)
 	                n_Q0         = n_Q0+1;
-	                obj.bc(bdx,1,cdx).set = false;
-	                obj.bc(bdx,1,cdx).var = 'Q';
+	                obj.bc(bdx,1).set = false;
+	                obj.bc(bdx,1).var = 'Q';
 	            %else	
 	            %end
 	        case {''}
 	            % nothing to do
-	            obj.bc(bdx,1,cdx).set = false;
+	            obj.bc(bdx,1).set = false;
 	        otherwise
 	            error('bcfun');
 	        end % switch
-	        if (obj.bc(bdx,1,cdx).p ~= 1)
+	        if (obj.bc(bdx,1).p ~= 1)
 	            error('only dirichlet condition supported for mwl so far');
 	        end
 	        
@@ -39,27 +40,27 @@ function obj = bc_transformation(obj)
 	
 	        % for each tidal frequency component
 	        for jd=k:size(obj.bc,2)
-	            switch (obj.bc(bdx,jd,cdx).var)
+	            switch (obj.bc(bdx,jd).var)
 	            case {'z'}
 	                % dQ/dx = -1i*o*z
-	                w0 = obj.width(cdx,obj.Xi(cdx,bdx));
-	                omega_j              =  (jd-df)*obj.omega;
-	                obj.bc(bdx,jd,cdx).rhs        = -1i*omega_j*w0*obj.bc(bdx,jd,cdx).rhs;
-	                if ( obj.bc(bdx,jd,cdx).p(2) ~= 0)
+	                w0 = obj.width(obj.Xi(bdx));
+	                omega_j              =  (jd-df)*omega;
+	                obj.bc(bdx,jd).rhs        = -1i*omega_j*w0*obj.bc(bdx,jd).rhs;
+	                if ( obj.bc(bdx,jd).p(2) ~= 0)
 	                	error('bc of type dz/dx not yet implemented');
 	                end
-	                p             = [0, obj.bc(bdx,jd,cdx).p(1), 0];
-	                obj.bc(bdx,jd,cdx).p   = p;
+	                p             = [0, obj.bc(bdx,jd).p(1), 0];
+	                obj.bc(bdx,jd).p   = p;
 	                % change type from level to discharge
-	                obj.bc(bdx,jd,cdx).var = 'Q';
+	                obj.bc(bdx,jd).var = 'Q';
 	            case {'Q'}
 	                % nothing to do, native format
 	                % bc(bdx,jd).rhs = bc(bdx,jd).rhs;
 	            case {'q'}
 	                % Q = w*q
-	                obj.bc(bdx,jd,cdx).rhs = obj.bc(bdx,jd,cdx).rhs*W0;
+	                obj.bc(bdx,jd).rhs = obj.bc(bdx,jd).rhs*W0;
 	                % change type from q to Q
-	                obj.bc(bdx,jd,cdx).var = 'Q';
+	                obj.bc(bdx,jd).var = 'Q';
 	            case {'u'}
 	                error('u condition not yet implemented');
 	            case {''}
@@ -67,7 +68,7 @@ function obj = bc_transformation(obj)
 	            otherwise
 	                error('bc');
 	            end % switch
-	            obj.bc(bdx,jd,cdx).set = true;
+	            obj.bc(bdx,jd).set = true;
 	        end % for jd, frequency components
 	    end % for bdx, left and right end of doamin
 	
@@ -79,6 +80,5 @@ function obj = bc_transformation(obj)
 	%	    error('Water level must be specified on opposit ends of the domain');
 	%	end
 	
-	end % for cdx
-end % bc_transform
+end % transform_bc
 

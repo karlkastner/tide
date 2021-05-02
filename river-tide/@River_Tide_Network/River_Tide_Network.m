@@ -19,9 +19,12 @@
 % TODO implement multigrid-like solver for morphodynamics
 % TODO move non-linear forcing terms to lhs, let odefun return the coefficients
 % TODO opt.oflag at the moment cannot skip frequencies
-%classdef River_Tide_BVP < handle
-classdef River_Tide_BVP < River_Tide
+%classdef River_Tide_Network < handle
+classdef River_Tide_Network < handle
 	properties
+		% river tide object
+		rt
+
 		% channel data
 		channel
 
@@ -57,22 +60,30 @@ classdef River_Tide_BVP < River_Tide
 
 		% convergence flag		
 		cflag;
-
-		% minimum water depth (m)
-		hmin = 0.1;
-
 	end % properties
 
 	methods
-	function obj = River_Tide_BVP(varargin)
+	function obj = River_Tide_Network(varargin)
+		% these default values can be overwritten with varargin
+		% they cannot be set in "properties" as this leads
+		% to concurrency problems between multiple instances
+
+
 		obj.bifurcation      = Bifurcation();
 		obj.bifurcation.division_rule = @obj.bifurcation.sediment_division_geometric;
 		obj.hydrosolver      = BVPS_Characteristic();
+
+		% note that inheriting does not work, due to call to rt functions by RT_Channel
+		obj.rt = River_Tide();
 		% cannot be set in properties, as opt is inherited
-		obj.opt.imethod = 'spline';
-		obj.opt.iorder =  1;
+		obj.rt.opt.imethod = 'spline';
+		obj.rt.opt.iorder  =  1;
 		% expansion of stokes flow at bifurcations
-		obj.opt.stokes_order = 2;
+		obj.rt.opt.stokes_order = 2;
+		% change of grid spacing along channel
+		obj.rt.opt.xs = 1;
+		% minimum water depth (m)
+		obj.rt.opt.hmin = 0.1;
 
                 for idx=1:2:length(varargin)
 			switch(varargin{idx})
@@ -80,12 +91,14 @@ classdef River_Tide_BVP < River_Tide
 				obj.hydrosolver = varargin{idx+1};
 			case {'opt'}
 			    % this keeps default options that are not set
-		            obj.opt = copy_fields(varargin{idx+1},obj.opt);
+		            obj.rt.opt = copy_fields(varargin{idx+1},obj.rt.opt);
 			case {'bc'}
 				bc = varargin{idx+1};
 				for jdx=1:length(bc)
 				    obj.bc(jdx) = copy_fields(bc(jdx),obj.bc(jdx));
 				end
+			case {'omega'}
+				obj.rt.omega = varargin{idx+1};
 %			case {'issym'}
 %				obj.issym = varargin{idx+1};
 %				if (obj.issym)
@@ -96,18 +109,11 @@ classdef River_Tide_BVP < River_Tide
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
 			end % switch
                 end %for idx
-		obj.hydrosolver.inifun = @obj.initial_value;
-		% TODO avoid access of channel to hydrosolver and id
-		for idx=1:length(obj.channel)
-			obj.channel(idx).hydrosolver = obj.hydrosolver;
-			obj.channel(idx).id          = idx;
-			obj.channel(idx).rt_bvp      = obj;
-			obj.channel(idx).opt         = obj.opt;
-			obj.channel(idx).omega       = obj.omega;
-		end
+
+
 	end % River_Tide (constructor)
 
-	function bc_transformation(obj)
+	function transform_bc(obj)
 		for cdx=1:obj.nc
 			obj.channel(cdx).transform_bc();
 		end
@@ -129,11 +135,12 @@ classdef River_Tide_BVP < River_Tide
 		for cdx=1:length(obj.nc)
 			[rmse(cdx),res{cdx}] = obj.channel(cdx).check_continuity();
 		end
-	end % River_Tide_BVP / check_continuity
+	end % River_Tide_Network / check_continuity
 
 	% quasi/pseudo members
 	function nc = nc(obj)
-		nc = obj.hydrosolver.nc;
+		%obj.hydrosolver.nc;
+		nc = length(obj.channel);
 	end
 
 	%function nx = nx(obj)
@@ -176,5 +183,5 @@ classdef River_Tide_BVP < River_Tide
 	end % clear
 
 	end % methods
-end % class River_Tide_BVP
+end % class River_Tide_Network
 

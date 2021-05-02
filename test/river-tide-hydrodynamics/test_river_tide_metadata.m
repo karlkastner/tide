@@ -16,10 +16,8 @@ function meta = river_tide_test_metadata()
 
 	% change of distance between points along channel 
 	opt.xs     = 1; 
-	opt.sopt.maxiter = 20;
 	opt.sopt.maxiter = 200;
 	opt.friction_order = 5;
-	opt.ode.advective_acceleration = true;
 	opt.ode.advective_acceleration = false;
 	opt.odefunk = 'odefunk_1';
 	

@@ -21,16 +21,16 @@ function y0 = initial_value(obj,x)
 			      );
 
 	h0(~isfinite(h0)) = 0;
-	h0 = max(h0,obj.rt_bvp.hmin);
+	h0 = max(h0,obj.rt.opt.hmin);
 
 	z0 = obj.zb(x) + h0;
 	z0 = max(z0,z0_min);
 
 	%nf = sum(obj.opt.oflag);
-	nf = sum(obj.rt_bvp.opt.oflag);
+	nf = sum(obj.rt.opt.oflag);
 	e = 1;
 	%if (~obj.opt.dischargeisvariable)
-	if (~obj.rt_bvp.opt.dischargeisvariable)
+	if (~obj.rt.opt.dischargeisvariable)
 		y0 = [z0; sqrt(eps)*randn(nf*length(x),1)];
 	else
 		%y0 = [z0; Q0_dummy; sqrt(eps)*randn(length(x)*(obj.neq-1),1)];

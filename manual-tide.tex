@@ -16,7 +16,7 @@ breaklines=true
 \setlength{\cftsubsecnumwidth}{3.5em}
 
 \title{Manual for Package:
-tide\protect\\Revision 22:23M
+tide\protect\\Revision 24M
 }
 \author{Karl K\"astner}
 %\date{}
@@ -407,6 +407,21 @@ ${}$
 \begin{lstlisting}
 
 \end{lstlisting}
+\subsection{discharge2level}
+${}$
+\begin{lstlisting}
+ determines tidal water surface amplitude (non-zero freqyency components of surface elevation)
+ from tidal discharge (non-zero freqyency components of the discharge)
+
+ by continuity :
+
+ dz/dt + dq/dx = 0
+ => i o z = - dq/dx
+ =>     z = -1/(io) dq/dx
+ =>     z = 1i/o dq/dx
+
+
+\end{lstlisting}
 \subsection{dkq\_dx}
 ${}$
 \begin{lstlisting}
@@ -699,85 +714,6 @@ ${}$
  function [k, k0, dk0_dx_rel, obj] = wave_numer_aproximation(obj)
 
 \end{lstlisting}
-\section{river-tide/@River\_Tide\_BVP}
-\subsection{River\_Tide\_BVP}
-${}$
-\begin{lstlisting}
- hydrodynamics and morphodynamics of 1D tidal channel networks
-
-\end{lstlisting}
-\subsection{check\_momentum}
-${}$
-\begin{lstlisting}
- compute residual for the momentum equation
- dQ/dt + d/dx (Q^2/A) = - g A dz/dx - g A dw/dx - cd w Q|Q|/A^2
-
-\end{lstlisting}
-\subsection{dzb\_dt}
-${}$
-\begin{lstlisting}
- change of bed level over time, when width constant over time
- dzb/dt + 1/(p rho w) dQs/dx = 0
-
-\end{lstlisting}
-\subsection{evolve\_bed\_level}
-${}$
-\begin{lstlisting}
- evolve the bed level of the tidal river network over time
-
-\end{lstlisting}
-\subsection{evolve\_bed\_level\_scenario}
-${}$
-\begin{lstlisting}
- shortcut function for batch simulation runs
-
-\end{lstlisting}
-\subsection{generate\_delft3d}
-${}$
-\begin{lstlisting}
- generate a Delft3D 4 model for the channel network
-
-\end{lstlisting}
-\subsection{init}
-${}$
-\begin{lstlisting}
- initial condition
- function obj = init(obj)
-
-\end{lstlisting}
-\subsection{mg\_interpolate}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{mg\_prepare}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{mg\_restrict}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{mg\_step}
-${}$
-\begin{lstlisting}
-
-\end{lstlisting}
-\subsection{sediment\_transport}
-${}$
-\begin{lstlisting}
- compute sediment transport for the channel network, including routing at
- junctions
-
-\end{lstlisting}
-\subsection{solve}
-${}$
-\begin{lstlisting}
- determine hydrodynamics
-
-\end{lstlisting}
 \section{river-tide/@River\_Tide\_Cai}
 \begin{lstlisting}
 Prediction of river tide by the method of Cai
@@ -864,21 +800,6 @@ ${}$
  decompose the tide into a right and left travelling wave,
  i.e. into incoming and reflected wave
  TODO subtract forcing term
-
-\end{lstlisting}
-\subsection{discharge2level}
-${}$
-\begin{lstlisting}
- determines tidal water surface amplitude (non-zero freqyency components of surface elevation)
- from tidal discharge (non-zero freqyency components of the discharge)
-
- by continuity :
-
- dz/dt + dq/dx = 0
- => i o z = - dq/dx
- =>     z = -1/(io) dq/dx
- =>     z = 1i/o dq/dx
-
 
 \end{lstlisting}
 \subsection{extract}
@@ -1084,6 +1005,83 @@ ${}$
 \begin{lstlisting}
  morphodynamics of a tidal river
  either retrive a precomputed scenario or compute and store a new scenario
+
+\end{lstlisting}
+\section{river-tide/@River\_Tide\_Network}
+\subsection{River\_Tide\_Network}
+${}$
+\begin{lstlisting}
+ hydrodynamics and morphodynamics of 1D tidal channel networks
+
+\end{lstlisting}
+\subsection{dzb\_dt}
+${}$
+\begin{lstlisting}
+ change of bed level over time, when width constant over time
+ dzb/dt + 1/(p rho w) dQs/dx = 0
+
+\end{lstlisting}
+\subsection{evolve\_bed\_level}
+${}$
+\begin{lstlisting}
+ evolve the bed level of the tidal river network over time
+
+\end{lstlisting}
+\subsection{evolve\_bed\_level\_scenario}
+${}$
+\begin{lstlisting}
+ shortcut function for batch simulation runs
+
+\end{lstlisting}
+\subsection{generate\_delft3d}
+${}$
+\begin{lstlisting}
+ generate a Delft3D 4 model for the channel network
+
+\end{lstlisting}
+\subsection{init}
+${}$
+\begin{lstlisting}
+ initial condition
+ function obj = init(obj)
+
+\end{lstlisting}
+\subsection{mg\_interpolate}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{mg\_prepare}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{mg\_restrict}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{mg\_step}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{read\_cfg}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{sediment\_transport}
+${}$
+\begin{lstlisting}
+ compute sediment transport for the channel network, including routing at
+ junctions
+
+\end{lstlisting}
+\subsection{solve}
+${}$
+\begin{lstlisting}
+ determine hydrodynamics
 
 \end{lstlisting}
 \section{river-tide/@River\_Tide\_Network\_Simple}
@@ -1338,6 +1336,11 @@ ${}$
 
 \end{lstlisting}
 \subsection{example\_river\_tide\_map}
+${}$
+\begin{lstlisting}
+
+\end{lstlisting}
+\subsection{example\_river\_tide\_read\_cfg}
 ${}$
 \begin{lstlisting}
 

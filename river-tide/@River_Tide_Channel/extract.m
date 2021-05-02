@@ -7,7 +7,7 @@
 function [z0, Q0, Qt] = extract(obj,x,y)
 	nx  = length(x);
 	nxc = nx-1;
-	if (obj.rt_bvp.opt.dischargeisvariable)
+	if (obj.rt.opt.dischargeisvariable)
 		z0  = y(1:nx);
 		Q0  = y(nx+1);
 		Qt  = reshape(y(nx+2:end),nx,[]);

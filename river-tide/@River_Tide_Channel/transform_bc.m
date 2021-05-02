@@ -4,7 +4,7 @@
 %% transform arbitrary to cs-integrated discharge boundary condition
 function transform_bc(obj)
 
-	omega = obj.channel(1).omega;
+	omega = obj.rt.omega;
 
 	% for each channel
 	    n_z0 = 0;
@@ -37,13 +37,14 @@ function transform_bc(obj)
 	        
 	        k = 2;
 	        df = 1;
-	
+
+		Xi = [0,obj.L];	
 	        % for each tidal frequency component
 	        for jd=k:size(obj.bc,2)
 	            switch (obj.bc(bdx,jd).var)
 	            case {'z'}
 	                % dQ/dx = -1i*o*z
-	                w0 = obj.width(obj.Xi(bdx));
+	                w0 = obj.width(Xi(bdx)); %obj.Xi(bdx));
 	                omega_j              =  (jd-df)*omega;
 	                obj.bc(bdx,jd).rhs        = -1i*omega_j*w0*obj.bc(bdx,jd).rhs;
 	                if ( obj.bc(bdx,jd).p(2) ~= 0)

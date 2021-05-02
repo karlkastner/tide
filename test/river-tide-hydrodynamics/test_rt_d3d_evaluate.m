@@ -1,7 +1,6 @@
 % Fri  4 Sep 20:00:10 +08 2020
 
 function [nres, d3d] = test_rt_d3d_evaluate(rt,tid,pflag)
-	pflag = 1;
 	if (nargin()<3)
 		pflag = 0;
 	end
@@ -204,7 +203,7 @@ function [nres, d3d] = test_rt_d3d_evaluate(rt,tid,pflag)
 	nx=size(q,1);
 	t=d3d.time;
 	t=t(end-nt+1:end);
-	g = rt.g;
+	g = rt.rt.g;
 	Cd = d3d.Chezy_u;
 	zb = d3d.zb;
 	h  = d3d.depth;

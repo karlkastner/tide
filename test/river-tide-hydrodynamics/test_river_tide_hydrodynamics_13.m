@@ -78,7 +78,7 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_13(rt_map,pflag)
 %	z0t = rt.channel(1).waterlevel(0) - z0;
 	z2 = rt.channel(1).waterlevel(2);
 
-	z2_ = rt.even_overtide_analytic(x,z10(1),h0,w0,abs(Q0),Cd,omega);
+	z2_ = rt.rt.even_overtide_analytic(x,z10(1),h0,w0,abs(Q0),Cd,omega);
 	%z0_ = interp1(x_,h_,rt.channel(1).x,'spline')+0*zbfun(rt.channel(1).x);
 	% r = (1+1i)*sqrt(-Cd.*omega.*Q0/w0./(g*h0.^3));
 	% z = z10*exp(-r*x);

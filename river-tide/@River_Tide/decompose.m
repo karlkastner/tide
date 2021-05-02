@@ -7,9 +7,9 @@
 %
 % function [Q1lr, z1lr, obj] = decompose(obj)
 %
-function [Q1lr,z1lr] = decompose(obj,x,w0,z0,z1,Q0,Q1)
+function [Q1lr,z1lr] = decompose(obj,x,Q,zs,zb,w0,Cd)
 	% TODO, quick fix
-	cdx = 1;
+	%cdx = 1;
 
 	omega = obj.omega;
 	dx    = diff(x);
@@ -19,23 +19,27 @@ function [Q1lr,z1lr] = decompose(obj,x,w0,z0,z1,Q0,Q1)
 	xc = mid(x);
 	wc = mid(w0);
 	
-	% TODO quick fix, pass Q2 and Q3 as well
-	Qt = Q1;
-	for idx=2:length(obj.opt.oflag)
-	if (obj.opt.oflag(idx))
-		Qt = [Qt;zeros(size(Q1,1),1)];
-	end
-	end
+%	% TODO quick fix, pass Q2 and Q3 as well
+%	Qt = Q1;
+%	for idx=2:length(obj.opt.oflag)
+%	if (obj.opt.oflag(idx))
+%		Qt = [Qt;zeros(size(Q1,1),1)];
+%	end
+%	end
+%
+%	if (obj.opt.dischargeisvariable)
+%		y = [z0; Q0(1); Qt];
+%		k=2;
+%	else
+%		y = [z0; Qt];
+%		k = 2;
+%	end
+	k = 2;
 
-	if (obj.opt.dischargeisvariable)
-		y = [z0; Q0(1); Qt];
-		k=2;
-	else
-		y = [z0; Qt];
-		k = 2;
-	end
+	% c  = obj.odefun(cdx,x,y);
+%        f = obj.odefun(x, [Q0, Qt], zs, zb, w0, Cd, dw_dx, D1_dx, D2_dx);
+	c = obj.odefun(x, Q, zs, zb, w0, Cd); %, dw_dx, D1_dx, D2_dx)
 
-	c = obj.odefun(cdx,x,y);
 	c_ = 0.5*(c(1:end-1,:,k)+c(2:end,:,k));	
 	r  = roots2(c_);
 	
@@ -45,8 +49,9 @@ function [Q1lr,z1lr] = decompose(obj,x,w0,z0,z1,Q0,Q1)
 	% Q(+1/2 dx) = Qm exp(+1/2 rm dx) + Qp exp(+1/2 rp dx)
 	A   = [diag(sparse(exp(-0.5*dx.*r(:,1)))), diag(sparse(exp(-0.5*dx.*(r(:,2)))));
 	       diag(sparse(exp(+0.5*dx.*r(:,1)))), diag(sparse(exp(+0.5*dx.*(r(:,2)))))];
+
 	% subtract constant part
-	Q1_   = [Q1(1:end-1,1)-c(1:end-1,4); Q1(2:end,1)-c(2:end,4)];
+	Q1_   = [Q(1:end-1,2)-c(1:end-1,4); Q(2:end,2)-c(2:end,4)];
 	Q1lrc = A \ Q1_;
 	Q1lrc = reshape(Q1lrc,[],2);
 

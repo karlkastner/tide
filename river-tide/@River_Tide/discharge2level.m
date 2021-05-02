@@ -12,7 +12,7 @@
 %% =>     z = 1i/o dq/dx
 %%
 function z = discharge2level(obj,x,Qt,w)
-	omega = obj.rt_bvp.omega;
+	omega = obj.omega;
 	z = zeros(size(Qt));
 	% TODO construct from basis functions, rather than derivative1
 	dQt_dx = derivative1(x,Qt);

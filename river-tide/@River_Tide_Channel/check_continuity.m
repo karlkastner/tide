@@ -11,6 +11,6 @@ function [rmse, res] = check_continuity(obj)
 	Q1    = obj.discharge(1);
 	z1    = obj.waterlevel(1);
 
-	[rmse, res] = check_continuity@River_Tide(obj,x,w,z1,Q1);
+	[rmse, res] = obj.rt.check_continuity(x,w,z1,Q1);
 end
 

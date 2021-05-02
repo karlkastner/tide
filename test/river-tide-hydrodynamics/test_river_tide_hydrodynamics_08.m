@@ -78,7 +78,7 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_08(rt_map,pflag)
 	z0 = S0*x;
 	z0t = rt.channel(1).waterlevel(0) - z0;
 %mwl_offset_analytic(obj,x,z10,h0,w0,Cd,Q0) 
-	z0t_ = rt.mwl_offset_analytic(x,z10,h0,w0,Cd,abs(Q0));
+	z0t_ = rt.rt.mwl_offset_analytic(x,z10,h0,w0,Cd,abs(Q0));
 	%z0_ = interp1(x_,h_,rt.channel(1).x,'spline')+0*zbfun(rt.channel(1).x);
 	% r = (1+1i)*sqrt(-Cd.*omega.*Q0/w0./(g*h0.^3));
 	% z = z10*exp(-r*x);

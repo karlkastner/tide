@@ -11,14 +11,17 @@ function [Q1lr, z1lr, obj] = decompose(obj)
 	if (nargin()<2)
 		cdx = 1;
 	end
-	z0    = obj.waterlevel(0);
-	z1    = obj.waterlevel(1);
-	Q0    = obj.discharge(0);
-	Q1    = obj.discharge(1);
 	x     = obj.x;
-	w0    = obj.width(x);
-	omega = obj.rt_bvp.omega;
+	z0    = obj.waterlevel(0);
+%	z1    = obj.waterlevel(1);
+	zb    = obj.zb();
+%	Q0    = obj.discharge(0);
+%	Q1    = obj.discharge(1);
+	w0    = obj.width();
+	Cd    = obj.cd(z0-zb);
+	%omega = obj.rt.omega;
 
-	[Q1lr, z1lr] = decompose@River_Tide(obj,x,w0,z0,z1,Q0,Q1);
+	%[Q1lr, z1lr] = obj.rt.decompose(x,w0,z0,z1,zb,Q0,Q1,Cd);
+	[Q1lr, z1lr] = obj.rt.decompose(x,obj.Q,obj.Q,zb,w0,Cd);
 end % decompose
 

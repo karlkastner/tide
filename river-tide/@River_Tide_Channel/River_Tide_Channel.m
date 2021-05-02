@@ -1,16 +1,26 @@
 % Wed 11 Oct 10:56:52 CEST 2017
-classdef River_Tide_Channel < River_Tide
+classdef River_Tide_Channel < handle
 	properties
-		% index of the channel
-		id
-		hydrosolver
-		rt_bvp;
+		% parent object
+		rt;
 
-		% water level, one column per frequency
-		z
+		% along channel coordinates at segment end-points
+		x
+
+		% channel length
+		L
+
+		% number of grid points along channel
+		nx
+
+		% water level at grid points, one column per frequency
+		z 
+		% water levels at segment centres
 		zc
+
  		% discharge
 		Q
+		% discharge at segment centres
 		Qc
 		% net sediment transport
 		Qs
@@ -52,43 +62,51 @@ classdef River_Tide_Channel < River_Tide
 
 	function obj = River_Tide_Channel(varargin)
                 for idx=1:2:length(varargin)
-			switch(varargin{idx})
+			switch(lower(varargin{idx}))
 			case {'fun.zb','zb','bed-level'}
 				obj.set_zb(varargin{idx+1});
 			case {'fun.width','width','w'}
 				obj.set_width(varargin{idx+1});
 			case {'fun.cd','cd'}
 				obj.set_cd(varargin{idx+1});
+			case {'xi'}
+				val = varargin{idx+1};
+				L   = diff(val);
+				obj.L = L;
 			otherwise
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
 			end % switch
 		end % for idx
 	end % constructor
 
-	function nx = nx(obj)
-		%nx = length(obj.hydrosolver.out(obj.id).x);
-		nx = obj.hydrosolver.nx(obj.id);
-		%out(obj.id).x);
+	function omega = omega(obj)
+		omega = obj.rt.omega;
 	end
+
+%	function nx = nx(obj)
+%		%nx = length(obj.hydrosolver.out(obj.id).x);
+%		nx = obj.hydrosolver.nx(obj.id);
+%		%out(obj.id).x);
+%	end
 
 	function neq = neq(obj)
-		neq = obj.hydrosolver.neq;
+		neq = obj.rt.neq;
 	end
 
-	% TODO, the hydrosolver should neither store x, not out
-	function x = x(obj)
+%	% TODO, the hydrosolver should neither store x, nor out
+%	function x = x(obj)
 %		if (nargin()<2)
 %			cid = 1;
 %		end
-		x = obj.hydrosolver.out(obj.id).x;
-	end
+%		x = obj.rt.hydrosolver.out(obj.id).x;
+%	end
 	
-	function Xi = Xi(obj,eid)
-		Xi = obj.hydrosolver.xi(obj.id,:);
-		if (nargin>1)
-			Xi = Xi(eid);
-		end
-	end
+%	function Xi = Xi(obj,eid)
+%		Xi = obj.hydrosolver.xi(obj.id,:);
+%		if (nargin>1)
+%			Xi = Xi(eid);
+%		end
+%	end
 
 	function set_cd(obj,fun)
 		if (isnumeric(fun))
@@ -265,7 +283,7 @@ classdef River_Tide_Channel < River_Tide
 %		end
 		y = obj.waterlevel(0);
 		for k=1:obj.neq-1
-			y = ( y + obj.waterlevel(k)*exp(2i*pi*k*obj.rt_bvp.omega*t) ...
+			y = ( y + obj.waterlevel(k)*exp(2i*pi*k*obj.rt.omega*t) ...
 			        + conj(obj.waterlevel(k)).*exp(-2i*pi*k*obj.omega*t) );
 		end
 		y = real(y);
@@ -277,7 +295,7 @@ classdef River_Tide_Channel < River_Tide
 %			cid = 1;
 %		end
 		y = obj.u(0);
-		omega = obj.rt_bvp.omega;
+		omega = obj.rt.omega;
 		for k=1:obj.neq-1
 			y = ( y + obj.u(k)*exp(2i*pi*k*omega*t) ...
 			        + conj(obj.u(k)).*exp(-2i*pi*k*omega*t) );

@@ -7,7 +7,7 @@ function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,Cd,c,D1_dx)
 	g     = obj.g;
 	omega = obj.omega;
 	pi_   = obj.pi;
-	fl = obj.opt.ode.oh || obj.opt.ode.gh;
+	fl    = obj.opt.ode.oh || obj.opt.ode.gh;
 
 	% - d/dt Cd/(g h^3 w^2) 1/pi(f0 Q_hr^2 + f1 Q + f2 Q^2)
 	% d/dt Q_hr^2 = 0, drops

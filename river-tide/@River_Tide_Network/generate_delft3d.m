@@ -12,7 +12,7 @@
 %	 as the numerical sheme is not TVD
 %
 function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
-	param_silent.omega = obj.omega;
+	param_silent.omega = obj.rt.omega;
 
 	if (obj.nc>1)
 		error('multiple channels are not yet supported')
@@ -93,7 +93,7 @@ function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
 		for idx=2:size(obj.channel(1).bc,2)
 			%zs0 = obj.channel(1).bc(1,idx,1).rhs;
 			dQ_dx    =  obj.channel(1).bc(1,idx).rhs;
-			zs0(idx) = -dQ_dx./(1i*(idx-1)*obj.omega*w0(1));
+			zs0(idx) = -dQ_dx./(1i*(idx-1)*obj.rt.omega*w0(1));
 		end
 	otherwise
 		error('here');

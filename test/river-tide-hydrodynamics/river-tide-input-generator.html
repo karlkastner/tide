@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>River Tide input file generator</title>
+    <link rel="stylesheet" href="css/form.css">
+</head>
+<body>
+        <!--form action="signup.html" method="post" id="rt_gui"-->
+        <form onSubmit="myFunction(this)" id="rt_gui">
+            <h1>River Tide input file generator</h1>
+            <table>
+	    <tr>
+	    <td style="width:14em">Omega                          </td> <td><input id="omega" type="text" value="1.4544e-04"></td>
+	    </tr>
+	    <tr><td><b>Channel 1</b>                              </td></tr>
+	    <tr><td style="padding-left:2em">Length (L)           </td><td><input id="length" type="text" value="2e5"></td></tr>
+	    <tr><td style="padding-left:2em">Width (w0)           </td><td><input id="width" type="text" value="500"></td></tr>
+	    <tr><td style="padding-left:2em">Bed level (zb)       </td><td><input id="bedlevel" type="text" value="@(x) -10 + 5e-5*x"></td></tr>
+	    <tr><td style="padding-left:2em">Drag coefficient (Cd)</td><td><input id="cd" type="text" value="2.5e-3"></td></tr>
+	    <tr><td style="padding-left:2em">nx                   </td><td><input id="nx" type="text" value="100"></td></tr>
+	    <tr><td style="padding-left:2em"><b>Boundary conditions</b></td></tr>
+	        <tr><td style="padding-left:4em"><b>Left end</b></td></tr>
+	            <tr><td style="padding-left:6em">Variable  </td><td><input id="bclvar" type="text" value="z"></td></tr>
+	            <tr><td style="padding-left:6em">Values    </td><td><input id="bclval" type="text" value="0 0+1.0i 0"></td></tr>
+	            <tr><td style="padding-left:6em">Ronbin-Weights p for : v_0 = p(1)*v(0) + p(2)*d/dx v|_0</td>
+                                                                    <td><input id="bclp" type="text" value="1 0"></div></td></tr>
+	            <tr><td style="padding-left:6em">Weights of right and left travelling wave</td>
+                                                                    <td><input id="bclq" type="text" value="1 0"></td></tr>
+	        <tr><td style="padding-left:4em"><b>Right end</b></td></tr>
+	            <tr><td style="padding-left:6em">Variable  </td><td><input id="bcrvar" type="text" value="Q"></td></tr>
+	            <tr><td style="padding-left:6em">Values    </td><td><input id="bcrval" type="text" value="-5 0 0"></td></tr>
+	            <tr><td style="padding-left:6em">Ronbin-Weights p for : v_0 = p(1)*v(0) + p(2)*d/dx v|_0</td>
+                                                                    <td><input id="bcrp" type="text" value="1 0"></div></td></tr>
+	            <tr><td style="padding-left:6em">Weights of right and left travelling wave</td>
+                                                                    <td><input id="bcrq" type="text" value="0 1"></td></tr>
+	    </table>
+            <input type="submit" value="Generate configuration file">
+	   </div>
+        </form>
+    <!--script src="js/form.js"></script-->
+<script>
+	function myFunction(passForm)
+	{
+	    var n = 8;	 
+
+	    var text = String("omega").padEnd(n) + "= " + document.getElementById('omega').value + "\n";
+	    text = text + String("length").padEnd(n) + "= " + document.getElementById('length').value + "\n";
+	    text = text + String("width").padEnd(n) + "= " + document.getElementById('width').value + "\n";
+	    text = text + String("zb").padEnd(n)    + "= " + document.getElementById('bedlevel').value + "\n";
+	    text = text + String("cd").padEnd(n)    + "= " + document.getElementById('cd').value + "\n";
+	    text = text + String("nx").padEnd(n)    + "= " + document.getElementById('nx').value + "\n";
+	    text = text + String("channel") + "\n"
+	    text = text + String("bclvar").padEnd(n) + "= " + document.getElementById('bclvar').value + "\n";
+	    text = text + String("bclval").padEnd(n) + "= " + document.getElementById('bclval').value + "\n";
+	    text = text + String("bclp").padEnd(n)  + "= " + document.getElementById('bclp').value + "\n";
+	    text = text + String("bclq").padEnd(n)  + "= " + document.getElementById('bclq').value + "\n";
+	    text = text + String("bcrvar").padEnd(n) + "= " + document.getElementById('bcrvar').value + "\n";
+	    text = text + String("bcrval").padEnd(n) + "= " + document.getElementById('bcrval').value + "\n";
+	    text = text + String("bcrp").padEnd(n)  + "= " + document.getElementById('bcrp').value + "\n";
+	    text = text + String("bcrq").padEnd(n)  + "= " + document.getElementById('bcrq').value + "\n";
+
+
+	   var element = document.createElement('a');
+           element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+           element.setAttribute('download', 'rt.cfg');
+
+          element.style.display = 'none';
+          document.body.appendChild(element);
+
+          element.click();
+
+          document.body.removeChild(element);
+	}
+</script>
+</body>
+</html>
+

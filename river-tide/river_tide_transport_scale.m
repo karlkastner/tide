@@ -3,7 +3,7 @@
 % scale of river transport to total transport that accounts for river-tide
 % interaction and stokes transport
 %
-% input : Ur = Ut/U0 = Qt/Q0	ratio of tidal to river flow
+% input : ut_div_ur = Ut/U0 = Qt/Q0	ratio of tidal to river flow
 %         Zr = zt/h0 		ratio or tidal surface amplitude to tidally averaged water depth
 %	  p : degree of nonlinearity of transport
 %	  (typically 1 for wash-load, 3 for bed-load, 5 for suspended bed-material load)
@@ -23,9 +23,9 @@
 %  3  | 0.82         | 2.5
 %  5  | 0.43         | 7.9
 %
-function [scale, rt, asym, stokes] = river_tide_transport_scale(Ur,Zr,p,order)
+function [scale, rt, asym, stokes] = river_tide_transport_scale(ut_div_ur,Zr,p,order)
 	if (nargin()<2)
-		Zr = zeros(1,size(Ur,2));
+		Zr = zeros(1,size(ut_div_ur,2));
 	end
 	if (nargin()<3)
 		p = 5;
@@ -50,7 +50,7 @@ function [scale, rt, asym, stokes] = river_tide_transport_scale(Ur,Zr,p,order)
 		% scale = 2   when ut_div_ur ~ 0.43
 		% scale ~ 1 + 5*(ut/ur)^2 when ut/ur small
 		% scale = (1  + 5*(ut_div_ur).^2 + 15/8*(ut_div_ur).^4 );
-		[scale, rt, asym, stokes] = river_tide_transport_scale_5(Ur,Zr,order);
+		[scale, rt, asym, stokes] = river_tide_transport_scale_5(ut_div_ur,Zr,order);
 	end
 end % river_tide_transport_scale
 

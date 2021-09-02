@@ -13,7 +13,7 @@ function mg_prepare(obj,x,nx)
 			if (obj.nxc(cdx)>3)
 				% note, this is also different to the standard multigrid
 				% as the bed level is sampled at the segment centres
-				xp(TODO)  = x(TODO) 2:2:end-1);
+				%xp(TODO)  = x(TODO) 2:2:end-1);
 				% TODO this only holds for nxc
 				nxp(cdx)  = 0.5*(nx+1)-1;
 			else

@@ -81,6 +81,7 @@ function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
 	param_silent.zb = @(x,y) interp1(obj.channel(1).x,obj.channel(1).zb,y,'linear','extrap');
 
 	% boundary condition
+if (0)
 	switch (obj.channel(1).bc(1,2).var)
 	case {'z'}
 		zs0(1) = obj.channel(1).bc(1,1).rhs;
@@ -99,6 +100,7 @@ function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
 		error('here');
 	end
 	param_silent.zs0 = zs0;
+end
 
 	% this fails when the length of the domain exceeds 5000km
 	% due to a segfault in d3d
@@ -129,13 +131,16 @@ function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
 %	Cz2 = [Cz2, Cz2(:,end)];
 %	Cz2 = [Cz2; Cz2(end,:)];
 
+	param_silent.bc = obj.channel(1).bc;
+if (0)
 	param_silent.z00 = obj.channel(1).bc(1,1,1).rhs;
 	param_silent.Q0 = obj.channel(1).bc(2,1,1).rhs;
+end
 %	param.nn = nn;
 
 	param_silent.sediment = obj.sediment;
 
-	mesh.generate_delft3d(folder,param,param_silent);
+	d3d = mesh.generate_delft3d(folder,param,param_silent);
 
 	% smoothly vary between initial and final value
 	function y = fun(x,a,b)

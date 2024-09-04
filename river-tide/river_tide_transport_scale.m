@@ -3,6 +3,8 @@
 % scale of river transport to total transport that accounts for river-tide
 % interaction and stokes transport
 %
+% function [scale, rt, asym, stokes] = river_tide_transport_scale(ut_div_ur,Zr,p,order)
+%
 % input : ut_div_ur = Ut/U0 = Qt/Q0	ratio of tidal to river flow
 %         Zr = zt/h0 		ratio or tidal surface amplitude to tidally averaged water depth
 %	  p : degree of nonlinearity of transport
@@ -24,7 +26,7 @@
 %  5  | 0.43         | 7.9
 %
 function [scale, rt, asym, stokes] = river_tide_transport_scale(ut_div_ur,Zr,p,order)
-	if (nargin()<2)
+	if (nargin()<2||isempty(Zr))
 		Zr = zeros(1,size(ut_div_ur,2));
 	end
 	if (nargin()<3)

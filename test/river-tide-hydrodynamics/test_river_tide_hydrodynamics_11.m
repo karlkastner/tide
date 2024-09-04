@@ -7,8 +7,11 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_11(rt_map,pflag)
 	if (nargin()<2)
 		pflag = 1;
 	end
-	tab      = readtable('test-river-tide.csv');
 	out.id   = 11;
+
+	%[rt, in] = hydrodynamic_scenario_from_table(rt_map, meta.rtspecfile_str, out.id, meta.opt); 
+
+	tab      = readtable('test-river-tide.csv');
 	fdx      = find(tab.id == out.id)
 	out.name = tab(fdx,:).name{1};
 

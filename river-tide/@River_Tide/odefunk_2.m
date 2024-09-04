@@ -40,7 +40,8 @@ function [f] = odefunk_2(obj, x, Q, h0, z0, zb, w0, Cd, dw_dx, D1_dx)
 	% zero frequency term
 	%zs_x(:,1) = z0_x;
 
-	Q_t    = (1i*omega*(0:nf)).*Q;
+	%Q_t    = (1i*omega*(0:nf)).*Q;
+	Q_t    = obj.fourier_derivative(Q);
 	AQ_t   = fourier_multiplicative_interaction_coefficients(A,Q_t);
 	QQ_t   = fourier_multiplicative_interaction_coefficients(Q,Q_t);
 	A2zs_x = fourier_multiplicative_interaction_coefficients(A2,zs_x);

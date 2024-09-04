@@ -10,7 +10,7 @@
 %% function [f, F3]  = odefunk(obj, k, Q, QQ, Qhr, h0, dh0_dx, dz0_dx, w0, dw0_dx, Cd, c, D1_dx)
 %  TODO : precomputed derivatives in the rhs should be avoided,
 %	  instead the block-diagonal entries should be set accordingly
-function [f, F3]  = odefunk(obj, k, Q, QQ, Qhr, h0, dh0_dx, dz0_dx, w0, dw0_dx, Cd, c, D1_dx)
+function [f, F3]  = odefunk_1_(obj, k, Q, QQ, Qhr, h0, dh0_dx, dz0_dx, w0, dw0_dx, Cd, c, D1_dx)
 
 	n = size(Q,1);
 	f = zeros(n,4);
@@ -37,6 +37,6 @@ function [f, F3]  = odefunk(obj, k, Q, QQ, Qhr, h0, dh0_dx, dz0_dx, w0, dw0_dx, 
 	% note : forcing by dzb/dx term is only non-zero for the mean (z0)
 
 	% normalize
-	f = f./(-1i.*k.*obj.omega.*obj.g.^-1.*w0.^-1);
+	f = f./(-1i.*obj.omega(k).*obj.g.^-1.*w0.^-1);
 end % odefunk
 

@@ -26,18 +26,19 @@ classdef River_Tide_Channel < handle
 		Qs
 
 		% hydrodynamic boundary conditions
-		% TODO, this should also go into "channel"
-		bc = [struct('p',       1, 'rhs',  0, 'q', []   ,'var','z'), ... % 0 mean (wl or discharge) left
-		      struct('p',       1, 'rhs',  1, 'q', [1 1],'var','Q'), ... % 1 main species left
-		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 2 even overtide left
-		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 3 triple overtide left
-		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'); ... % 4 quadruple overtide left
-		      struct('p', [1 0 0], 'rhs', [], 'q', []   ,'var','Q'), ... % 0 mean (wl or discharge) right
-		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 1 main species right
-		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 2 even overtide right
-		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 3 overtide right
-		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 4 overtide right
-		];
+		% fields : p, rhs, q, var
+		bc = [];
+%		bc = [struct('p',       1, 'rhs',  0, 'q', []   ,'var','z'), ... % 0 mean (wl or discharge) left
+%		      struct('p',       1, 'rhs',  1, 'q', [1 1],'var','Q'), ... % 1 main species left
+%		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 2 even overtide left
+%		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 3 triple overtide left
+%		      struct('p', [0 1 0], 'rhs',  0, 'q', [1 1],'var','Q'); ... % 4 quadruple overtide left
+%		      struct('p', [1 0 0], 'rhs', [], 'q', []   ,'var','Q'), ... % 0 mean (wl or discharge) right
+%		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 1 main species right
+%		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 2 even overtide right
+%		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 3 overtide right
+%		      struct('p', [1 0 0], 'rhs',  0, 'q', [1 1],'var','Q'), ... % 4 overtide right
+%		];
 
 		% functions for channel properties
 		fun = struct(  'z0', [] ...
@@ -79,8 +80,8 @@ classdef River_Tide_Channel < handle
 		end % for idx
 	end % constructor
 
-	function omega = omega(obj)
-		omega = obj.rt.omega;
+	function omega = omega(obj,k)
+		omega = obj.rt.omega(k);
 	end
 
 %	function nx = nx(obj)

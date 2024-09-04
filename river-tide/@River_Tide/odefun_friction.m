@@ -4,20 +4,21 @@
 % TODO : change h0.^3 to h0.^p for arbitrary power (manning)
 % TODO : 1/h nonlinearity !
 function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,Cd,c,D1_dx)
-	g     = obj.g;
-	omega = obj.omega;
-	pi_   = obj.pi;
-	fl    = obj.opt.ode.oh || obj.opt.ode.gh;
+	g       = obj.g;
+	omega_k = obj.omega(k);
+	pi_     = obj.pi;
+	fl      = obj.opt.ode.oh || obj.opt.ode.gh;
 
 	% - d/dt Cd/(g h^3 w^2) 1/pi(f0 Q_hr^2 + f1 Q + f2 Q^2)
 	% d/dt Q_hr^2 = 0, drops
 	%s  = - (1i*k*omega).*Cd./(pi_.*g.*h0.^3.*w0.^2);
-	s  = - (1i*k*omega).*Cd./(pi*g.*h0.^3.*w0.^2);
+	s  = - (1i*omega_k).*Cd./(pi*g.*h0.^3.*w0.^2);
 
 	% f1 : Q''
 	% f2 : Q'
-	f(:,2) = f(:,2) + fl.*s.*(   -3./(1i.*omega.*w0).*c(:,1).*Qhr  ...
-				   + -3./(1i.*omega.*w0).*c(:,2).*Q(:,1) );
+	% TODO this used to be omega, not k*omega
+	f(:,2) = f(:,2) + fl.*s.*(   -3./(1i.*omega_k.*w0).*c(:,1).*Qhr  ...
+				   + -3./(1i.*omega_k.*w0).*c(:,2).*Q(:,1) );
 
 	% quadratic interaction of Q and 1./k Q (!)
 	Qk      = Q./(0:(size(Q,2)-1));
@@ -40,8 +41,9 @@ function f = odefun_friction(obj,f,k,Q,QQ,Qhr,h0,w0,Cd,c,D1_dx)
 	% TODO the factor in front of c(3) seems wrong,
 	% for z1=0.01/h0, it is too small, for z1=0.1/h0 it is just right,
 	% maybe the 1/h non-linearity cannot be ignored
+	% TODO this used to be omega, not k*omega
 	f(:,4) = f(:,4) + s.*(   c(:,3).*QQ(:,k+1) ...
-			       + fl.*(  -3./(1i.*omega.*w0).*c(:,2).*DQ2k1(:,k+1) ...
-                                      + -3./(1i.*omega.*w0).*c(:,3).*DQ3k1(:,k+1)));
+			       + fl.*(  -3./(1i.*omega_k.*w0).*c(:,2).*DQ2k1(:,k+1) ...
+                                      + -3./(1i.*omega_k.*w0).*c(:,3).*DQ3k1(:,k+1)));
 end % odefun_friction
 

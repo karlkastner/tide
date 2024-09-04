@@ -7,56 +7,59 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_09(rt_map,pflag)
 	if (nargin()<2)
 		pflag = 1;
 	end
-	tab = readtable('test-river-tide.csv');
 	out.id   = 9;
-	fdx = find(tab.id == out.id)
-	out.name = tab(fdx,:).name{1};
 
-	% mean surface elevation
-	z00 = 0;
+	[rt, in] = hydrodynamic_scenario_from_table(rt_map, meta.rtspecfile_str, out.id, meta.opt); 
 
-	% tidal surface elevation
-	z10 = tab.z10(fdx);
-	zs = [0,z10,0,0,0];
-
-	% river discharge
-	Q0 = tab.Q0(fdx);
-
-	% width of channel at river mouth
-	w00 = tab.w00(fdx);
-
-	% width of channel
-	w0  = eval(tab(fdx,:).w0{1});
-
-	% drag/friction coefficient
-	Cd = tab.Cd(fdx);
-
-	% depth of channel
-	h0 = tab.h0(fdx);
-
-	% slope of channel bed
-	S0        = -normal_flow_slope(Q0,h0,w00,drag2chezy(Cd));
-
-	% bed level of channel
-	zb        = eval(tab(fdx,:).zb{1});
-
-	% base frequency
-	T_d       = tab.T(fdx);
-	T         = T_d*Constant.SECONDS_PER_DAY;
-	omega     = 2*pi/T;
-
-	% length of computational domain
-	Lx = tab.Lx(fdx);
-
-	% reflection coefficient at right end of boundary
-	ql = tab.ql(fdx);
-	qr = tab.qr(fdx);
-
-	meta = test_river_tide_metadata();
-	opt = meta.opt;
-
-	rt = hydrodynamic_scenario(rt_map,zs,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt);
-
+%	tab = readtable('test-river-tide.csv');
+%	fdx = find(tab.id == out.id)
+%	out.name = tab(fdx,:).name{1};
+%
+%	% mean surface elevation
+%	z00 = 0;
+%
+%	% tidal surface elevation
+%	z10 = tab.z10(fdx);
+%	zs = [0,z10,0,0,0];
+%
+%	% river discharge
+%	Q0 = tab.Q0(fdx);
+%
+%	% width of channel at river mouth
+%	w00 = tab.w00(fdx);
+%
+%	% width of channel
+%	w0  = eval(tab(fdx,:).w0{1});
+%
+%	% drag/friction coefficient
+%	Cd = tab.Cd(fdx);
+%
+%	% depth of channel
+%	h0 = tab.h0(fdx);
+%
+%	% slope of channel bed
+%	S0        = -normal_flow_slope(Q0,h0,w00,drag2chezy(Cd));
+%
+%	% bed level of channel
+%	zb        = eval(tab(fdx,:).zb{1});
+%
+%	% base frequency
+%	T_d       = tab.T(fdx);
+%	T         = T_d*Constant.SECONDS_PER_DAY;
+%	omega     = 2*pi/T;
+%
+%	% length of computational domain
+%	Lx = tab.Lx(fdx);
+%
+%	% reflection coefficient at right end of boundary
+%	ql = tab.ql(fdx);
+%	qr = tab.qr(fdx);
+%
+%	meta = test_river_tide_metadata();
+%	opt = meta.opt;
+%
+%	rt = hydrodynamic_scenario(rt_map,zs,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt);
+%
 	% generate d3d equivalent model for comparison
 	d3dopt                = struct();
 	d3dopt.Lc            = tab.Lc(fdx);

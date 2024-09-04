@@ -7,52 +7,56 @@ function [out, rt, d3d] = test_river_tide_hydrodynamics_02(rt_map,pflag)
 	if (nargin()<2)
 		pflag = 1;
 	end
-	tab = readtable('test-river-tide.csv');
 	out.id   = 2;
-	fdx = find(tab.id == out.id)
-	out.name = tab(fdx,:).name{1};
 
-	% surface elevation at channel mouth
-	z10 = tab.z10(fdx);
+	rt = hydrodynamic_scenario_from_table(rt_map, meta.rtspecfile_str, out.id, meta.opt); 
 
-	zs = [0,z10];
+%	rt.tab = readtable(meta.testspec, out.id, meta.opt); 
 
-	% river discharge
-	Q0 = tab.Q0(fdx);
-
-	% width at channel mouth
-	w00 = tab.w00(fdx);
-
-	% width of channel
-	w0  = eval(tab(fdx,:).w0{1});
-
-	% convergence length of width
-	Lw        = 1e6;
-
-	% drag/friction coefficient
-	Cd = tab.Cd(fdx);
-
-	% depth at channel mouth
-	h0 = tab.h0(fdx);
-
-	% bed level of channel
-	zb        = eval(tab(fdx,:).zb{1});
-
-	% base frequency
-	T_d       = tab.T(fdx);
-	T         = T_d*Constant.SECONDS_PER_DAY;
-	omega     = 2*pi/T;
-
-	% length of computational domain
-	Lx = tab.Lx(fdx);
-
-	% reflection coefficient at right end of boundary
-	ql = tab.ql(fdx);
-	qr = tab.qr(fdx);
-
-	opt  = meta.opt;
-
-	rt = hydrodynamic_scenario(rt_map,zs,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt);
+%	fdx = find(tab.id == out.id)
+%	out.name = tab(fdx,:).name{1};
+%
+%	% surface elevation at channel mouth
+%	z10 = tab.z10(fdx);
+%
+%	zs = [0,z10];
+%
+%	% river discharge
+%	Q0 = tab.Q0(fdx);
+%
+%	% width at channel mouth
+%	w00 = tab.w00(fdx);
+%
+%	% width of channel
+%	w0  = eval(tab(fdx,:).w0{1});
+%
+%	% convergence length of width
+%	Lw        = 1e6;
+%
+%	% drag/friction coefficient
+%	Cd = tab.Cd(fdx);
+%
+%	% depth at channel mouth
+%	h0 = tab.h0(fdx);
+%
+%	% bed level of channel
+%	zb        = eval(tab(fdx,:).zb{1});
+%
+%	% base frequency
+%	T_d       = tab.T(fdx);
+%	T         = T_d*Constant.SECONDS_PER_DAY;
+%	omega     = 2*pi/T;
+%
+%	% length of computational domain
+%	Lx = tab.Lx(fdx);
+%
+%	% reflection coefficient at right end of boundary
+%	ql = tab.ql(fdx);
+%	qr = tab.qr(fdx);
+%
+%	opt  = meta.opt;
+%
+%	rt = hydrodynamic_scenario(rt_map,zs,ql,qr,zb,Q0,w0,Cd,omega,Lx,opt);
 
 	% generate d3d equivalent model for comparison
 	d3dopt               = struct();

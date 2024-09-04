@@ -8,10 +8,8 @@
 % function [Q1lr, z1lr, obj] = decompose(obj)
 %
 function [Q1lr,z1lr] = decompose(obj,x,Q,zs,zb,w0,Cd)
-	% TODO, quick fix
-	%cdx = 1;
-
-	omega = obj.omega;
+	% TODO higher components
+	omega_1 = obj.omega(1);
 	dx    = diff(x);
 
 	% element edges to centres
@@ -56,7 +54,7 @@ function [Q1lr,z1lr] = decompose(obj,x,Q,zs,zb,w0,Cd)
 	Q1lrc = reshape(Q1lrc,[],2);
 
 	% z = r/(i omega w) Q, as coefficients are constant along segments
-	z1lrc = [r(:,1)./(1i*omega*wc).*Q1lrc(:,1), r(:,2)./(1i*omega*wc).*Q1lrc(:,2)];
+	z1lrc = [r(:,1)./(1i*omega_1*wc).*Q1lrc(:,1), r(:,2)./(1i*omega_1*wc).*Q1lrc(:,2)];
 	
 	% segment centres to end points
 	n = length(x);

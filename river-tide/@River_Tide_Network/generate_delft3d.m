@@ -11,8 +11,7 @@
 %	 acceleration causes very high spurious oscillations in Delft3D,
 %	 as the numerical sheme is not TVD
 %
-function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
-	param_silent.omega = obj.rt.omega;
+function [d3d,param,param_silent] = generate_delft3d(obj, folder, param, param_silent, opt);
 
 	if (obj.nc>1)
 		error('multiple channels are not yet supported')
@@ -21,9 +20,12 @@ function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
 	if (~isfieldorprop(opt,'Lc'))
 		opt.Lc = 0;
 	end
+	% TODO Cz_end should better be covered by an Cz function along channel
 	if (~isfieldorprop(opt,'Cz_end'))
 		opt.Cz_end = 50;
 	end
+
+	param_silent.omega = obj.rt.omega_;
 
 	nn  = [2, obj.hydrosolver.nx];
 	Xi  = obj.hydrosolver.xi;
@@ -45,28 +47,21 @@ function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
 	else
 		opt.Cz_end = [];
 	end
-	%y     = repmat(rvec(x),2,1);
 	y = [1/2;-1/2]*ones(1,length(x));
 
 	% set width, X is here the accross and Y the along channel coordinate
 	w0         = rvec(obj.channel(1).width(cvec(x)));
-	%X          = mesh.X;
-%	x          = x;
 	Y          = w0.*y;
-	%d3d.mesh.Y = Y;
 
 	% roughness
-	%Cd  = obj.cd(1,x);
-	%Cz  = drag2chezy(Cd);
-	%Cz  = min(1e4,Cz);
 	if (~isempty(opt.Cz_end))
 		% TODO no magic numbers
 		Czmin = 1e3;
 		x_  = [cvec(obj.channel(1).x); opt.Lc]
 		Cz_ = [cvec(min(Czmin,drag2chezy(obj.channel(1).cd))); opt.Cz_end];
-		param_silent.Cz = @(x,y) interp1(x_, Cz_, y,'linear','extrap');
+		param_silent.Chezy = @(x,y) interp1(x_, Cz_, y,'linear','extrap');
 	else
-		param_silent.Cz = @(x,y) interp1(obj.channel(1).x,min(drag2chezy(obj.channel(1).cd),1e3),y,'linear','extrap');
+		param_silent.Chezy = @(x,y) interp1(obj.channel(1).x,min(drag2chezy(obj.channel(1).cd),1e3),y,'linear','extrap');
 	end
 
 	% must follow computation of Cz
@@ -74,10 +69,6 @@ function d3d = generate_delft3d(obj, folder, param, param_silent, opt);
 	mesh.Y     = repmat(rvec(x),2,1);
 
 	% TODO quick fix for off by 1/2 error
-%	x  = Y(1,:);
-%	zb = obj.zb(1,cvec(x));
-%	zb = [zb(2:end); 2*zb(end)-zb(end-1)];
-%	zb  = repmat(rvec(zb),size(Y,1),1);
 	param_silent.zb = @(x,y) interp1(obj.channel(1).x,obj.channel(1).zb,y,'linear','extrap');
 
 	% boundary condition
@@ -102,43 +93,18 @@ if (0)
 	param_silent.zs0 = zs0;
 end
 
-	% this fails when the length of the domain exceeds 5000km
+	% note setup fails when the length of the domain exceeds 5000km
 	% due to a segfault in d3d
 
-	% extend the domain at the right end
-	% TODO this is inappropriate for test cases with flow from left to right
-
-	%	Lc = opt.Lc;
-	% limit chezy coefficients for frictionless cases
-	% TODO no magic numbers
-%	Cz1 = min(Cz(end),100);
-%	Cz1 = min(Cz(end),100);
-%		Cz_ = fun(x_,Cz(end),Cz_end);
-%		x_  = x_ + x(end);
-		% extend domain
-%		x    = [ x, x_];
-%		Cz   = [Cz,Cz_];
-%	else
-%		x_ = [];
-%		Cz_ = [];
-%	end
-%	end
-%	Y = repmat(x,size(Y,1),1);
-%	X = repmat(X(:,1),1,length(x));
-	
-%	Cz2 = repmat(Cz,size(Y,1),1);
-	% TODO, inner2outer
-%	Cz2 = [Cz2, Cz2(:,end)];
-%	Cz2 = [Cz2; Cz2(end,:)];
-
 	param_silent.bc = obj.channel(1).bc;
+
 if (0)
 	param_silent.z00 = obj.channel(1).bc(1,1,1).rhs;
 	param_silent.Q0 = obj.channel(1).bc(2,1,1).rhs;
 end
-%	param.nn = nn;
 
 	param_silent.sediment = obj.sediment;
+%	param_silet.components_are_integer_multiples = obj.opt.components_are_integer_multiples;
 
 	d3d = mesh.generate_delft3d(folder,param,param_silent);
 

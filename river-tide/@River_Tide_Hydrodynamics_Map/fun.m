@@ -69,13 +69,15 @@ function [out, key, obj] = fun(obj ...
 		cd_str = num2str(cd);
 	end
 
+	omega_ = omega;
+	omega_(end+1:2) = NaN;
+
 	key = obj.key(  ...	
-			...  % opt.model_str, ...
-			...  % func2str(opt.solver), ...
 			zb_str, ...
 			w_str, ...
 			cd_str, ...
-			omega, ...		
+			omega_(1), ...		
+			omega_(2), ...		
 			bc0l_var{1}, ...		% left end
 			bc0l_val{1}, ...
 			bc0l_p{1}(1), ...
@@ -139,7 +141,6 @@ function [out, key, obj] = fun(obj ...
 			% opt.dischargeisvariable = true;
 
 			out = River_Tide_Network( ...
-				 ... % 'hydrosolver',   hydrosolver ...
 				   'channel',       channel ...
 				 , 'opt',           opt ...
 				 , 'omega',         omega ...
@@ -157,7 +158,7 @@ function [out, key, obj] = fun(obj ...
 			bc(2,1).rhs   = bc0r_val{1};
 			bc(2,1).p     = bc0r_p{1};
 
-			% boundary condition main tidal component
+			% boundary condition first tidal component
 			bc(1,2).var   = bc1l_var{1};
 			bc(1,2).rhs   = bc1l_val{1};
 			bc(1,2).p     = bc1l_p{1}; 
@@ -168,30 +169,31 @@ function [out, key, obj] = fun(obj ...
 			bc(2,2).q     = bc1r_q{1};
 
 			if (~isempty(bc2l_var))
-			% bc of even overtide
+				% bc of even overtide
 				bc(1,3).var   = bc2l_var{1};
 				bc(1,3).rhs   = bc2l_val{1};
 				bc(1,3).p     = bc2l_p{1}; 
 				bc(1,3).q     = bc2l_q{1}; 
 			end
+
 			if (~isempty(bc2r_var))
-			% bc of odd overtide
+				% bc of odd overtide
 				bc(2,3).var   = bc2r_var{1};
 				bc(2,3).rhs   = bc2r_val{1};
 				bc(2,3).p     = bc2r_p{1}; 
 				bc(2,3).q     = bc2r_q{1}; 
 			end
-
 			% dummy frequencies
-			for idx = (size(bc,2)+1:length(opt.oflag)+1)
+			%for idx = (size(bc,2)+1:length(opt.oflag)+1)
+if (0)
+			for idx = (size(bc,2)+1:sum(opt.oflag)+1)
 				if (opt.oflag(idx-1))
 					bc(1,idx) = out.channel(1).bc(1,idx);
 					bc(2,idx) = out.channel(1).bc(2,idx);
 				end
 			end
-			%bc            = out.bc;
-		
-			out.channel(1).bc = bc;
+end
+			out.channel(1).bc = bc
 
 			out.init();
 

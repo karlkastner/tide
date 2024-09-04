@@ -17,8 +17,7 @@
 %%     =    (k^2 o^2)/(g h w) Q + 1/w Q''
 function f = odefun_swe_jacobian(obj,f,k,h0,w0)
 	g     = obj.g;
-	omega = obj.omega;
-
+	omega_k = obj.omega(k);
 
 	% Q''
 	f(:,1) = f(:,1) + 1./w0;
@@ -27,8 +26,8 @@ function f = odefun_swe_jacobian(obj,f,k,h0,w0)
 	% f(2) = 0
 
 	% Q
-	f(:,3) = f(:,3) + (k*k*omega*omega)./(g.*h0.*w0);
-	%f(:,3) = f(:,3) - (1i*k*omega).^2./(g.*h0.*w0);
+	%f(:,3) = f(:,3) - (1i*omega_k).^2./(g.*h0.*w0);
+	f(:,3) = f(:,3) + (omega_k*omega_k)./(g.*h0.*w0);
 
 	% constant
 	% f(4) = 0

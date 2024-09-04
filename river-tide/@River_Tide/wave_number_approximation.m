@@ -11,7 +11,6 @@ function [k10, kz1, kq1, dk, obj] = wave_numer_aproximation(obj,x,Q,h0,z0,w0,Cd,
 %	Q1    = obj.Q(1);
 %	x     = obj.x;
 	L     = x(end);
-	omega = obj.omega;
 
 	% coefficients of the characteristic polynomial of the wave equation
 	% TODO pass z0 when h is not precomputed

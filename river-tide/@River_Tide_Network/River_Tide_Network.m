@@ -60,6 +60,9 @@ classdef River_Tide_Network < handle
 
 		% convergence flag		
 		cflag;
+
+		% human readable description of model scenario
+		description
 	end % properties
 
 	methods
@@ -98,7 +101,7 @@ classdef River_Tide_Network < handle
 				    obj.bc(jdx) = copy_fields(bc(jdx),obj.bc(jdx));
 				end
 			case {'omega'}
-				obj.rt.omega = varargin{idx+1};
+				obj.rt.omega_ = varargin{idx+1};
 %			case {'issym'}
 %				obj.issym = varargin{idx+1};
 %				if (obj.issym)
@@ -109,8 +112,6 @@ classdef River_Tide_Network < handle
                             obj = setfield_deep(obj,varargin{idx},varargin{idx+1});
 			end % switch
                 end %for idx
-
-
 	end % River_Tide (constructor)
 
 	function transform_bc(obj)
@@ -150,6 +151,7 @@ classdef River_Tide_Network < handle
 	function neq = neq(obj)
 		neq = obj.hydrosolver.neq;
 	end
+
 
 	function clear(obj)
 		obj.cflag = [];

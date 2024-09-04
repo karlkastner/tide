@@ -29,7 +29,6 @@ function [f, obj] = odefun(obj,x,y)
 %	k = obj.neq;
 
 	g      = obj.rt.g;
-	omega1 = obj.rt.omega;
 	%flag   = obj.flag;
 
 	w0     = obj.width(x);

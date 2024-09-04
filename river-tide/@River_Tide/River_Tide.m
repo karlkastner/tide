@@ -24,7 +24,7 @@ classdef River_Tide < handle
 		pi = pi;
 
 		% angular frequency of the main tidal species
-		omega
+		omega_
 
 		% options
 		% TODO dischargeisvariables is options for bvp-solver
@@ -61,7 +61,17 @@ classdef River_Tide < handle
 			end
                 end %for idx
 	    end % River_Tide (constructor)
-
+	function omega_k = omega(obj,k)
+		if (isscalar(obj.omega_))
+			omega_k = k*obj.omega_;
+		else
+			% zero is for mean
+			omega_k = obj.omega_(k+1);
+		end
+	end
+	function ci = components_are_integer_multiples(obj)
+		ci = isscalar(obj.omega);
+	end
 	end % methods
 end % class River_Tide
 

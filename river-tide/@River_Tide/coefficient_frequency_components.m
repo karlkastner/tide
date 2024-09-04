@@ -5,7 +5,8 @@
 % = (a b exp(k-l) a'b' exp(-k-l) ) + (a' b exp(l-k)) + a b' exp(k-l)
 function f = coefficient_frequency_components(obj,f,c,Q,ddx,dt)
 	nf = size(Q,2)-1;
-	omega = obj.omega;
+	% TODO this has to be modified for non-integer multiples
+	omega = obj.omega(1);
 	
 	% for the zero, first, and second order derivative
 	% (c_0 + ... + c_k) D^ddx (Q_0 + ... Q_k)

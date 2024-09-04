@@ -6,7 +6,6 @@
 %%
 function [rmse, res] = check_continuity(obj)
 	x     = obj.x;
-	omega = obj.omega;
 	w     = obj.width();
 	Q1    = obj.discharge(1);
 	z1    = obj.waterlevel(1);

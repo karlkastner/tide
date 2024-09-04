@@ -12,12 +12,12 @@ function z0t = mwl_offset_analytic(obj,x,z10,h0,w0,Cd,Q0)
 %	h0 = obj.h0(cdx,x(1));
 %	Q0 = obj.Q(0,cdx,x(1));
 %	Q0 = obj.Q0_;
-	omega = obj.omega;
+	omega_1 = obj.omega(1);
 %	Cd = obj.cd(cdx,x(1));
-	r1  = sqrt(omega*Cd*Q0/(g*w0*h0.^3));
+	r1  = sqrt(omega_1*Cd*Q0/(g*w0*h0.^3));
 	k   = (1-1i)*r1;
 	%k = r1*sqrt(2);
-	Q10 = abs(1i*omega*w0/k)*z10;
+	Q10 = abs(1i*omega_1*w0/k)*z10;
 	% r0  = 1/2*(3*Q0^2*Cd)./(g*h0^4*w0^2); <- from script
 	% thesis seems factor 3 too small
 	r0 = 1/2*Cd*Q0^2/(g*w0^2*h0^4); % <- from thesis

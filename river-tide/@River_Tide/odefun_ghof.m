@@ -2,7 +2,6 @@
 % Karl Kastner, Berlin
 %
 function f = odefun_ghof(obj,k,q0,qhr,h0,dz0_dx,cD,c0,c1,c2,Pi)
-	o1     = obj.omega;
 	g      = obj.g;
 	flag   = obj.flag;
 	f      = zeros(size(q0,1),4);
